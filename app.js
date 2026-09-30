@@ -646,12 +646,23 @@
     showFeedback(item, idx, ok, timeBonus, streakBonus, learnNote);
   }
 
+  /* after answering: the technical terms in each answer option, explained right under it */
+  function termScope(q) { return q.t === "arabisch" ? "a" : q.t === "tajwid" ? "t" : "f"; }
+  function optionTermsHtml(q, text) {
+    if (!window.FIQH_TERMS) return "";
+    var list = window.FIQH_TERMS([text], termScope(q), q.t === "arabisch" && q.arMark != null).slice(0, 2);
+    if (!list.length) return "";
+    return '<span class="opt-terms" dir="ltr">' + list.map(function (t) {
+      return "<span><b>" + bidiHtml(t[0]) + "</b> – " + bidiHtml(t[1]) + "</span>";
+    }).join("") + "</span>";
+  }
   function showFeedback(item, idx, ok, timeBonus, streakBonus, learnNote) {
     $all(".option").forEach(function (b) {
       var i = +b.getAttribute("data-opt");
       b.disabled = true;
       if (item.options[i].correct) b.classList.add("is-correct");
       else if (i === idx) b.classList.add("is-wrong");
+      if (!b.querySelector(".opt-terms")) b.insertAdjacentHTML("beforeend", optionTermsHtml(item.src, item.options[i].text));
     });
 
     var fb = $("#q-feedback");
@@ -789,7 +800,7 @@
   function termsHtml(q, answers) {
     if (!window.FIQH_TERMS) return "";
     var ar = q.t === "arabisch";
-    var list = window.FIQH_TERMS([q.arMark != null ? "" : q.q].concat(answers || q.a || [], [q.e]), ar ? "a" : q.t === "tajwid" ? "t" : "f", ar && q.arMark != null).slice(0, 8);
+    var list = window.FIQH_TERMS([q.arMark != null ? "" : q.q].concat(answers || q.a || [], [q.e]), termScope(q), ar && q.arMark != null).slice(0, 8);
     if (!list.length) return "";
     return '<details><summary class="fb-terms-h">' + esc(T("Begriffe in dieser Frage")) + "</summary>" + list.map(function (t) {
       return '<p class="fb-term" dir="ltr"><b>' + bidiHtml(t[0]) + "</b> – " + bidiHtml(t[1]) + "</p>";
