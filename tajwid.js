@@ -18,7 +18,7 @@
   function srcText(src) {
     if (!src) return "";
     return T("Quelle:") + " " + String(src).replace(/B (\d+(?:[–-]\d+)?(?:, \d+)*)/g, function (m, n) { return D.src.book + ", " + T("Frage") + " " + n; })
-      .replace(/Tafel/g, D.src.chart);
+      .replace(/Tafel/g, D.src.chart).replace(/Allg\./g, D.src.general || "");
   }
 
   /* ---------- questions ---------- */
@@ -32,6 +32,67 @@
     });
     QS = QS.concat(SETS[c.id]);
   });
+  /* Maḫraǧ-Aufgaben aus der Liste der 17 Austrittsstellen (tajwid/ergaenzung.js) */
+  var MK = D.makharij || [];
+  function near(idx, pool, n) {
+    return pool.map(function (x, i) { return [Math.abs(i - idx) + (hash(String(i) + idx).charCodeAt(0) % 3) / 10, x]; })
+      .filter(function (p, i) { return i !== idx; }).sort(function (a, b) { return a[0] - b[0]; }).slice(0, n).map(function (p) { return p[1]; });
+  }
+  function mkQ(q, a, e, ar) {
+    return { t: "tajwid", tt: T("Taǧwīd · {t}", { t: BY_ID.makharij ? BY_ID.makharij.title : "Maḫāriǧ" }), srcText: srcText("B 64–76"), c: 0, chapter: "makharij",
+      _lid: "tj-m-" + hash(q + "|" + (ar || "")), q: q, ar: ar, a: a, e: e };
+  }
+  if (MK.length && SETS.makharij) {
+    var labels = MK.map(function (m) { return m[0]; }), extra = [];
+    MK.forEach(function (m, idx) {
+      if (!m[1]) return;
+      m[1].split(" ").forEach(function (ch) {
+        var cons = (ch === "و" || ch === "ي") && idx === 0;
+        if (cons) return;                                   /* و und ي kommen unten als Konsonanten */
+        var pool = labels.filter(function (l, i) { return !((ch === "و" || ch === "ي") && i === 0); });
+        extra.push(mkQ(T("Aus welcher Austrittsstelle kommt dieser Buchstabe?") + (ch === "و" || ch === "ي" ? " " + T("(mit Vokal)") : ch === "ا" ? " " + T("(als Dehnungsbuchstabe)") : ""),
+          [m[0]].concat(near(pool.indexOf(m[0]), pool, 3)), T("{c}: {m}.", { c: ch, m: m[0] }) + (m[2] ? " – " + m[2] : ""), ch));
+      });
+      var sets = MK.map(function (x) { return x[1]; }), others = near(idx, sets.map(function (x, i) { return x || "—" + i; }), 5)
+        .filter(function (x) { return x && x.charAt(0) !== "—"; }).slice(0, 3);
+      if (others.length === 3)
+        extra.push(mkQ(T("Welche Buchstaben kommen aus dieser Stelle: {m}?", { m: m[0] }), [m[1]].concat(others), T("{m}: {c}", { m: m[0], c: m[1] })));
+    });
+    var nasal = MK[MK.length - 1];
+    if (nasal && !nasal[1]) extra.push(mkQ(T("Was kommt aus dem Nasenraum (Ḫayšūm)?"), [T("Die Ġunna"), T("Der Buchstabe Nūn"), T("Die Qalqala"), T("Der Madd")],
+      T("Aus dem Nasenraum kommt die Ġunna. Das Nūn selbst kommt von der Zungenspitze.")));
+    SETS.makharij = SETS.makharij.concat(extra);
+    QS = QS.concat(extra);
+  }
+
+  /* „Regel erkennen“: Qurʾān-Stellen mit markierter Stelle (tajwid/regeln.js) */
+  var RG = window.TAJWID_REGELN, RULE_QS = [];
+  if (RG) {
+    RG.ITEMS.forEach(function (x) {
+      var words = x.s.split(/\s+/), mw = x.m.split(/\s+/), start = -1;
+      for (var i = 0; i + mw.length <= words.length && start < 0; i++)
+        if (mw.every(function (w, k) { return words[i + k].replace(/[.،؛؟!]/g, "") === w; })) start = i;
+      if (start < 0) { if (window.console) console.warn("tajwid: Markierung nicht gefunden", x.m); return; }
+      /* falsche Antworten aus der ersten Gruppe, die die Regel enthält; reicht das nicht, aus allen ihren Gruppen */
+      var mark = mw.map(function (w, k) { return start + k; }), pool = {};
+      function fill(all) {
+        RG.GROUPS.some(function (g) { if (g.indexOf(x.r) === -1) return false; g.forEach(function (r) { pool[r] = 1; }); return !all; });
+        delete pool[x.r];
+        if (/^Lām in „Allah“/.test(x.r)) { delete pool["Lām šamsiyya"]; delete pool["Lām qamariyya"]; }
+      }
+      fill(false);
+      if (Object.keys(pool).length < 3) fill(true);
+      var wrong = Object.keys(pool).sort(function (a, b) { return hash(x.s + a) < hash(x.s + b) ? -1 : 1; }).slice(0, 3);
+      if (wrong.length < 3) return;
+      RULE_QS.push({ t: "tajwid", tt: T("Taǧwīd · Regel erkennen"), srcText: T("Quelle:") + " Qurʾān " + x.v, c: 0, chapter: "regeln",
+        _lid: "tj-r-" + hash(x.s + "|" + x.m + "|" + x.r),
+        q: T("Welche Taǧwīd-Regel gilt an der markierten Stelle?") + (x.f ? " (" + x.f + ")" : ""),
+        ar: x.s, arMark: mark.length === 1 ? mark[0] : mark, a: [x.r].concat(wrong), e: x.e });
+    });
+    SETS.regeln = RULE_QS;
+    QS = QS.concat(RULE_QS);
+  }
+
   function lv(q) { return L.levelOf(q._lid); }
   function stats(list) {
     var s = { total: list.length, learned: 0, almost: 0, wrong: 0, fresh: 0 };
@@ -50,7 +111,7 @@
   /* ---------- rounds ---------- */
   var lastRound = null;
   function listOf(id) { return id && SETS[id] ? SETS[id] : QS; }
-  function labelOf(id) { return id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
+  function labelOf(id) { return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
   function start(id) {
     var list = listOf(id), r = roundFor(list);
     if (!r.qs.length) return;
@@ -94,20 +155,29 @@
     return null;
   }
 
+  function rulesCard() {
+    if (!RULE_QS.length) return "";
+    var s = stats(RULE_QS);
+    return '<div class="panel tj-quizcard"><div><p class="eyebrow">' + T("Allgemeines Taǧwīd-Quiz") + "</p><h3>" + T("Regel erkennen") + "</h3><p>" +
+      T("Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Regel gilt dort? {n} Stellen aus allen Kapiteln.", { n: RULE_QS.length }) + "</p>" + bar(s) +
+      '<small class="lt-meta">' + (s.learned ? T("{n} von {m} gelernt", { n: s.learned, m: s.total }) : T("noch nicht begonnen")) + "</small></div>" +
+      '<button type="button" class="btn btn-primary" data-tj-learn="regeln">' + (s.pct === 100 ? T("✓ Wiederholen") : s.learned ? T("Weiter üben · {n} %", { n: s.pct }) : T("Quiz starten")) + "</button></div>";
+  }
   function listPane() {
-    return '<ol class="ar-lessons">' + CH.map(function (c) {
+    return rulesCard() + '<ol class="ar-lessons">' + CH.map(function (c) {
       var s = stats(SETS[c.id]), st = s.pct === 100 ? "done" : s.learned + s.almost + s.wrong ? "busy" : "new";
       return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-tj-ch="' + c.id + '">' +
         '<span class="ar-num">' + c.n + "</span>" +
         '<span class="lt-main"><span class="lt-title"><strong>' + esc(c.title) + "</strong>" + ar(c.ar, "lt-ar") + "</span>" + bar(s) +
-        '<small class="lt-meta">' + T("{n} Regeln · {m} Übungen · {k} Fragen aus dem Heft", { n: c.rules.length, m: c.quiz.length, k: c.book.length }) +
+        '<small class="lt-meta">' + (c.book.length ? T("{n} Regeln · {m} Übungen · {k} Fragen aus dem Heft", { n: c.rules.length, m: SETS[c.id].length, k: c.book.length })
+          : T("{n} Regeln · {m} Übungen · ergänzt", { n: c.rules.length, m: SETS[c.id].length })) +
         (s.learned ? " · " + T("{n} % gelernt", { n: s.pct }) : "") + "</small></span>" +
         '<span class="lt-pct">' + (st === "done" ? "✓" : s.pct + " %") + "</span></button></li>";
     }).join("") + "</ol>";
   }
 
   function ruleHtml(r) {
-    return '<section class="tj-rule"><h4>' + esc(r.h) + (r.ar ? " " + ar(r.ar, "tj-rule-ar") : "") + "</h4>" +
+    return '<section class="tj-rule"><h4>' + esc(r.h) + (r.ar ? " " + ar(r.ar, "tj-rule-ar") : "") + (r.g ? '<span class="tj-badge">' + T("ergänzt") + "</span>" : "") + "</h4>" +
       (r.text ? "<p>" + mixed(r.text) + "</p>" : "") +
       (r.ex && r.ex.length ? '<ul class="ar-examples">' + r.ex.map(function (e) {
         return "<li>" + ar(e[0], "ar-ex") + '<span class="ar-de">' + esc(e[1] || "") + "</span></li>";
@@ -131,10 +201,11 @@
       '<button type="button" class="linkish ar-back" data-tj-back>← ' + T("Alle Kapitel") + "</button>" +
       '<header class="ar-lesson-head"><p class="eyebrow">' + T("Kapitel") + " " + c.n + "</p><h2>" + esc(c.title) + "</h2>" + ar(c.ar, "ar-title") + "</header>" +
       '<p class="tj-intro">' + mixed(c.intro) + "</p>" +
+      (c.general ? '<p class="tj-note">' + T("Dieses Kapitel steht nicht im Heft und nicht auf der Tafel. Es ist ergänzt nach dem allgemein überlieferten Taǧwīd (u. a. Tuḥfat al-Aṭfāl und al-Muqaddima al-Ǧazariyya), Lesart Ḥafṣ ʿan ʿĀṣim.") + "</p>" : "") +
       '<button type="button" class="btn btn-primary" data-tj-learn="' + c.id + '">' + (s.pct === 100 ? T("✓ Kapitel wiederholen") : T("Kapitel üben · {n} %", { n: s.pct })) + "</button>" +
       '<section class="ar-block"><h3>' + T("Regeln") + "</h3>" + c.rules.map(ruleHtml).join("") + "</section>" +
       (c.table ? '<section class="ar-block"><h3>' + T("Übersicht") + "</h3>" + tableHtml(c.table) + "</section>" : "") +
-      '<section class="ar-block">' + bookHtml(c) + "</section>" +
+      (c.book.length ? '<section class="ar-block">' + bookHtml(c) + "</section>" : "") +
       '<nav class="ar-pager">' + (prev ? '<button type="button" class="btn" data-tj-ch="' + prev.id + '">← ' + esc(prev.title) + "</button>" : "<span></span>") +
       (next ? '<button type="button" class="btn" data-tj-ch="' + next.id + '">' + esc(next.title) + " →</button>" : "<span></span>") + "</nav></div>";
   }
