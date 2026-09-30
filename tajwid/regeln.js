@@ -180,6 +180,67 @@ window.TAJWID_REGELN = {
     { s: "إِيلَافِهِمْ رِحْلَةَ الشِّتَاءِ وَالصَّيْفِ", m: "وَالصَّيْفِ", r: "Madd al-līn", f: "das Yāʾ, beim Anhalten", v: "106:2", e: "Yāʾ sākin nach Fatḥa, beim Anhalten → Līn." },
     { s: "وَفِي أَنْفُسِكُمْ أَفَلَا تُبْصِرُونَ", m: "وَفِي أَنْفُسِكُمْ", r: "Madd munfaṣil", f: "das Yāʾ von فِي", v: "51:21", e: "Yāʾ als Dehnungsbuchstabe am Wortende, Hamza im nächsten Wort." },
     { s: "وَلَا يُشْرِكْ بِعِبَادَةِ رَبِّهِ أَحَدًا", m: "رَبِّهِ أَحَدًا", r: "Madd aṣ-ṣila kubrā", f: "das Hāʾ", v: "18:110", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach Hamza → ṣila kubrā, 4–5." },
-    { s: "وَيَخْلُدْ فِيهِ مُهَانًا", m: "فِيهِ", r: "Madd aṣ-ṣila ṣuġrā", f: "das Hāʾ", v: "25:69", e: "Ausnahme: obwohl davor ein Sākin steht, wird das Hāʾ hier gedehnt (2 Ḥarakāt)." }
+    { s: "وَيَخْلُدْ فِيهِ مُهَانًا", m: "فِيهِ", r: "Madd aṣ-ṣila ṣuġrā", f: "das Hāʾ", v: "25:69", e: "Ausnahme: obwohl davor ein Sākin steht, wird das Hāʾ hier gedehnt (2 Ḥarakāt)." },
+    /* ---- noch mehr schwere Stellen ---- */
+    /* eine Stelle, drei Regeln */
+    { s: "وَمِنْهُمْ مَنْ يَقُولُ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً", m: "وَمِنْهُمْ", r: "Iẓhār ḥalqī", f: "das Nūn", v: "2:200", e: "Nūn sākin vor Hāʾ – auch im selben Wort deutlich." },
+    { s: "وَمِنْهُمْ مَنْ يَقُولُ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً", m: "وَمِنْهُمْ مَنْ", r: "Idġām šafawī (Mīm in Mīm)", f: "das Mīm von وَمِنْهُمْ", v: "2:200", e: "Mīm sākin vor Mīm → verschmelzen mit Ġunna." },
+    { s: "وَمِنْهُمْ مَنْ يَقُولُ رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً", m: "مَنْ يَقُولُ", r: "Idġām mit Ġunna", f: "das Nūn von مَنْ", v: "2:200", e: "Nūn sākin vor Yāʾ im nächsten Wort." },
+    /* Nūn und Tanwīn */
+    { s: "يَا أَيُّهَا الَّذِينَ آمَنُوا اتَّقُوا اللَّهَ وَقُولُوا قَوْلًا سَدِيدًا", m: "قَوْلًا سَدِيدًا", r: "Iḫfāʾ", f: "das Tanwīn", v: "33:70", e: "Tanwīn vor Sīn → Iḫfāʾ." },
+    { s: "إِنِّي أَحْبَبْتُ حُبَّ الْخَيْرِ عَنْ ذِكْرِ رَبِّي", m: "عَنْ ذِكْرِ", r: "Iḫfāʾ", f: "das Nūn", v: "38:32", e: "Nūn sākin vor Ḏāl → Iḫfāʾ." },
+    { s: "لَئِنْ شَكَرْتُمْ لَأَزِيدَنَّكُمْ", m: "لَئِنْ شَكَرْتُمْ", r: "Iḫfāʾ", f: "das Nūn", v: "14:7", e: "Nūn sākin vor Šīn → Iḫfāʾ." },
+    { s: "إِنَّ اللَّهَ عَلِيمٌ بِذَاتِ الصُّدُورِ", m: "عَلِيمٌ بِذَاتِ", r: "Iqlāb", f: "das Tanwīn", v: "3:119", e: "Tanwīn vor Bāʾ → Mīm mit Ġunna." },
+    { s: "وَمَا بِكُمْ مِنْ نِعْمَةٍ فَمِنَ اللَّهِ", m: "مِنْ نِعْمَةٍ", r: "Idġām mit Ġunna", f: "das Nūn von مِنْ", v: "16:53", e: "Nūn sākin vor Nūn → Idġām mit Ġunna." },
+    { s: "لِيُنْذِرَ بَأْسًا شَدِيدًا مِنْ لَدُنْهُ", m: "مِنْ لَدُنْهُ", r: "Idġām ohne Ġunna", f: "das Nūn von مِنْ", v: "18:2", e: "Nūn sākin vor Lām → ohne Ġunna." },
+    { s: "وَمِنَ النَّخْلِ مِنْ طَلْعِهَا قِنْوَانٌ دَانِيَةٌ", m: "قِنْوَانٌ", r: "Iẓhār muṭlaq", f: "das erste Nūn", v: "6:99", e: "Nūn sākin vor Wāw im selben Wort → deutlich, kein Idġām." },
+    /* Mīm */
+    { s: "أَفْتَرَىٰ عَلَى اللَّهِ كَذِبًا أَمْ بِهِ جِنَّةٌ", m: "أَمْ بِهِ", r: "Iḫfāʾ šafawī", f: "das Mīm", v: "34:8", e: "Mīm sākin vor Bāʾ → Lippen-Iḫfāʾ." },
+    { s: "وَمَا هُمْ بِمُؤْمِنِينَ", m: "هُمْ بِمُؤْمِنِينَ", r: "Iḫfāʾ šafawī", f: "das Mīm", v: "2:8", e: "Mīm sākin vor Bāʾ." },
+    { s: "فَقَالُوا إِنَّا إِلَيْكُمْ مُرْسَلُونَ", m: "إِلَيْكُمْ مُرْسَلُونَ", r: "Idġām šafawī (Mīm in Mīm)", f: "das Mīm", v: "36:14", e: "Mīm sākin vor Mīm." },
+    /* Ġunna */
+    { s: "إِنَّمَا الْمُؤْمِنُونَ إِخْوَةٌ", m: "إِنَّمَا", r: "Ġunna (Nūn/Mīm mit Šadda)", f: "das Nūn", v: "49:10", e: "Nūn mit Šadda → Ġunna." },
+    /* Madd */
+    { s: "وَجَاءُوا أَبَاهُمْ عِشَاءً يَبْكُونَ", m: "عِشَاءً", r: "Madd muttaṣil", f: "das Alif vor der Hamza", v: "12:16", e: "Alif und Hamza im selben Wort." },
+    { s: "وَجَاءُوا أَبَاهُمْ عِشَاءً يَبْكُونَ", m: "وَجَاءُوا أَبَاهُمْ", r: "Madd munfaṣil", f: "das Wāw am Ende von جَاءُوا", v: "12:16", e: "Das Wāw steht nach einer Hamza (badal) und vor der Hamza des nächsten Wortes (munfaṣil) – die stärkere Ursache zählt: munfaṣil." },
+    { s: "وَبِالْآخِرَةِ هُمْ يُوقِنُونَ", m: "وَبِالْآخِرَةِ", r: "Madd al-badal", f: "das ā nach dem Lām", v: "2:4", e: "In الْآخِرَة steht die Hamza vor dem Alif → badal, 2 Ḥarakāt." },
+    { s: "شَهْرُ رَمَضَانَ الَّذِي أُنْزِلَ فِيهِ الْقُرْآنُ هُدًى لِلنَّاسِ", m: "الْقُرْآنُ", r: "Madd al-badal", f: "das ā nach der Hamza, beim Weiterlesen", v: "2:185", e: "Hamza vor dem Alif im selben Wort → badal (beim Anhalten wäre es ʿāriḍ)." },
+    { s: "إِنَّا لِلَّهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ", m: "وَإِنَّا إِلَيْهِ", r: "Madd munfaṣil", f: "das Alif von وَإِنَّا", v: "2:156", e: "Alif am Wortende, Hamza am Anfang des nächsten." },
+    { s: "تَبَّتْ يَدَا أَبِي لَهَبٍ وَتَبَّ", m: "يَدَا أَبِي", r: "Madd munfaṣil", f: "das Alif von يَدَا", v: "111:1", e: "Getrennt: Madd munfaṣil." },
+    { s: "هَا أَنْتُمْ هَٰؤُلَاءِ حَاجَجْتُمْ", m: "هَا أَنْتُمْ", r: "Madd munfaṣil", f: "das Alif von هَا", v: "3:66", e: "هَا ist ein eigenes Wort → Hamza im nächsten Wort: munfaṣil." },
+    { s: "هَا أَنْتُمْ هَٰؤُلَاءِ حَاجَجْتُمْ", m: "هَٰؤُلَاءِ", r: "Madd muttaṣil", f: "das Alif vor der letzten Hamza", v: "3:66", e: "Alif und Hamza im selben Wort." },
+    { s: "قُلْ آللَّهُ أَذِنَ لَكُمْ", m: "آللَّهُ", r: "Madd lāzim kalimī", f: "das erste ā", v: "10:59", e: "Madd al-farq: die zweite Hamza wird zu Alif mit Šadda-Lām danach → 6 Ḥarakāt (wie lāzim)." },
+    { s: "كهيعص ذِكْرُ رَحْمَتِ رَبِّكَ عَبْدَهُ زَكَرِيَّا", m: "كهيعص", r: "Madd lāzim ḥarfī", f: "das Kāf", v: "19:1–2", e: "kāf: drei Buchstaben, der mittlere ein Dehnungsbuchstabe → 6." },
+    { s: "كهيعص ذِكْرُ رَحْمَتِ رَبِّكَ عَبْدَهُ زَكَرِيَّا", m: "كهيعص", r: "Madd ṭabīʿī", f: "das Hāʾ", v: "19:1–2", e: "hā gehört zu „حَيٌّ طَهُرَ“ – nur 2 Ḥarakāt." },
+    { s: "طس تِلْكَ آيَاتُ الْقُرْآنِ", m: "طس", r: "Madd ṭabīʿī", f: "das Ṭāʾ", v: "27:1", e: "ṭā – zwei Buchstaben → natürliche Dehnung." },
+    { s: "طس تِلْكَ آيَاتُ الْقُرْآنِ", m: "طس", r: "Madd lāzim ḥarfī", f: "das Sīn", v: "27:1", e: "sīn – drei Buchstaben, der mittlere ein Dehnungsbuchstabe → 6." },
+    { s: "حم تَنْزِيلُ الْكِتَابِ مِنَ اللَّهِ الْعَزِيزِ الْعَلِيمِ", m: "حم", r: "Madd ṭabīʿī", f: "das Ḥāʾ", v: "40:1–2", e: "ḥā – nur 2 Ḥarakāt." },
+    { s: "ن وَالْقَلَمِ وَمَا يَسْطُرُونَ", m: "ن", r: "Madd lāzim ḥarfī", f: "der Buchstabenname", v: "68:1", e: "nūn – drei Buchstaben, der mittlere ein Dehnungsbuchstabe → 6." },
+    { s: "إِنَّ اللَّهَ كَانَ عَلِيمًا حَكِيمًا", m: "حَكِيمًا", r: "Madd al-ʿiwaḍ", f: "das Ende, beim Anhalten", v: "4:11", e: "Tanwīn mit Fatḥa → beim Anhalten Alif." },
+    { s: "ذَٰلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ", m: "رَيْبَ", r: "Madd al-līn", f: "das Yāʾ, beim Anhalten auf رَيْبَ", v: "2:2", e: "Yāʾ sākin nach Fatḥa; hält man hier an (Muʿānaqa-Stelle), entsteht Līn." },
+    { s: "إِنَّهُ كَانَ بِعِبَادِهِ خَبِيرًا بَصِيرًا", m: "بِعِبَادِهِ", r: "Madd aṣ-ṣila ṣuġrā", f: "das Hāʾ am Ende", v: "17:30", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach keine Hamza." },
+    /* Qalqala */
+    { s: "وَالسَّمَاءِ ذَاتِ الْبُرُوجِ", m: "الْبُرُوجِ", r: "Qalqala kubrā", f: "das Ǧīm beim Anhalten", v: "85:1", e: "Ǧīm am Wortende beim Anhalten." },
+    { s: "وَالطُّورِ وَكِتَابٍ مَسْطُورٍ", m: "مَسْطُورٍ", r: "Qalqala ṣuġrā", f: "das Ṭāʾ", v: "52:1–2", e: "Ṭāʾ sākin mitten im Wort." },
+    { s: "إِنَّ شَانِئَكَ هُوَ الْأَبْتَرُ", m: "الْأَبْتَرُ", r: "Qalqala ṣuġrā", f: "das Bāʾ", v: "108:3", e: "Bāʾ sākin mitten im Wort." },
+    /* Lām */
+    { s: "قَالَتْ رُسُلُهُمْ أَفِي اللَّهِ شَكٌّ", m: "أَفِي اللَّهِ", r: "Lām in „Allah“ dünn", f: "das Lām in „Allah“", v: "14:10", e: "Das Yāʾ fällt beim Weiterlesen weg; davor steht die Kasra des Fāʾ → dünn." },
+    { s: "وَاتَّقُوا اللَّهَ لَعَلَّكُمْ تُفْلِحُونَ", m: "وَاتَّقُوا اللَّهَ", r: "Lām in „Allah“ dick", f: "das Lām in „Allah“", v: "2:189", e: "Das Wāw fällt beim Weiterlesen weg; davor steht die Ḍamma des Qāf → dick." },
+    { s: "الرِّجَالُ قَوَّامُونَ عَلَى النِّسَاءِ", m: "الرِّجَالُ", r: "Lām šamsiyya", f: "das Lām des Artikels", v: "4:34", e: "Rāʾ ist ein Sonnenbuchstabe." },
+    { s: "الرِّجَالُ قَوَّامُونَ عَلَى النِّسَاءِ", m: "الرِّجَالُ", r: "Rāʾ dünn", f: "das Rāʾ", v: "4:34", e: "Rāʾ mit Kasra → dünn." },
+    /* Rāʾ */
+    { s: "مَا يُفَرِّقُونَ بِهِ بَيْنَ الْمَرْءِ وَزَوْجِهِ", m: "الْمَرْءِ", r: "Rāʾ dick", f: "das Rāʾ", v: "2:102", e: "Rāʾ sākin nach Fatḥa → dick." },
+    { s: "فَلَوْلَا نَفَرَ مِنْ كُلِّ فِرْقَةٍ مِنْهُمْ طَائِفَةٌ", m: "فِرْقَةٍ", r: "Rāʾ dick", f: "das Rāʾ", v: "9:122", e: "Rāʾ sākin nach Kasra, danach Qāf (Isti‘lāʾ) mit Fatḥa → dick." },
+    { s: "إِنَّ رَبَّكَ لَبِالْمِرْصَادِ", m: "لَبِالْمِرْصَادِ", r: "Rāʾ dick", f: "das Rāʾ", v: "89:14", e: "Rāʾ sākin nach Kasra, danach Ṣād → dick." },
+    { s: "وَالْفَجْرِ وَلَيَالٍ عَشْرٍ", m: "وَالْفَجْرِ", r: "Rāʾ dick", f: "das Rāʾ beim Anhalten", v: "89:1", e: "Beim Anhalten: davor Ǧīm sākin, davor Fatḥa → dick." },
+    { s: "ص وَالْقُرْآنِ ذِي الذِّكْرِ", m: "الذِّكْرِ", r: "Rāʾ dünn", f: "das Rāʾ beim Anhalten", v: "38:1", e: "Beim Anhalten: davor Kāf sākin, davor Kasra → dünn." },
+    { s: "إِنَّ رَبَّهُمْ بِهِمْ يَوْمَئِذٍ لَخَبِيرٌ", m: "لَخَبِيرٌ", r: "Rāʾ dünn", f: "das Rāʾ beim Anhalten", v: "100:11", e: "Beim Anhalten: davor Yāʾ sākina → dünn." },
+    { s: "وَأَسَلْنَا لَهُ عَيْنَ الْقِطْرِ", m: "الْقِطْرِ", r: "Rāʾ: beides erlaubt", f: "das Rāʾ beim Anhalten", v: "34:12", e: "Davor Ṭāʾ sākin (Isti‘lāʾ), davor Kasra → dick oder dünn erlaubt." },
+    /* Idġām-Arten */
+    { s: "فَقَالَ أَحَطْتُ بِمَا لَمْ تُحِطْ بِهِ", m: "أَحَطْتُ", r: "Idġām mutaǧānisayn", f: "Ṭāʾ und Tāʾ", v: "27:22", e: "Ṭāʾ vor Tāʾ – unvollständiger Idġām: die Schwere (Iṭbāq) des Ṭāʾ bleibt hörbar." },
+    { s: "لَئِنْ بَسَطْتَ إِلَيَّ يَدَكَ لِتَقْتُلَنِي", m: "بَسَطْتَ", r: "Idġām mutaǧānisayn", f: "Ṭāʾ und Tāʾ", v: "5:28", e: "Unvollständiger Idġām des Ṭāʾ ins Tāʾ." },
+    { s: "وَمِنْ قَبْلُ مَا فَرَّطْتُمْ فِي يُوسُفَ", m: "فَرَّطْتُمْ", r: "Idġām mutaǧānisayn", f: "Ṭāʾ und Tāʾ", v: "12:80", e: "Ṭāʾ vor Tāʾ, unvollständig." },
+    { s: "ذَٰلِكَ بِمَا عَصَوْا وَكَانُوا يَعْتَدُونَ", m: "عَصَوْا وَكَانُوا", r: "Idġām miṯlayn", f: "das Wāw", v: "2:61", e: "Wāw sākin nach Fatḥa (Līn) vor Wāw → Idġām. (Nach Ḍamma, z. B. قَالُوا وَهُمْ, wäre es ein Dehnungsbuchstabe – dann kein Idġām.)" },
+    { s: "وَقُلْ لَهُمْ فِي أَنْفُسِهِمْ قَوْلًا بَلِيغًا", m: "وَقُلْ لَهُمْ", r: "Idġām miṯlayn", f: "das Lām", v: "4:63", e: "Lām sākin vor Lām." }
   ]
 };
