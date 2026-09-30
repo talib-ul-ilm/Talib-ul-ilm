@@ -147,7 +147,7 @@
       add(s.gram, base("ar-g-" + hash(pre + g.q + "|" + g.a[0]), { q: strip(g.q), ar: g.ar, a: g.a, e: strip(g.e), why: whyList(g.w), plus: true }));
     });
     l.irab.forEach(function (it, i) {
-      add(s.irab, base("ar-i-" + hash(pre + it.s + "|" + it.w), { q: T("Iʿrāb des markierten Wortes:"), ar: it.s, arMark: it.w, a: it.a, e: strip(it.e), why: whyList(why.i && why.i[i]) }));
+      add(s.irab, base("ar-i-" + hash(pre + it.s + "|" + it.w), { q: T("Iʿrāb des markierten Wortes:"), ar: it.s, arMark: it.w, a: window.IRAB_OPTIONS ? window.IRAB_OPTIONS(it.a, pre + it.s + "|" + it.w) : it.a, e: strip(it.e), why: whyList(why.i && why.i[i]) }));
     });
   });
   function lessonQs(id) { var s = SETS[id]; return s.vocab.concat(s.gram, s.irab); }
