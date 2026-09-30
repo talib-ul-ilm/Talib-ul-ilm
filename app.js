@@ -684,9 +684,9 @@
     var wh = whyHtml(item.src, item.options, idx);
     $("#fb-why").innerHTML = wh;
     $("#fb-why").hidden = !wh;
-    var th = termsHtml(item.src, item.options.map(function (o) { return o.text; }));
-    $("#fb-terms").innerHTML = th;
-    $("#fb-terms").hidden = !th;
+    /* the terms are explained right under the answer options (optionTermsHtml), not in an extra box */
+    $("#fb-terms").innerHTML = "";
+    $("#fb-terms").hidden = true;
     $("#next-q").textContent = game.i + 1 < game.qs.length ? T("Nächste Frage") : (game.preset && game.preset.learn ? T("Runde abschließen") : T("Ergebnis ansehen"));
     $("#q-score").textContent = game.score;
     $("#q-streak").textContent = game.streak > 1 ? T("{n}er-Serie", { n: game.streak }) : "";
@@ -940,7 +940,7 @@
   }
   window.FIQH_APP = {
     TOPICS: TOPICS, QUESTIONS: QUESTIONS, TOPIC_BY_ID: TOPIC_BY_ID, GROUPS: GROUPS,
-    esc: esc, markedArabic: markedArabic, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
+    esc: esc, markedArabic: markedArabic, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, optionTermsHtml: optionTermsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
     showView: showView, tabOf: TAB_OF, startQuiz: startQuiz, onResume: onResume, relang: relangLabel, renderSetup: renderSetup, openTopic: openTopic,
     isPlaying: function () { return !!game && !$("#quiz-play").hidden; },
     on: function (name, fn) { (listeners[name] = listeners[name] || []).push(fn); }
