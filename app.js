@@ -646,23 +646,13 @@
     showFeedback(item, idx, ok, timeBonus, streakBonus, learnNote);
   }
 
-  /* after answering: the technical terms in each answer option, explained right under it */
   function termScope(q) { return q.t === "arabisch" ? "a" : q.t === "tajwid" ? "t" : "f"; }
-  function optionTermsHtml(q, text) {
-    if (!window.FIQH_TERMS) return "";
-    var list = window.FIQH_TERMS([text], termScope(q), q.t === "arabisch" && q.arMark != null).slice(0, 2);
-    if (!list.length) return "";
-    return '<span class="opt-terms" dir="ltr">' + list.map(function (t) {
-      return "<span><b>" + bidiHtml(t[0]) + "</b> – " + bidiHtml(t[1]) + "</span>";
-    }).join("") + "</span>";
-  }
   function showFeedback(item, idx, ok, timeBonus, streakBonus, learnNote) {
     $all(".option").forEach(function (b) {
       var i = +b.getAttribute("data-opt");
       b.disabled = true;
       if (item.options[i].correct) b.classList.add("is-correct");
       else if (i === idx) b.classList.add("is-wrong");
-      if (!b.querySelector(".opt-terms")) b.insertAdjacentHTML("beforeend", optionTermsHtml(item.src, item.options[i].text));
     });
 
     var fb = $("#q-feedback");
@@ -684,9 +674,10 @@
     var wh = whyHtml(item.src, item.options, idx);
     $("#fb-why").innerHTML = wh;
     $("#fb-why").hidden = !wh;
-    /* the terms are explained right under the answer options (optionTermsHtml), not in an extra box */
-    $("#fb-terms").innerHTML = "";
-    $("#fb-terms").hidden = true;
+    /* all technical terms of the question and its answers, in one box below the explanation */
+    var th = termsHtml(item.src, item.options.map(function (o) { return o.text; }));
+    $("#fb-terms").innerHTML = th;
+    $("#fb-terms").hidden = !th;
     $("#next-q").textContent = game.i + 1 < game.qs.length ? T("Nächste Frage") : (game.preset && game.preset.learn ? T("Runde abschließen") : T("Ergebnis ansehen"));
     $("#q-score").textContent = game.score;
     $("#q-streak").textContent = game.streak > 1 ? T("{n}er-Serie", { n: game.streak }) : "";
@@ -940,7 +931,7 @@
   }
   window.FIQH_APP = {
     TOPICS: TOPICS, QUESTIONS: QUESTIONS, TOPIC_BY_ID: TOPIC_BY_ID, GROUPS: GROUPS,
-    esc: esc, markedArabic: markedArabic, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, optionTermsHtml: optionTermsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
+    esc: esc, markedArabic: markedArabic, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
     showView: showView, tabOf: TAB_OF, startQuiz: startQuiz, onResume: onResume, relang: relangLabel, renderSetup: renderSetup, openTopic: openTopic,
     isPlaying: function () { return !!game && !$("#quiz-play").hidden; },
     on: function (name, fn) { (listeners[name] = listeners[name] || []).push(fn); }
