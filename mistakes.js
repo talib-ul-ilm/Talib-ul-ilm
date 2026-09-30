@@ -5,7 +5,7 @@
    and a way back to where it was started (Quiz, Lernen, Arabisch, …). */
 (function () {
   "use strict";
-  var APP = window.FIQH_APP, L = window.FIQH_LEARN, AR = window.FIQH_ARABIC;
+  var APP = window.FIQH_APP, L = window.FIQH_LEARN, AR = window.FIQH_ARABIC, TJ = window.FIQH_TAJWID;
   var view = document.getElementById("view-mistakes");
   if (!APP || !L || !view) return;
   function $(sel, root) { return (root || document).querySelector(sel); }
@@ -38,6 +38,9 @@
       if (byLesson.gen) out.push({ key: "a-gen", title: T("Iʿrāb · neue Sätze"), ar: "إِعْرَابٌ", qs: byLesson.gen });
       return out;
     } });
+    if (TJ) SUBJECTS.push({ id: "tajwid", name: "Taǧwīd", back: "tajwid", folders: TJ.chapters.map(function (c) {
+      return { key: "t-" + c.id, title: T("Kapitel") + " " + c.n + " · " + c.title, ar: c.ar, qs: TJ.questions.filter(function (q) { return q.chapter === c.id; }) };
+    }) });
   })();
   function foldersOf(subject) { return subject.make ? subject.make() : subject.folders; }
   function openIn(folder) { return folder.qs.filter(isOpen); }
@@ -48,7 +51,7 @@
   /* ---------- practising ---------- */
   var state = { filter: "alle", opened: {} };
   var last = null;
-  var BACK = { quiz: T("Zurück zum Quiz"), wettbewerb: T("Zurück zum Wettbewerb"), lernen: T("Zurück zu Fiqh – Lernen"), arabisch: T("Zurück zu Arabisch") };
+  var BACK = { quiz: T("Zurück zum Quiz"), wettbewerb: T("Zurück zum Wettbewerb"), lernen: T("Zurück zu Fiqh – Lernen"), arabisch: T("Zurück zu Arabisch"), tajwid: T("Zurück zu Taǧwīd") };
 
   /* wrong ones first, then "fast"; size limits the round (folder rounds), none = all given */
   function practice(list, label, back, size) {
