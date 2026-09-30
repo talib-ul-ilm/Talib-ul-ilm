@@ -568,18 +568,24 @@
     el.classList.toggle("is-ar", arOnly(s));
     if (arOnly(s)) el.setAttribute("lang", "ar"); else el.removeAttribute("lang");
   }
-  /* q.ar: an Arabic word or sentence shown large; q.arMark: index of the word to highlight */
+  /* q.ar: an Arabic word or sentence shown large; q.arMark: index of the word to highlight,
+     or a list of indices (e.g. two words for a Taǧwīd rule between them) – neighbours share one mark */
+  function markedArabic(ar, mark) {
+    var on = function (i) { return Array.isArray(mark) ? mark.indexOf(i) !== -1 : i === mark; };
+    var ws = String(ar).split(/\s+/);
+    return ws.map(function (w, i) {
+      if (!on(i)) return esc(w);
+      /* the full stop or comma after the last marked word stays outside the highlight */
+      var last = !on(i + 1), m = last ? w.match(/^(.*?)([.،؛؟!?,:]*)$/) : [w, w, ""];
+      return (on(i - 1) ? "" : "<mark>") + esc(m[1]) + (last ? "</mark>" + esc(m[2]) : "");
+    }).join(" ");
+  }
   function renderArabicLine(q) {
     var el = $("#q-ar");
     if (!el) return;
     el.hidden = !q.ar;
     if (!q.ar) { el.innerHTML = ""; return; }
-    el.innerHTML = String(q.ar).split(/\s+/).map(function (w, i) {
-      if (i !== q.arMark) return esc(w);
-      /* the full stop or comma after the word stays outside the highlight */
-      var m = w.match(/^(.*?)([.،؛؟!?,:]*)$/);
-      return "<mark>" + esc(m[1]) + "</mark>" + esc(m[2]);
-    }).join(" ");
+    el.innerHTML = markedArabic(q.ar, q.arMark);
   }
 
   function startTimer() {
@@ -923,7 +929,7 @@
   }
   window.FIQH_APP = {
     TOPICS: TOPICS, QUESTIONS: QUESTIONS, TOPIC_BY_ID: TOPIC_BY_ID, GROUPS: GROUPS,
-    esc: esc, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
+    esc: esc, markedArabic: markedArabic, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
     showView: showView, tabOf: TAB_OF, startQuiz: startQuiz, onResume: onResume, relang: relangLabel, renderSetup: renderSetup, openTopic: openTopic,
     isPlaying: function () { return !!game && !$("#quiz-play").hidden; },
     on: function (name, fn) { (listeners[name] = listeners[name] || []).push(fn); }

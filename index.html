@@ -1276,6 +1276,12 @@ dialog.auth { border-radius: 20px; }
 .soon-badge { justify-self: start; font: 700 .7rem/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 5px 9px; }
 
 /* ---------- Taǧwīd ---------- */
+.tj-quizcard { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; margin-bottom: 14px; padding: 16px 18px; }
+.tj-quizcard > div { display: grid; gap: 6px; flex: 1 1 260px; }
+.tj-quizcard h3, .tj-quizcard p { margin: 0; }
+.tj-badge { font: 700 .68rem/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; }
+.tj-note { margin: 0; padding: 8px 12px; border-left: 3px solid var(--gold); background: var(--surface-2); border-radius: 8px; font-size: .92rem; color: var(--muted); max-width: 72ch; }
+
 .tj-intro { margin: 0; max-width: 72ch; }
 .tj-rule { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .tj-rule h4 { margin: 0; font: 700 1rem/1.35 var(--body); display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
@@ -1536,7 +1542,7 @@ dialog.auth { border-radius: 20px; }
       <div class="wrap intro">
         <p class="hero-eyebrow">Taǧwīd <span lang="ar" dir="rtl">·&nbsp;هِدَايَةُ الرَّحْمَنِ فِي تَجْوِيدِ الْقُرْآنِ</span></p>
         <h1>Den Qurʾān richtig lesen</h1>
-        <p>Die Regeln des Taǧwīd Kapitel für Kapitel – Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen. Mit den Fragen aus <b>Hidāyat ar-Raḥmān</b> und der Taǧwīd-Tafel.</p>
+        <p>Die Regeln des Taǧwīd Kapitel für Kapitel – Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen. Mit den Fragen aus <b>Hidāyat ar-Raḥmān</b>, der Taǧwīd-Tafel und dem Quiz <b>Regel erkennen</b>.</p>
         <div class="stats"><span><b id="tj-count-ch">0</b> Kapitel</span><span><b id="tj-count-q">0</b> Übungsfragen</span><span><b id="tj-count-b">0</b> Fragen aus dem Heft</span></div>
       </div>
     </div>
@@ -2121,6 +2127,8 @@ dialog.auth { border-radius: 20px; }
 <script src="sarf.js"></script>
 <script src="arabic.js"></script>
 <script src="tajwid/inhalt.js"></script>
+<script src="tajwid/ergaenzung.js"></script>
+<script src="tajwid/regeln.js"></script>
 <script src="tajwid.js"></script>
 <script src="mistakes.js"></script>
 <script src="progress.js"></script>

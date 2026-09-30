@@ -40,7 +40,7 @@
     } });
     if (TJ) SUBJECTS.push({ id: "tajwid", name: "Taǧwīd", back: "tajwid", folders: TJ.chapters.map(function (c) {
       return { key: "t-" + c.id, title: T("Kapitel") + " " + c.n + " · " + c.title, ar: c.ar, qs: TJ.questions.filter(function (q) { return q.chapter === c.id; }) };
-    }) });
+    }).concat([{ key: "t-regeln", title: T("Regel erkennen"), ar: "تَجْوِيدٌ", qs: TJ.questions.filter(function (q) { return q.chapter === "regeln"; }) }]) });
   })();
   function foldersOf(subject) { return subject.make ? subject.make() : subject.folders; }
   function openIn(folder) { return folder.qs.filter(isOpen); }
@@ -98,9 +98,7 @@
   }
   function arLine(q) {
     if (!q.ar) return "";
-    return '<p class="mf-ar" lang="ar" dir="rtl">' + String(q.ar).split(/\s+/).map(function (w, i) {
-      return i === q.arMark ? "<mark>" + esc(w) + "</mark>" : esc(w);
-    }).join(" ") + "</p>";
+    return '<p class="mf-ar" lang="ar" dir="rtl">' + APP.markedArabic(q.ar, q.arMark) + "</p>";
   }
   function item(q) {
     var l = lv(q);
