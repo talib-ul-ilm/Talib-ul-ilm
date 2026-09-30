@@ -93,6 +93,26 @@
     QS = QS.concat(RULE_QS);
   }
 
+  /* Begriffe abfragen (tajwid/begriffe.js): „Was bedeutet …?“ und „Wie heißt …?“ */
+  var BG = window.TAJWID_BEGRIFFE, TERM_QS = [];
+  if (BG) {
+    var byGroup = {};
+    BG.LIST.forEach(function (t) { (byGroup[t[2]] = byGroup[t[2]] || []).push(t); });
+    BG.LIST.forEach(function (t) {
+      var peers = byGroup[t[2]].filter(function (o) { return o !== t; });
+      if (peers.length < 3) peers = peers.concat(BG.LIST.filter(function (o) { return o[2] !== t[2]; }));
+      function pick(salt) { return peers.slice().sort(function (a, b) { return hash(t[0] + salt + a[0]) < hash(t[0] + salt + b[0]) ? -1 : 1; }).slice(0, 3); }
+      var expl = t[0] + " (" + t[1] + "): " + t[3] + "." + (t[4] ? " " + T("Wörtlich: „{w}“.", { w: t[4] }) : "");
+      var base = { t: "tajwid", tt: T("Taǧwīd · Begriffe"), srcText: T("Taǧwīd-Begriffe") + " · " + (BG.GROUPS[t[2]] || ""), c: 0, chapter: "begriffe", e: expl };
+      TERM_QS.push(Object.assign({}, base, { _lid: "tj-b-" + hash("m|" + t[0]), q: T("Was bedeutet der Taǧwīd-Begriff „{t}“?", { t: t[0] }), ar: t[1],
+        a: [t[3]].concat(pick("m").map(function (o) { return o[3]; })) }));
+      TERM_QS.push(Object.assign({}, base, { _lid: "tj-b-" + hash("n|" + t[0]), q: T("Wie heißt dieser Begriff? – {m}", { m: t[3] }),
+        a: [t[0] + " · " + t[1]].concat(pick("n").map(function (o) { return o[0] + " · " + o[1]; })) }));
+    });
+    SETS.begriffe = TERM_QS;
+    QS = QS.concat(TERM_QS);
+  }
+
   function lv(q) { return L.levelOf(q._lid); }
   function stats(list) {
     var s = { total: list.length, learned: 0, almost: 0, wrong: 0, fresh: 0 };
@@ -111,7 +131,7 @@
   /* ---------- rounds ---------- */
   var lastRound = null;
   function listOf(id) { return id && SETS[id] ? SETS[id] : QS; }
-  function labelOf(id) { return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
+  function labelOf(id) { return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id === "begriffe" ? T("Taǧwīd · Begriffe") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
   function start(id) {
     var list = listOf(id), r = roundFor(list);
     if (!r.qs.length) return;
@@ -163,8 +183,22 @@
       '<small class="lt-meta">' + (s.learned ? T("{n} von {m} gelernt", { n: s.learned, m: s.total }) : T("noch nicht begonnen")) + "</small></div>" +
       '<button type="button" class="btn btn-primary" data-tj-learn="regeln">' + (s.pct === 100 ? T("✓ Wiederholen") : s.learned ? T("Weiter üben · {n} %", { n: s.pct }) : T("Quiz starten")) + "</button></div>";
   }
+  function termsCard() {
+    if (!TERM_QS.length) return "";
+    var s = stats(TERM_QS), groups = {};
+    BG.LIST.forEach(function (t) { (groups[t[2]] = groups[t[2]] || []).push(t); });
+    return '<div class="panel tj-quizcard"><div><p class="eyebrow">' + T("Fachwörter") + "</p><h3>" + T("Taǧwīd-Begriffe") + "</h3><p>" +
+      T("{n} Begriffe – abgefragt in beide Richtungen: Was bedeutet der Begriff, und wie heißt er?", { n: BG.LIST.length }) + "</p>" + bar(s) +
+      '<small class="lt-meta">' + (s.learned ? T("{n} von {m} gelernt", { n: s.learned, m: s.total }) : T("noch nicht begonnen")) + "</small></div>" +
+      '<button type="button" class="btn btn-primary" data-tj-learn="begriffe">' + (s.pct === 100 ? T("✓ Wiederholen") : s.learned ? T("Weiter üben · {n} %", { n: s.pct }) : T("Begriffe üben")) + "</button>" +
+      '<details class="tj-terms"><summary>' + T("Alle Begriffe anzeigen") + "</summary>" + Object.keys(BG.GROUPS).filter(function (g) { return groups[g]; }).map(function (g) {
+        return "<h4>" + esc(BG.GROUPS[g]) + '</h4><div class="ar-table-wrap"><table class="ar-table tj-table"><tbody>' + groups[g].map(function (t) {
+          return "<tr><td><b>" + esc(t[0]) + "</b><br>" + ar(t[1], "tj-rule-ar") + "</td><td>" + mixed(t[3]) + (t[4] ? '<br><small class="tj-lit">' + T("wörtlich: {w}", { w: esc(t[4]) }) + "</small>" : "") + "</td></tr>";
+        }).join("") + "</tbody></table></div>";
+      }).join("") + "</details></div>";
+  }
   function listPane() {
-    return rulesCard() + '<ol class="ar-lessons">' + CH.map(function (c) {
+    return rulesCard() + termsCard() + '<ol class="ar-lessons">' + CH.map(function (c) {
       var s = stats(SETS[c.id]), st = s.pct === 100 ? "done" : s.learned + s.almost + s.wrong ? "busy" : "new";
       return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-tj-ch="' + c.id + '">' +
         '<span class="ar-num">' + c.n + "</span>" +

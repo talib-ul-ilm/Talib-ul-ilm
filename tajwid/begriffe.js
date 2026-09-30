@@ -1,0 +1,87 @@
+/* Taǧwīd-Begriffe: [Umschrift, Arabisch, Gruppe, Fachbedeutung, wörtliche Bedeutung]
+   – tajwid.js zeigt die Liste im Taǧwīd-Bereich und fragt die Begriffe ab
+     („Was bedeutet …?“ und „Wie heißt …?“; falsche Antworten aus derselben Gruppe).
+   – glossar.js erklärt die Begriffe unter jeder Taǧwīd-Frage („Begriffe in dieser Frage“).
+   Wird vor glossar.js geladen. */
+window.TAJWID_BEGRIFFE = {
+  GROUPS: { grund: "Grundbegriffe", madd: "Madd", nun: "Nūn, Mīm und Idġām", lam: "Lām, Rāʾ, dick und dünn", sifat: "Eigenschaften (Ṣifāt)", makhraj: "Austrittsstellen", waqf: "Anhalten und Lesen" },
+  LIST: [
+    /* Grundbegriffe */
+    ["Taǧwīd", "التَّجْوِيدُ", "grund", "Die Wissenschaft, jedem Buchstaben sein Recht zu geben – nach Austrittsstelle und Eigenschaft", "gut machen, verschönern"],
+    ["Tartīl", "التَّرْتِيلُ", "grund", "Das ruhige, deutliche Vortragen des Qurʾān mit Taǧwīd", "ordnen, gemessen vortragen"],
+    ["Maḫraǧ", "الْمَخْرَجُ", "grund", "Die Austrittsstelle eines Buchstabens", "Ausgang"],
+    ["Ṣifa", "الصِّفَةُ", "grund", "Eine Eigenschaft eines Buchstabens (z. B. Hams, Qalqala)", "Eigenschaft"],
+    ["Ḥaraka", "الْحَرَكَةُ", "grund", "Maßeinheit der Dehnung – so lange, wie man einen Finger beugt oder streckt; auch: Vokalzeichen", "Bewegung"],
+    ["Sukūn", "السُّكُونُ", "grund", "Der Buchstabe hat keinen Vokal (ـْ)", "Ruhe"],
+    ["Šadda", "الشَّدَّةُ", "grund", "Der Buchstabe wird doppelt gesprochen (ـّ): erst ohne, dann mit Vokal", "Stärke, Verdopplung"],
+    ["Tanwīn", "التَّنْوِينُ", "grund", "Nūn sākina am Ende eines Nomens: gesprochen, nicht geschrieben, beim Anhalten weggelassen", "Nunation"],
+    ["Laḥn ǧalī", "اللَّحْنُ الْجَلِيُّ", "grund", "Offensichtlicher Fehler, der Wort oder Vokal ändert – verboten", "deutlicher Fehler"],
+    ["Laḥn ḫafī", "اللَّحْنُ الْخَفِيُّ", "grund", "Versteckter Fehler gegen die Taǧwīd-Regeln (z. B. Ġunna weglassen), den der Sinn nicht ändert", "verborgener Fehler"],
+    ["Istiʿāḏa", "الِاسْتِعَاذَةُ", "grund", "„Aʿūḏu billāhi mina š-šayṭāni r-raǧīm“ vor dem Lesen", "Zuflucht suchen"],
+    ["Basmala", "الْبَسْمَلَةُ", "grund", "„Bismillāhi r-raḥmāni r-raḥīm“ am Anfang jeder Sūra außer at-Tawba", "das Sagen von bismillāh"],
+    /* Madd */
+    ["Madd", "الْمَدُّ", "madd", "Das Dehnen des Lautes mit einem Dehnungsbuchstaben", "Dehnung"],
+    ["Qaṣr", "الْقَصْرُ", "madd", "Kurze Dehnung, 2 Ḥarakāt", "Kürzen"],
+    ["Tawassuṭ", "التَّوَسُّطُ", "madd", "Mittlere Dehnung, 4 Ḥarakāt", "Mitte"],
+    ["Ṭūl", "الطُّولُ", "madd", "Lange Dehnung, 6 Ḥarakāt", "Länge"],
+    ["Madd ṭabīʿī", "الْمَدُّ الطَّبِيعِيُّ", "madd", "Natürliche Dehnung ohne Ursache, 2 Ḥarakāt", "natürliche Dehnung"],
+    ["Madd muttaṣil", "الْمَدُّ الْمُتَّصِلُ", "madd", "Dehnungsbuchstabe und Hamza im selben Wort, 4–5 Ḥarakāt (Pflicht)", "verbundene Dehnung"],
+    ["Madd munfaṣil", "الْمَدُّ الْمُنْفَصِلُ", "madd", "Dehnungsbuchstabe am Wortende, Hamza am Anfang des nächsten Wortes, 4–5 Ḥarakāt (erlaubt)", "getrennte Dehnung"],
+    ["Madd lāzim", "الْمَدُّ اللَّازِمُ", "madd", "Nach dem Dehnungsbuchstaben ein ursprüngliches Sukūn oder eine Šadda, immer 6 Ḥarakāt", "notwendige Dehnung"],
+    ["Madd ʿāriḍ li-s-sukūn", "الْمَدُّ الْعَارِضُ لِلسُّكُونِ", "madd", "Dehnung vor einem Sukūn, das erst beim Anhalten entsteht, 2, 4 oder 6 Ḥarakāt", "Dehnung wegen vorübergehenden Sukūns"],
+    ["Madd al-līn", "مَدُّ اللِّينِ", "madd", "Wāw oder Yāʾ sākin nach Fatḥa, beim Anhalten gedehnt, 2, 4 oder 6 Ḥarakāt", "Dehnung der Weichheit"],
+    ["Madd al-badal", "مَدُّ الْبَدَلِ", "madd", "Hamza vor dem Dehnungsbuchstaben im selben Wort, 2 Ḥarakāt", "Dehnung des Ersatzes"],
+    ["Madd al-ʿiwaḍ", "مَدُّ الْعِوَضِ", "madd", "Alif statt Tanwīn mit Fatḥa beim Anhalten, 2 Ḥarakāt", "Dehnung als Ausgleich"],
+    ["Madd aṣ-ṣila", "مَدُّ الصِّلَةِ", "madd", "Dehnung des Hāʾ des Pronomens zwischen zwei Vokalen", "Dehnung der Verbindung"],
+    ["Ḥurūf al-madd", "حُرُوفُ الْمَدِّ", "madd", "Die drei Dehnungsbuchstaben ا و ي – gesammelt in نُوحِيهَا", "Buchstaben der Dehnung"],
+    /* Nūn, Mīm, Idġām */
+    ["Iẓhār", "الْإِظْهَارُ", "nun", "Deutliches Sprechen des Nūn oder Mīm ohne zusätzliche Ġunna", "Deutlichmachen"],
+    ["Idġām", "الْإِدْغَامُ", "nun", "Einen Buchstaben ohne Vokal in den folgenden übergehen lassen, sodass beide einer mit Šadda werden", "Hineinstecken, Verschmelzen"],
+    ["Iqlāb", "الْإِقْلَابُ", "nun", "Nūn sākina oder Tanwīn vor Bāʾ wird zu einem verborgenen Mīm mit Ġunna", "Umwandeln"],
+    ["Iḫfāʾ", "الْإِخْفَاءُ", "nun", "Zustand zwischen Iẓhār und Idġām, ohne Šadda, mit Ġunna – vor 15 Buchstaben", "Verbergen"],
+    ["Ġunna", "الْغُنَّةُ", "nun", "Nasalklang aus dem Nasenraum, ohne Mitwirkung der Zunge", "Näseln"],
+    ["Iẓhār ḥalqī", "الْإِظْهَارُ الْحَلْقِيُّ", "nun", "Nūn deutlich vor den sechs Kehllauten ء ه ع ح غ خ", "Deutlichmachen an der Kehle"],
+    ["Iẓhār šafawī", "الْإِظْهَارُ الشَّفَوِيُّ", "nun", "Mīm sākin deutlich vor allen Buchstaben außer م und ب", "Deutlichmachen an den Lippen"],
+    ["Iḫfāʾ šafawī", "الْإِخْفَاءُ الشَّفَوِيُّ", "nun", "Mīm sākin vor Bāʾ verborgen, mit Ġunna", "Verbergen an den Lippen"],
+    ["Idġām miṯlayn", "إِدْغَامُ الْمِثْلَيْنِ", "nun", "Idġām zweier gleicher Buchstaben", "Verschmelzen zweier Gleicher"],
+    ["Idġām mutaǧānisayn", "إِدْغَامُ الْمُتَجَانِسَيْنِ", "nun", "Idġām zweier Buchstaben mit gleicher Austrittsstelle und verschiedenen Eigenschaften", "Verschmelzen zweier Gleichartiger"],
+    ["Idġām mutaqāribayn", "إِدْغَامُ الْمُتَقَارِبَيْنِ", "nun", "Idġām zweier Buchstaben mit nahen Austrittsstellen oder Eigenschaften (ل–ر, ق–ك)", "Verschmelzen zweier Naher"],
+    ["Iẓhār muṭlaq", "الْإِظْهَارُ الْمُطْلَقُ", "nun", "Nūn sākin vor ي oder و im selben Wort bleibt deutlich (الدُّنْيَا)", "unbedingtes Deutlichmachen"],
+    /* Lām, Rāʾ, dick/dünn */
+    ["Tafḫīm", "التَّفْخِيمُ", "lam", "Dicke Aussprache: der Mundraum füllt sich mit dem Laut", "Dickmachen"],
+    ["Tarqīq", "التَّرْقِيقُ", "lam", "Dünne Aussprache: der Laut bleibt schmal", "Dünnmachen"],
+    ["Lām šamsiyya", "اللَّامُ الشَّمْسِيَّةُ", "lam", "Lām des Artikels, das vor 14 Buchstaben nicht gesprochen wird (الشَّمْسُ)", "Sonnen-Lām"],
+    ["Lām qamariyya", "اللَّامُ الْقَمَرِيَّةُ", "lam", "Lām des Artikels, das vor 14 Buchstaben deutlich gesprochen wird (الْقَمَرُ)", "Mond-Lām"],
+    ["Lafẓ al-Ǧalāla", "لَفْظُ الْجَلَالَةِ", "lam", "Der Name „Allah“ – sein Lām ist nach Fatḥa/Ḍamma dick, nach Kasra dünn", "das Wort der Majestät"],
+    ["Qalqala", "الْقَلْقَلَةُ", "lam", "Hörbarer Nachstoß bei ق ط ب ج د, wenn sie sākin sind", "Erschütterung"],
+    /* Eigenschaften */
+    ["Hams", "الْهَمْسُ", "sifat", "Der Atem strömt beim Buchstaben weiter – 10 Buchstaben „فَحَثَّهُ شَخْصٌ سَكَتَ“", "Flüstern"],
+    ["Ǧahr", "الْجَهْرُ", "sifat", "Der Atem stockt beim Buchstaben – Gegenteil von Hams", "Lautwerden"],
+    ["Šidda", "الشِّدَّةُ", "sifat", "Der Laut stockt ganz – „أَجِدْ قَطٍ بَكَتْ“", "Härte"],
+    ["Riḫāwa", "الرَّخَاوَةُ", "sifat", "Der Laut fließt weiter – Gegenteil von Šidda", "Weichheit"],
+    ["Istiʿlāʾ", "الِاسْتِعْلَاءُ", "sifat", "Der hintere Zungenrücken hebt sich – „خُصَّ ضَغْطٍ قِظْ“, immer dick", "Erheben"],
+    ["Istifāl", "الِاسْتِفَالُ", "sifat", "Die Zunge bleibt unten – Gegenteil von Istiʿlāʾ", "Senken"],
+    ["Iṭbāq", "الْإِطْبَاقُ", "sifat", "Die Zunge liegt breit am Gaumen – ص ض ط ظ", "Anlegen, Bedecken"],
+    ["Ṣafīr", "الصَّفِيرُ", "sifat", "Pfeifender Laut – ص ز س", "Pfeifen"],
+    ["Takrīr", "التَّكْرِيرُ", "sifat", "Neigung zum Rollen beim Rāʾ – nur andeuten, nicht rollen", "Wiederholung"],
+    ["Tafaššī", "التَّفَشِّي", "sifat", "Die Luft breitet sich im Mund aus – beim ش", "Ausbreiten"],
+    ["Istiṭāla", "الِاسْتِطَالَةُ", "sifat", "Der Laut dehnt sich entlang des Zungenrands – beim ض", "Verlängern"],
+    /* Austrittsstellen */
+    ["Ǧawf", "الْجَوْفُ", "makhraj", "Der leere Mund- und Rachenraum – Austrittsstelle der Dehnungsbuchstaben", "Hohlraum"],
+    ["Ḥalq", "الْحَلْقُ", "makhraj", "Die Kehle – Austrittsstelle von ء ه ع ح غ خ", "Kehle"],
+    ["Lisān", "اللِّسَانُ", "makhraj", "Die Zunge – Austrittsstelle der meisten Buchstaben", "Zunge"],
+    ["Šafatān", "الشَّفَتَانِ", "makhraj", "Die beiden Lippen – Austrittsstelle von ف و ب م", "die beiden Lippen"],
+    ["Ḫayšūm", "الْخَيْشُومُ", "makhraj", "Der Nasenraum – dort entsteht die Ġunna", "Nasenhöhle"],
+    /* Anhalten und Lesen */
+    ["Waqf", "الْوَقْفُ", "waqf", "Anhalten am Wortende mit Atemholen", "Stehenbleiben"],
+    ["Ibtidāʾ", "الِابْتِدَاءُ", "waqf", "Neu beginnen nach dem Anhalten", "Beginnen"],
+    ["Waṣl", "الْوَصْلُ", "waqf", "Weiterlesen, ohne anzuhalten", "Verbinden"],
+    ["Sakt", "السَّكْتُ", "waqf", "Kurzes Innehalten ohne Atemholen", "Schweigen"],
+    ["Rawm", "الرَّوْمُ", "waqf", "Beim Anhalten den Vokal (Ḍamma oder Kasra) ganz leise andeuten", "Anstreben"],
+    ["Išmām", "الْإِشْمَامُ", "waqf", "Beim Anhalten nach dem Sukūn die Lippen runden, ohne Laut – nur bei Ḍamma", "riechen lassen"],
+    ["Imāla", "الْإِمَالَةُ", "waqf", "Das Alif zum ē hin neigen – bei Ḥafṣ nur in مَجْرَاهَا", "Neigen"],
+    ["Tashīl", "التَّسْهِيلُ", "waqf", "Eine Hamza erleichtert, zwischen Hamza und Alif sprechen – bei Ḥafṣ in ءَأَعْجَمِيٌّ", "Erleichtern"],
+    ["Hamzat al-waṣl", "هَمْزَةُ الْوَصْلِ", "waqf", "Hamza, die nur am Anfang gesprochen wird und beim Weiterlesen wegfällt", "Verbindungs-Hamza"],
+    ["Hamzat al-qaṭʿ", "هَمْزَةُ الْقَطْعِ", "waqf", "Hamza, die immer gesprochen wird – am Anfang und beim Weiterlesen", "Trenn-Hamza"]
+  ]
+};

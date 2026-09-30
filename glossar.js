@@ -362,6 +362,10 @@
     var n = name.split("|");
     return EN ? (n[1] || n[0]).replace(/[ǦǧŠšḪḫĠġḎḏṮṯ]/g, function (c) { return TR[c]; }) : n[0];
   }
+  /* Taǧwīd-Begriffe (tajwid/begriffe.js) – nur bei Taǧwīd-Fragen (scope "t") */
+  if (window.TAJWID_BEGRIFFE) window.TAJWID_BEGRIFFE.LIST.forEach(function (t) {
+    G.push(["t", fold(t[0]).replace(/[^a-z0-9 -]/g, ""), t[0], t[3] + " (" + t[1] + ")", t[3] + " (" + t[1] + ")"]);
+  });
   var latin = G.map(function (g) {
     var raw = [], plain = [];
     g[1].split("|").forEach(function (p) { if (p.charAt(0) === "=") raw.push(foldKeepAyn(p.slice(1))); else plain.push(p); });
