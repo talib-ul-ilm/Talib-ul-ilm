@@ -789,7 +789,7 @@
   function termsHtml(q, answers) {
     if (!window.FIQH_TERMS) return "";
     var ar = q.t === "arabisch";
-    var list = window.FIQH_TERMS([q.arMark != null ? "" : q.q].concat(answers || q.a || [], [q.e]), ar ? "a" : "f", ar && q.arMark != null).slice(0, 8);
+    var list = window.FIQH_TERMS([q.arMark != null ? "" : q.q].concat(answers || q.a || [], [q.e]), ar ? "a" : q.t === "tajwid" ? "t" : "f", ar && q.arMark != null).slice(0, 8);
     if (!list.length) return "";
     return '<details><summary class="fb-terms-h">' + esc(T("Begriffe in dieser Frage")) + "</summary>" + list.map(function (t) {
       return '<p class="fb-term" dir="ltr"><b>' + bidiHtml(t[0]) + "</b> – " + bidiHtml(t[1]) + "</p>";
