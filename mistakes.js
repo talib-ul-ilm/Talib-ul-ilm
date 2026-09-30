@@ -107,11 +107,12 @@
       '<p class="rv-q">' + (l === -1 ? '<span class="rv-label bad">' + T("falsch") + "</span>" : '<span class="rv-label mid">' + T("fast · noch 1× richtig") + "</span>") +
       mixed(q.q, "span") + "</p>" + arLine(q) +
       '<p class="rv-a"><span class="rv-label good">' + T("Richtig") + "</span> " + mixed(q.a[q.c], "span") + "</p>" +
+      (APP.optionTermsHtml ? APP.optionTermsHtml(q, q.a[q.c]).replace('class="opt-terms"', 'class="opt-terms rv-terms"') : "") +
       (q.e ? mixed(q.e, "p", "rv-e") : "") +
       (APP.whyHtml && APP.whyHtml(q) ? '<div class="fb-why">' + APP.whyHtml(q) + "</div>" : "") +
       (q.s !== undefined && APP.sourceLine ? '<p class="fb-source">' + esc(APP.sourceLine(q)) + "</p>" : "") +
       (APP.dalilHtml && APP.dalilHtml(q) ? '<ul class="fb-dalil">' + APP.dalilHtml(q) + "</ul>" : "") +
-      (APP.termsHtml && APP.termsHtml(q) ? '<div class="fb-terms">' + APP.termsHtml(q) + "</div>" : "") + "</li>";
+"</li>";
   }
 
   function renderRound() {
