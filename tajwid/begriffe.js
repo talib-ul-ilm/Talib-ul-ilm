@@ -44,6 +44,7 @@ window.TAJWID_BEGRIFFE = {
     ["Iẓhār šafawī", "الْإِظْهَارُ الشَّفَوِيُّ", "nun", "Mīm sākin deutlich vor allen Buchstaben außer م und ب", "Deutlichmachen an den Lippen"],
     ["Iḫfāʾ šafawī", "الْإِخْفَاءُ الشَّفَوِيُّ", "nun", "Mīm sākin vor Bāʾ verborgen, mit Ġunna", "Verbergen an den Lippen"],
     ["Idġām miṯlayn", "إِدْغَامُ الْمِثْلَيْنِ", "nun", "Idġām zweier gleicher Buchstaben", "Verschmelzen zweier Gleicher"],
+    ["Idġām miṯlayn mit Ġunna", "إِدْغَامُ الْمِثْلَيْنِ مَعَ الْغُنَّةِ", "nun", "Idġām zweier gleicher Buchstaben, wenn es Nūn in Nūn oder Mīm in Mīm ist – mit Ġunna", "Verschmelzen zweier Gleicher mit Näseln"],
     ["Idġām mutaǧānisayn", "إِدْغَامُ الْمُتَجَانِسَيْنِ", "nun", "Idġām zweier Buchstaben mit gleicher Austrittsstelle und verschiedenen Eigenschaften", "Verschmelzen zweier Gleichartiger"],
     ["Idġām mutaqāribayn", "إِدْغَامُ الْمُتَقَارِبَيْنِ", "nun", "Idġām zweier Buchstaben mit nahen Austrittsstellen oder Eigenschaften (ل–ر, ق–ك)", "Verschmelzen zweier Naher"],
     ["Iẓhār muṭlaq", "الْإِظْهَارُ الْمُطْلَقُ", "nun", "Nūn sākin vor ي oder و im selben Wort bleibt deutlich (الدُّنْيَا)", "unbedingtes Deutlichmachen"],
