@@ -3,7 +3,7 @@
    until then it shows up as "bald". */
 (function () {
   "use strict";
-  var APP = window.FIQH_APP, L = window.FIQH_LEARN, AR = window.FIQH_ARABIC;
+  var APP = window.FIQH_APP, L = window.FIQH_LEARN, AR = window.FIQH_ARABIC, TJ = window.FIQH_TAJWID;
   var box = document.getElementById("subjects");
   if (!APP || !box) return;
   var esc = APP.esc, T = window.T || function (s, v) { return v ? String(s).replace(/\{(\w+)\}/g, function (m, k) { return v[k] !== undefined ? v[k] : m; }) : s; };
@@ -24,6 +24,11 @@
       },
       stats: function () { return AR ? AR.stats() : null; },
       actions: [{ label: T("Lektionen öffnen"), view: "arabisch", primary: true }] },
+    { id: "tajwid", name: "Taǧwīd", ar: "التَّجْوِيدُ",
+      text: T("Den Qurʾān richtig lesen: Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen."),
+      meta: function () { return TJ ? [[TJ.chapters.length, T("Kapitel")], [TJ.questions.length, T("Übungen")]] : []; },
+      stats: function () { return TJ ? TJ.stats() : null; },
+      actions: [{ label: T("Kapitel öffnen"), view: "tajwid", primary: true }] },
     { id: "aqida", name: "ʿAqīda", ar: "العقيدة", soon: true,
       text: T("Die Glaubenslehre: Allah, Seine Namen und Eigenschaften und die sechs Säulen des Īmān.") },
     { id: "tazkiya", name: "Tazkiya", ar: "التزكية", soon: true,

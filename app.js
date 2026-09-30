@@ -126,8 +126,8 @@
 
   /* ---------- views ---------- */
   /* "start" is the page with all subjects (Fächer); a subject's views belong to that tab */
-  var views = { start: $("#view-home"), nachschlagen: $("#view-lookup"), lernen: $("#view-learn"), arabisch: $("#view-arabic"), fehler: $("#view-mistakes"), lernstand: $("#view-progress"), sarf: $("#view-sarf"), quiz: $("#view-quiz"), wettbewerb: $("#view-social"), chat: $("#view-chat") };
-  var TAB_OF = { nachschlagen: "start", lernen: "start", arabisch: "start", fehler: "start", sarf: "start", lernstand: "start" };
+  var views = { start: $("#view-home"), nachschlagen: $("#view-lookup"), lernen: $("#view-learn"), arabisch: $("#view-arabic"), tajwid: $("#view-tajwid"), fehler: $("#view-mistakes"), lernstand: $("#view-progress"), sarf: $("#view-sarf"), quiz: $("#view-quiz"), wettbewerb: $("#view-social"), chat: $("#view-chat") };
+  var TAB_OF = { nachschlagen: "start", lernen: "start", arabisch: "start", tajwid: "start", fehler: "start", sarf: "start", lernstand: "start" };
   function showView(name, push) {
     if (!views[name]) name = "start";
     /* A learning round (Lernen, Arabisch, Fehler, Sarf) ends without the result screen and hides
