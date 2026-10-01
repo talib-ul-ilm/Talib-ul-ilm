@@ -82,14 +82,21 @@
       }
       fill(false);
       if (Object.keys(pool).length < 3) fill(true);
+      var lvl = x.d || (RG.HARD && RG.HARD.indexOf(x.m) !== -1 ? 3 : RG.BASIC && RG.BASIC.indexOf(x.r) !== -1 ? 1 : 2);
+      /* Anfänger: nur Grundregeln als falsche Antworten, wenn genug da sind */
+      if (lvl === 1 && RG.BASIC) {
+        var basic = Object.keys(pool).filter(function (r) { return RG.BASIC.indexOf(r) !== -1; });
+        if (basic.length >= 3) { pool = {}; basic.forEach(function (r) { pool[r] = 1; }); }
+      }
       var wrong = Object.keys(pool).sort(function (a, b) { return hash(x.s + a) < hash(x.s + b) ? -1 : 1; }).slice(0, 3);
       if (wrong.length < 3) return;
       RULE_QS.push({ t: "tajwid", tt: T("Taǧwīd · Regel erkennen"), srcText: T("Quelle:") + " Qurʾān " + x.v, c: 0, chapter: "regeln",
         _lid: "tj-r-" + hash(x.s + "|" + x.m + "|" + x.r),
         q: T("Welche Taǧwīd-Regel gilt an der markierten Stelle?") + (x.f ? " (" + x.f + ")" : ""),
-        ar: x.s, arMark: mark.length === 1 ? mark[0] : mark, a: [x.r].concat(wrong), e: x.e });
+        ar: x.s, arMark: mark.length === 1 ? mark[0] : mark, a: [x.r].concat(wrong), e: x.e, level: lvl });
     });
     SETS.regeln = RULE_QS;
+    [1, 2, 3].forEach(function (n) { SETS["regeln" + n] = RULE_QS.filter(function (q) { return q.level === n; }); });
     QS = QS.concat(RULE_QS);
   }
 
@@ -131,7 +138,12 @@
   /* ---------- rounds ---------- */
   var lastRound = null;
   function listOf(id) { return id && SETS[id] ? SETS[id] : QS; }
-  function labelOf(id) { return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id === "begriffe" ? T("Taǧwīd · Begriffe") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
+  var LEVELS = [[1, "Anfänger", "Die Grundregeln an klaren Stellen: Nūn und Mīm sākina, Ġunna, Madd ṭabīʿī, muttaṣil und munfaṣil, Qalqala, Lām."],
+    [2, "Fortgeschritten", "Weitere Regeln: Madd lāzim, ʿāriḍ, līn, badal, ṣila, Rāʾ, die Idġām-Arten, Iẓhār muṭlaq."],
+    [3, "Lehrer / Ustāḏ", "Fallen und Feinheiten: wegfallende Dehnungsbuchstaben, zwei Madd-Ursachen, Buchstabennamen, Sakt, unvollständiger Idġām, Ausnahmen."]];
+  function levelName(n) { return T(LEVELS[n - 1][1]); }
+  function labelOf(id) { var lv = /^regeln([123])$/.exec(id || ""); if (lv) return T("Taǧwīd · Regel erkennen") + " · " + levelName(+lv[1]);
+    return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id === "begriffe" ? T("Taǧwīd · Begriffe") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
   function start(id) {
     var list = listOf(id), r = roundFor(list);
     if (!r.qs.length) return;
@@ -179,9 +191,15 @@
     if (!RULE_QS.length) return "";
     var s = stats(RULE_QS);
     return '<div class="panel tj-quizcard"><div><p class="eyebrow">' + T("Allgemeines Taǧwīd-Quiz") + "</p><h3>" + T("Regel erkennen") + "</h3><p>" +
-      T("Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Regel gilt dort? {n} Stellen aus allen Kapiteln.", { n: RULE_QS.length }) + "</p>" + bar(s) +
+      T("Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Regel gilt dort? {n} Stellen in drei Stufen.", { n: RULE_QS.length }) + "</p>" + bar(s) +
       '<small class="lt-meta">' + (s.learned ? T("{n} von {m} gelernt", { n: s.learned, m: s.total }) : T("noch nicht begonnen")) + "</small></div>" +
-      '<button type="button" class="btn btn-primary" data-tj-learn="regeln">' + (s.pct === 100 ? T("✓ Wiederholen") : s.learned ? T("Weiter üben · {n} %", { n: s.pct }) : T("Quiz starten")) + "</button></div>";
+      '<div class="tj-levels">' + LEVELS.map(function (l) {
+        var list = SETS["regeln" + l[0]], ls = stats(list);
+        return '<div class="tj-level"><div><strong>' + T(l[1]) + '</strong> <small class="lt-meta">' + T("{n} Stellen", { n: list.length }) +
+          (ls.learned ? " · " + T("{n} % gelernt", { n: ls.pct }) : "") + "</small><p>" + mixed(T(l[2])) + "</p>" + bar(ls) + "</div>" +
+          '<button type="button" class="btn' + (l[0] === 1 ? " btn-primary" : "") + '" data-tj-learn="regeln' + l[0] + '">' +
+          (ls.pct === 100 ? T("✓ Wiederholen") : ls.learned ? T("Weiter · {n} %", { n: ls.pct }) : T("Starten")) + "</button></div>";
+      }).join("") + "</div></div>";
   }
   function termsCard() {
     if (!TERM_QS.length) return "";

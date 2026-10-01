@@ -4,6 +4,17 @@
    Die falschen Antworten nimmt tajwid.js aus der ersten Gruppe (GROUPS), die die Regel enthält – damit man wirklich unterscheiden muss.
    Lesart Ḥafṣ ʿan ʿĀṣim. */
 window.TAJWID_REGELN = {
+  /* Stufen: Anfänger = Grundregeln (BASIC) an klaren Stellen · Lehrer/Ustāḏ = die Fallen und Feinheiten (HARD,
+     nach dem markierten Text m) · Fortgeschritten = alles andere. Ein Eintrag kann die Stufe mit d: 1|2|3 festlegen. */
+  BASIC: ["Iẓhār ḥalqī", "Idġām mit Ġunna", "Idġām ohne Ġunna", "Iqlāb", "Iḫfāʾ", "Iḫfāʾ šafawī", "Iẓhār šafawī",
+    "Idġām miṯlayn mit Ġunna (Mīm in Mīm)", "Ġunna (Nūn/Mīm mit Šadda)", "Madd ṭabīʿī", "Madd muttaṣil", "Madd munfaṣil",
+    "Qalqala ṣuġrā", "Qalqala kubrā", "Lām šamsiyya", "Lām qamariyya", "Lām in „Allah“ dick", "Lām in „Allah“ dünn"],
+  HARD: ["إِرَمَ", "قُلِ اللَّهُمَّ", "أَمِ ارْتَابُوا", "الذِّكْرَ", "شَهْرٍ", "بِالصَّبْرِ", "فِيهِ", "آمِّينَ", "آلْآنَ", "طه", "عسق",
+    "فِرْقٍ", "مِصْرَ", "عِوَجًا قَيِّمًا", "وَمِمَّا", "لَسِحْرٌ", "وَجَاءُوا أَبَاهُمْ", "وَبِالْآخِرَةِ", "الْقُرْآنُ", "رَيْبَ",
+    "كهيعص", "طس", "حم", "ن", "ق", "الم", "طسم", "المص", "آللَّهُ", "أَفِي اللَّهِ", "وَاتَّقُوا اللَّهَ", "أَحَطْتُ", "بَسَطْتَ",
+    "فَرَّطْتُمْ", "عَصَوْا وَكَانُوا", "الْقِطْرِ", "وَمِنْهُمْ", "وَمِنْهُمْ مَنْ", "مَنْ يَقُولُ", "الْيَوْمَ", "الَّذِي", "هَا أَنْتُمْ",
+    "هَٰؤُلَاءِ", "إِنَّا", "قَدْ جَاءَنِي", "لَبِالْمِرْصَادِ", "الْمَرْءِ", "بَلْ رَانَ", "مَنْ رَاقٍ", "مَرْقَدِنَا هَٰذَا", "ارْجِعِي",
+    "تَأْوِيلَهُ", "الْتَقَى", "أَلْهَاكُمُ", "الْأَنْعَامِ", "قِنْوَانٌ", "يَنْهَوْنَ", "بِعِبَادِهِ"],
   GROUPS: [
     ["Iẓhār ḥalqī", "Idġām mit Ġunna", "Idġām miṯlayn mit Ġunna (Nūn in Nūn)", "Idġām ohne Ġunna", "Iqlāb", "Iḫfāʾ", "Iẓhār muṭlaq"],
     ["Iḫfāʾ šafawī", "Iẓhār šafawī", "Idġām miṯlayn mit Ġunna (Mīm in Mīm)", "Ġunna (Nūn/Mīm mit Šadda)", "Iqlāb"],
