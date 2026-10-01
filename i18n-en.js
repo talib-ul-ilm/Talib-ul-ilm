@@ -61,7 +61,7 @@ window.I18N_EN = {
  "Prüfen": "Check",
  "✓ alles übersetzt": "✓ all translated",
  "Zur Lektion": "Back to the lesson",
- "Fortgeschritten / Ṭālib": "Advanced / Ṭālib",
+ "Fortgeschritten / Ṭālibu l-ʿIlm": "Advanced / Ṭālibu l-ʿIlm",
  "{n} Kapiteln": "{n} chapters",
  "Wähle mindestens ein Kapitel.": "Choose at least one chapter.",
  "Auf diesem Niveau gibt es keine Stellen.": "There are no passages at this level.",

@@ -7,7 +7,7 @@
   var TOPIC_BY_ID = {};
   TOPICS.forEach(function (t) { TOPIC_BY_ID[t.id] = t; });
 
-  /* Niveau of each Fiqh question (Quiz: Anfänger / Fortgeschritten · Ṭālib / Lehrer · Ustāḏ), worked out from the
+  /* Niveau of each Fiqh question (Quiz: Anfänger / Fortgeschritten · Ṭālibu l-ʿIlm / Lehrer · Ustāḏ), worked out from the
      German text: questions on differences between the imams, fatwa opinions, Uṣūl terms or exact measures → 3;
      the lessons and the definition questions of the book → 1; the other in-depth questions of the book → 2. */
   var LEVEL_HARD = /Abū Yūsuf|Imām Muḥammad|\bMuḥammad\b(?! ﷺ)|Zufar|Šāfiʿ|Schāfiʿ|Mālik|Aḥmad|Ḥanbal|Mehrheit|Fatwa|fatwā|Madhab|Madhhab|Meinung|Ansicht|Unterschied|Iḫtilāf|Ikhtilaf|ẓannī|qaṭʿī|Āḥād|Naskh|Nāsiḫ|muṭlaq|muqayyad|Muḥkam|Qiyās|ʿIlla|Istiḥsān|Gramm|Miṯqāl|Mithqal|Ṣāʿ|Dirham|Dinar|Niṣāb|Elle|Kilometer|Farsaḫ|taḥrīmī|tanzīhī|li-ġairihī|li-ḏātihī/;
@@ -343,7 +343,7 @@
     tjMode: store("tjmode") === "rules" ? "rules" : "topic",   /* Taǧwīd: Themenquiz (Kapitel) oder „Regel erkennen“ */
     tjTopics: store("tjtopics") || null
   };
-  var LEVEL_NAMES = ["Alle Niveaus", "Anfänger", "Fortgeschritten / Ṭālib", "Lehrer / Ustāḏ"];
+  var LEVEL_NAMES = ["Alle Niveaus", "Anfänger", "Fortgeschritten / Ṭālibu l-ʿIlm", "Lehrer / Ustāḏ"];
   /* Taǧwīd in the quiz: the passages of „Regel erkennen“ (tajwid.js), each with its level */
   function tajwidQs() {
     var TJ = window.FIQH_TAJWID;
