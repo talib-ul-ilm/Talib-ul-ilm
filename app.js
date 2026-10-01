@@ -377,8 +377,8 @@
       mixedFrom: "allen Kapiteln und „Regel erkennen“", many: "{n} Kapiteln", none: "Wähle mindestens ein Kapitel.",
       ready: function () { return !!window.FIQH_TAJWID; },
       all: tajwidQs,
-      topicQs: function () { return tajwidQs().filter(function (q) { return q.chapter !== "regeln"; }); },
-      key: function (q) { return q.chapter; },
+      topicQs: function () { return tajwidQs().filter(function (q) { return q.chapter !== "regeln" || q.ruleCh; }); },
+      key: function (q) { return q.ruleCh || q.chapter; },
       defaults: function (ids) { return ids; },
       groups: function () {
         var TJ = window.FIQH_TAJWID;
