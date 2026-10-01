@@ -7,6 +7,16 @@
   var TOPIC_BY_ID = {};
   TOPICS.forEach(function (t) { TOPIC_BY_ID[t.id] = t; });
 
+  /* Niveau of each Fiqh question (Quiz: Anfänger / Fortgeschritten · Ṭālib / Lehrer · Ustāḏ), worked out from the
+     German text: questions on differences between the imams, fatwa opinions, Uṣūl terms or exact measures → 3;
+     the lessons and the definition questions of the book → 1; the other in-depth questions of the book → 2. */
+  var LEVEL_HARD = /Abū Yūsuf|Imām Muḥammad|\bMuḥammad\b(?! ﷺ)|Zufar|Šāfiʿ|Schāfiʿ|Mālik|Aḥmad|Ḥanbal|Mehrheit|Fatwa|fatwā|Madhab|Madhhab|Meinung|Ansicht|Unterschied|Iḫtilāf|Ikhtilaf|ẓannī|qaṭʿī|Āḥād|Naskh|Nāsiḫ|muṭlaq|muqayyad|Muḥkam|Qiyās|ʿIlla|Istiḥsān|Gramm|Miṯqāl|Mithqal|Ṣāʿ|Dirham|Dinar|Niṣāb|Elle|Kilometer|Farsaḫ|taḥrīmī|tanzīhī|li-ġairihī|li-ḏātihī/;
+  var LEVEL_DEF = /^(Was (bedeutet|ist|sind|heißt)|Wie (nennt man|heißt|nennen)|Welche(s|r)? (Wort|Begriff|Name))/;
+  QUESTIONS.forEach(function (q) {
+    var text = q.q + " " + q.a.join(" ") + " " + (q.e || "");
+    q.lvl = LEVEL_HARD.test(text) ? 3 : q.src !== "buch" || LEVEL_DEF.test(q.q) ? 1 : 2;
+  });
+
   /* English: swap in translated questions and topic names. q_de keeps the
      German text so progress ids (learn.js) stay the same in every language. */
   var EN = window.I18N && I18N.lang === "en" && window.FIQH_EN;
@@ -325,15 +335,26 @@
      QUIZ
      ===================================================== */
   var setup = {
+    subject: store("subject") === "tajwid" ? "tajwid" : "fiqh",
+    level: store("level") || 0,                     /* 0 = alle, 1–3 = Anfänger … Lehrer/Ustāḏ */
     mode: store("mode") || "topic",
     topics: store("topics") || ["wudhu"],
     count: store("count") || 5
   };
+  var LEVEL_NAMES = ["Alle Niveaus", "Anfänger", "Fortgeschritten / Ṭālib", "Lehrer / Ustāḏ"];
+  /* Taǧwīd in the quiz: the passages of „Regel erkennen“ (tajwid.js), each with its level */
+  function tajwidQs() {
+    var TJ = window.FIQH_TAJWID;
+    return TJ ? TJ.questions.filter(function (q) { return q.chapter === "regeln"; }) : [];
+  }
+  function byLevel(list) { return setup.level ? list.filter(function (q) { return (q.lvl || q.level) === setup.level; }) : list; }
   setup.topics = setup.topics.filter(function (id) { return TOPIC_BY_ID[id]; });
   if (!setup.topics.length) setup.topics = [TOPICS[0].id];
 
   function bestKey() {
-    return setup.mode === "mixed" ? "best:mixed:" + setup.count : "best:" + setup.topics.slice().sort().join("+") + ":" + setup.count;
+    var lv = setup.level ? ":L" + setup.level : "";
+    if (setup.subject === "tajwid") return "best:tajwid" + lv + ":" + setup.count;
+    return (setup.mode === "mixed" ? "best:mixed:" + setup.count : "best:" + setup.topics.slice().sort().join("+") + ":" + setup.count) + lv;
   }
 
   function renderSetup() {
@@ -341,11 +362,17 @@
     $("#quiz-play").hidden = true;
     $("#quiz-result").hidden = true;
 
+    var tj = setup.subject === "tajwid";
+    $all("[data-subject]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-subject") === setup.subject)); });
+    $all("[data-level]").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-level") === setup.level)); });
+    $("#quiz-eyebrow").textContent = tj ? T("Taǧwīd-Quiz") : T("Fiqh-Quiz");
+    $("#mode-step").hidden = tj;
+    $("#tajwid-note").hidden = !tj;
     $all("[data-mode]").forEach(function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-mode") === setup.mode ? "true" : "false");
     });
-    $("#topic-picker").hidden = setup.mode !== "topic";
-    $("#mixed-note").hidden = setup.mode !== "mixed";
+    $("#topic-picker").hidden = tj || setup.mode !== "topic";
+    $("#mixed-note").hidden = tj || setup.mode !== "mixed";
 
     var chips = $("#topic-chips");
     chips.innerHTML = GROUPS.map(function (g, gi) {
@@ -385,23 +412,27 @@
     });
 
     var pool = poolFor();
-    var mixed = setup.mode === "mixed";
+    var mixed = !tj && setup.mode === "mixed";
     var startBtn = $("#start-quiz");
-    var ok = mixed || pool.length > 0;
+    var ok = tj ? pool.length > 0 : mixed || pool.length > 0;
     startBtn.disabled = !ok;
-    var n = mixed ? Math.min(setup.count, QUESTIONS.length) : Math.min(setup.count, pool.length);
-    var paused = mixed ? QUESTIONS.length - pool.length : 0;
-    $("#setup-summary").textContent = ok
+    var all = byLevel(QUESTIONS);
+    var n = mixed ? Math.min(setup.count, all.length) : Math.min(setup.count, pool.length);
+    var paused = mixed ? all.length - pool.length : 0;
+    $("#setup-summary").textContent = tj
+      ? (pool.length ? T("{n} Stellen aus „Regel erkennen“ · {p} im Pool", { n: n, p: pool.length }) : T("Taǧwīd wird noch geladen …"))
+      : ok
       ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
           from: setup.mode === "mixed" ? T("allen {n} Themengebieten", { n: TOPICS.length }) :
             setup.topics.length === 1 ? T("„{t}“", { t: TOPIC_BY_ID[setup.topics[0]].title }) : T("{n} Themengebieten", { n: setup.topics.length }) })
       : T("Wähle mindestens ein Themengebiet.");
+    if (ok && setup.level) $("#setup-summary").textContent += " · " + T(LEVEL_NAMES[setup.level]);
     if (ok && paused) $("#setup-summary").textContent += " · " + T("{k} kürzlich gestellt (2 Std. Pause)", { k: paused });
 
     var best = store(bestKey());
     $("#setup-best").textContent = best ? T("Dein Bestwert hier: {s} Punkte ({c}/{t})", { s: best.score, c: best.correct, t: best.total }) : T("Noch kein Bestwert für diese Auswahl.");
 
-    store("mode", setup.mode); store("topics", setup.topics); store("count", setup.count);
+    store("mode", setup.mode); store("topics", setup.topics); store("count", setup.count); store("subject", setup.subject); store("level", setup.level);
   }
 
   $all("[data-mode]").forEach(function (b) {
@@ -409,6 +440,12 @@
   });
   $all("[data-count]").forEach(function (b) {
     b.addEventListener("click", function () { setup.count = +b.getAttribute("data-count"); renderSetup(); });
+  });
+  $all("[data-subject]").forEach(function (b) {
+    b.addEventListener("click", function () { setup.subject = b.getAttribute("data-subject"); renderSetup(); });
+  });
+  $all("[data-level]").forEach(function (b) {
+    b.addEventListener("click", function () { setup.level = +b.getAttribute("data-level"); renderSetup(); });
   });
   $("#select-all").addEventListener("click", function () { setup.topics = TOPICS.map(function (t) { return t.id; }); renderSetup(); });
   $("#select-none").addEventListener("click", function () { setup.topics = []; renderSetup(); });
@@ -428,16 +465,17 @@
     store("mixseen", seen);
   }
   function poolFor() {
+    if (setup.subject === "tajwid") return byLevel(tajwidQs());
     if (setup.mode === "mixed") {
       var seen = mixSeen();
-      return QUESTIONS.filter(function (q) { return !seen[qid(q)]; });
+      return byLevel(QUESTIONS).filter(function (q) { return !seen[qid(q)]; });
     }
-    return QUESTIONS.filter(function (q) { return setup.topics.indexOf(q.t) !== -1; });
+    return byLevel(QUESTIONS).filter(function (q) { return setup.topics.indexOf(q.t) !== -1; });
   }
   function mixFill(pool, n) {
     if (pool.length >= n) return [];
     var seen = mixSeen();
-    return QUESTIONS.filter(function (q) { return seen[qid(q)]; })
+    return byLevel(QUESTIONS).filter(function (q) { return seen[qid(q)]; })
       .sort(function (a, b) { return seen[qid(a)] - seen[qid(b)]; })
       .slice(0, n - pool.length);
   }
@@ -493,13 +531,13 @@
       qs = preset.questions.map(function (q) { return withOptions(q, preset.rnd); });
     } else {
       var pool = poolFor();
-      var extra = setup.mode === "mixed" ? mixFill(pool, setup.count) : [];
+      var extra = setup.subject !== "tajwid" && setup.mode === "mixed" ? mixFill(pool, setup.count) : [];
       if (!pool.length && !extra.length) return;
       qs = shuffle(pickQuestions(pool, Math.min(setup.count, pool.length)).concat(extra))
         .map(function (q) { return withOptions(q); });
     }
     game = { qs: qs, i: 0, score: 0, correct: 0, streak: 0, bestStreak: 0, joker: true, answers: [], key: preset ? null : bestKey(), preset: preset || null,
-      mixed: !preset && setup.mode === "mixed" };
+      mixed: !preset && setup.subject !== "tajwid" && setup.mode === "mixed" };
     showPlay();
     renderQuestion();
     window.scrollTo(0, 0);
