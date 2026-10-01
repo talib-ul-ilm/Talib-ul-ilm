@@ -1623,22 +1623,24 @@ dialog.auth { border-radius: 20px; }
           <div class="segmented" role="group" aria-label="Fach">
             <button type="button" data-subject="fiqh" aria-pressed="true">Fiqh</button>
             <button type="button" data-subject="tajwid" aria-pressed="false">Taǧwīd</button>
+            <button type="button" data-subject="arabisch" aria-pressed="false">Arabisch</button>
           </div>
         </div>
-        <div id="tj-mode-step" hidden>
+        <div id="sub-mode-step" hidden>
           <p class="step-label">Modus</p>
           <div class="modes">
-            <button type="button" class="mode" data-tjmode="topic" aria-pressed="true">
+            <button type="button" class="mode" data-submode="topic" aria-pressed="true">
               <strong>Themenquiz</strong>
-              <span>Du wählst ein oder mehrere Kapitel, z. B. nur Nūn sākina oder Madd und Maḫāriǧ.</span>
+              <span id="sub-topic-desc"></span>
             </button>
-            <button type="button" class="mode" data-tjmode="mixed" aria-pressed="false">
+            <button type="button" class="mode" data-submode="mixed" aria-pressed="false">
               <strong>Gemischt</strong>
-              <span>Fragen quer durch alle Kapitel, mit Begriffen, Maḫāriǧ und markierten Qurʾān-Stellen.</span>
+              <span id="sub-mixed-desc"></span>
             </button>
           </div>
         </div>
         <p class="note" id="tajwid-note" hidden>Die Fragen werden gleichmäßig über die Kapitel verteilt. Das Niveau richtet sich nach dem Kapitel; bei den Qurʾān-Stellen aus „Regel erkennen“ nach ihrer Stufe.</p>
+        <p class="note" id="arabic-note" hidden>Niveau bei Arabisch: Anfänger · Mubtadiʾ sind die Wörter (Bedeutung, Deutsch → Arabisch, Plural), Fortgeschritten · Ṭālibu l-ʿIlm die Grammatik, Experte · Ustāḏ der Iʿrāb.</p>
         <div id="mode-step">
           <p class="step-label">Modus</p>
           <div class="modes">
