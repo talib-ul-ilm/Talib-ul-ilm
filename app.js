@@ -340,14 +340,19 @@
     mode: store("mode") || "topic",
     topics: store("topics") || ["wudhu"],
     count: store("count") || 5,
-    tjMode: store("tjmode") === "rules" ? "rules" : "topic",   /* Taǧwīd: Themenquiz (Kapitel) oder „Regel erkennen“ */
+    tjMode: store("tjmode") === "mixed" ? "mixed" : "topic",   /* Taǧwīd: Themenquiz (Kapitel) oder gemischt */
     tjTopics: store("tjtopics") || null
   };
   var LEVEL_NAMES = ["Alle Niveaus", "Anfänger / Mubtadiʾ", "Fortgeschritten / Ṭālibu l-ʿIlm", "Experte / Ustāḏ"];
-  /* Taǧwīd in the quiz: the passages of „Regel erkennen“ (tajwid.js), each with its level */
+  /* Taǧwīd in the quiz, mixed: all questions of tajwid.js. The passages of „Regel erkennen“ bring
+     their own level; the chapter questions get the level of their chapter. */
+  var TJ_LEVEL = { einf: 1, istiadha: 1, madd: 1, nun: 1, mim: 1, ghunna: 1, lam: 1, begriffe: 1,
+    lazim: 2, idgham: 2, ra: 2, tafkhim: 2, sifat: 2, hamza: 2, makharij: 2, waqf: 2, sakt: 3, hafs: 3 };
   function tajwidQs() {
     var TJ = window.FIQH_TAJWID;
-    return TJ ? TJ.questions.filter(function (q) { return q.chapter === "regeln"; }) : [];
+    if (!TJ) return [];
+    TJ.questions.forEach(function (q) { if (!q.level && !q.lvl) q.lvl = TJ_LEVEL[q.chapter] || 2; });
+    return TJ.questions;
   }
   /* Taǧwīd-Themenquiz: the chapters (+ the term quiz) as topics */
   function tajwidGroups() {
@@ -375,7 +380,7 @@
     var lv = setup.level ? ":L" + setup.level : "";
     if (setup.subject === "tajwid") return setup.tjMode === "topic"
       ? "best:tajwid:" + tjTopicList().slice().sort().join("+") + ":" + setup.count
-      : "best:tajwid" + lv + ":" + setup.count;
+      : "best:tajwid:mixed" + lv + ":" + setup.count;
     return (setup.mode === "mixed" ? "best:mixed:" + setup.count : "best:" + setup.topics.slice().sort().join("+") + ":" + setup.count) + lv;
   }
 
@@ -402,7 +407,7 @@
     $all("[data-level-count]").forEach(function (el) {
       var l = +el.getAttribute("data-level-count");
       var n = l ? lvBase.filter(function (q) { return (q.lvl || q.level) === l; }).length : lvBase.length;
-      el.textContent = T(tj ? "{n} Stellen" : "{n} Fragen", { n: n });
+      el.textContent = T("{n} Fragen", { n: n });
     });
     $all("[data-mode]").forEach(function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-mode") === setup.mode ? "true" : "false");
@@ -464,7 +469,7 @@
           from: topics.length === 1 ? T("„{t}“", { t: (tajwidGroups().map(function (g) { return g.topics; }).reduce(function (a, b) { return a.concat(b); }, [])
             .filter(function (t) { return t.id === topics[0]; })[0] || {}).title }) : T("{n} Kapiteln", { n: topics.length }) })
         : T("Wähle mindestens ein Kapitel."))
-      : tj ? (ok ? T("{n} Stellen aus „Regel erkennen“ · {p} im Pool", { n: n, p: pool.length }) : T("Auf diesem Niveau gibt es keine Stellen."))
+      : tj ? (ok ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length, from: T("allen Kapiteln und „Regel erkennen“") }) : T("Auf diesem Niveau gibt es keine Fragen."))
       : ok
       ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
           from: setup.mode === "mixed" ? T("allen {n} Themengebieten", { n: TOPICS.length }) :
@@ -518,7 +523,7 @@
   }
   function poolFor() {
     if (setup.subject === "tajwid") {
-      if (setup.tjMode === "rules") return byLevel(tajwidQs());
+      if (setup.tjMode === "mixed") return byLevel(tajwidQs());
       var on = tjTopicList();
       return tajwidTopicQs().filter(function (q) { return on.indexOf(q.chapter) !== -1; });
     }
