@@ -732,4 +732,6 @@
     allQuestions: QS, allLessons: LESSONS, book2Open: function () { return book2Open(); },
     /* overall progress: book 2 counts only once it is open */
     stats: function () { return stats(book2Open() ? QS : QS.filter(function (q) { return qBook(q) === 1; })); } };
+  /* the Quiz tab offers Arabisch as a subject too */
+  if (APP.renderSetup && APP.isPlaying && !APP.isPlaying()) APP.renderSetup();
 })();

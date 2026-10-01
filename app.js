@@ -334,18 +334,22 @@
   /* =====================================================
      QUIZ
      ===================================================== */
+  var SUB_IDS = ["fiqh", "tajwid", "arabisch"];
   var setup = {
-    subject: store("subject") === "tajwid" ? "tajwid" : "fiqh",
+    subject: SUB_IDS.indexOf(store("subject")) !== -1 ? store("subject") : "fiqh",
     level: store("level") || 0,                     /* 0 = alle, 1–3 = Anfänger … Experte/Ustāḏ */
     mode: store("mode") || "topic",
     topics: store("topics") || ["wudhu"],
     count: store("count") || 5,
-    tjMode: store("tjmode") === "mixed" ? "mixed" : "topic",   /* Taǧwīd: Themenquiz (Kapitel) oder gemischt */
-    tjTopics: store("tjtopics") || null
+    /* Taǧwīd and Arabisch: Themenquiz (Kapitel / Lektionen) or gemischt, each with its own choice */
+    sub: {
+      tajwid: { mode: store("tjmode") === "mixed" ? "mixed" : "topic", topics: store("tjtopics") || null },
+      arabisch: { mode: store("armode") === "mixed" ? "mixed" : "topic", topics: store("artopics") || null }
+    }
   };
   var LEVEL_NAMES = ["Alle Niveaus", "Anfänger / Mubtadiʾ", "Fortgeschritten / Ṭālibu l-ʿIlm", "Experte / Ustāḏ"];
-  /* Taǧwīd in the quiz, mixed: all questions of tajwid.js. The passages of „Regel erkennen“ bring
-     their own level; the chapter questions get the level of their chapter. */
+  /* Taǧwīd: all questions of tajwid.js. The passages of „Regel erkennen“ bring their own level;
+     the chapter questions get the level of their chapter. */
   var TJ_LEVEL = { einf: 1, istiadha: 1, madd: 1, nun: 1, mim: 1, ghunna: 1, lam: 1, begriffe: 1,
     lazim: 2, idgham: 2, ra: 2, tafkhim: 2, sifat: 2, hamza: 2, makharij: 2, waqf: 2, sakt: 3, hafs: 3 };
   function tajwidQs() {
@@ -354,33 +358,74 @@
     TJ.questions.forEach(function (q) { if (!q.level && !q.lvl) q.lvl = TJ_LEVEL[q.chapter] || 2; });
     return TJ.questions;
   }
-  /* Taǧwīd-Themenquiz: the chapters (+ the term quiz) as topics */
-  function tajwidGroups() {
-    var TJ = window.FIQH_TAJWID;
-    if (!TJ) return [];
-    return [{ name: "Kapitel", topics: TJ.chapters.map(function (c) { return { id: c.id, title: c.title }; }) },
-      { name: "Begriffe", topics: [{ id: "begriffe", title: T("Taǧwīd-Begriffe") }] }];
+  /* Arabisch: the questions of arabic.js (book 2 once it is open). Level by kind:
+     words (meaning, German → Arabic, plural) → Anfänger, grammar → Fortgeschritten, Iʿrāb → Experte */
+  function arabicQs() {
+    var A = window.FIQH_ARABIC;
+    if (!A) return [];
+    var b2 = A.book2Open(), book = {};
+    A.allLessons.forEach(function (l) { book[l.id] = l.book || 1; });
+    return A.allQuestions.filter(function (q) {
+      if (!q.lvl) q.lvl = /^ar-[vdp]-/.test(q._lid) ? 1 : /^ar-g-/.test(q._lid) ? 2 : 3;
+      return b2 || book[q.lesson] !== 2;
+    });
   }
-  function tajwidTopicQs() {
-    var TJ = window.FIQH_TAJWID;
-    return TJ ? TJ.questions.filter(function (q) { return q.chapter !== "regeln"; }) : [];
-  }
-  function tjTopicList() {
-    var ids = {};
-    tajwidGroups().forEach(function (g) { g.topics.forEach(function (t) { ids[t.id] = 1; }); });
-    if (!setup.tjTopics) setup.tjTopics = window.FIQH_TAJWID ? Object.keys(ids) : [];
-    else if (window.FIQH_TAJWID) for (var i = setup.tjTopics.length - 1; i >= 0; i--) if (!ids[setup.tjTopics[i]]) setup.tjTopics.splice(i, 1);
-    return setup.tjTopics;
+  var SUBS = {
+    tajwid: { eyebrow: "Taǧwīd-Quiz", loading: "Taǧwīd wird noch geladen …", topicLabel: "Kapitel", topicLevel: false,
+      topicDesc: "Du wählst ein oder mehrere Kapitel, z. B. nur Nūn sākina oder Madd und Maḫāriǧ.",
+      mixedDesc: "Fragen quer durch alle Kapitel, mit Begriffen, Maḫāriǧ und markierten Qurʾān-Stellen.",
+      mixedFrom: "allen Kapiteln und „Regel erkennen“", many: "{n} Kapiteln", none: "Wähle mindestens ein Kapitel.",
+      ready: function () { return !!window.FIQH_TAJWID; },
+      all: tajwidQs,
+      topicQs: function () { return tajwidQs().filter(function (q) { return q.chapter !== "regeln"; }); },
+      key: function (q) { return q.chapter; },
+      defaults: function (ids) { return ids; },
+      groups: function () {
+        var TJ = window.FIQH_TAJWID;
+        if (!TJ) return [];
+        return [{ name: "Kapitel", topics: TJ.chapters.map(function (c) { return { id: c.id, title: c.title }; }) },
+          { name: "Begriffe", topics: [{ id: "begriffe", title: T("Taǧwīd-Begriffe") }] }];
+      } },
+    arabisch: { eyebrow: "Arabisch-Quiz", loading: "Arabisch wird noch geladen …", topicLabel: "Lektionen", topicLevel: true,
+      topicDesc: "Du wählst eine oder mehrere Lektionen aus dem Madina-Buch, z. B. nur Lektion 3 oder 1 bis 5.",
+      mixedDesc: "Fragen quer durch alle Lektionen: Wörter, Grammatik und Iʿrāb.",
+      mixedFrom: "allen Lektionen", many: "{n} Lektionen", none: "Wähle mindestens eine Lektion.",
+      ready: function () { return !!window.FIQH_ARABIC; },
+      all: arabicQs,
+      topicQs: arabicQs,
+      key: function (q) { return q.lesson; },
+      defaults: function (ids) { return ids.slice(0, 1); },
+      groups: function () {
+        var A = window.FIQH_ARABIC;
+        if (!A) return [];
+        var out = [{ name: "Madina-Buch 1", topics: [] }, { name: "Madina-Buch 2", topics: [] }];
+        A.allLessons.forEach(function (l) { out[(l.book || 1) - 1].topics.push({ id: l.id, title: l.n + " · " + l.title }); });
+        if (!A.book2Open()) out.pop();
+        return out;
+      } }
+  };
+  function curSub() { return SUBS[setup.subject] || null; }
+  /* the chosen topics of a subject, cleaned up against what exists (kept as the same array) */
+  function subTopics(id) {
+    var S = SUBS[id], st = setup.sub[id], ids = {}, list = [];
+    if (!S.ready()) return st.topics || [];
+    S.groups().forEach(function (g) { g.topics.forEach(function (t) { ids[t.id] = 1; list.push(t.id); }); });
+    if (!st.topics) st.topics = S.defaults(list);
+    for (var i = st.topics.length - 1; i >= 0; i--) if (!ids[st.topics[i]]) st.topics.splice(i, 1);
+    return st.topics;
   }
   function byLevel(list) { return setup.level ? list.filter(function (q) { return (q.lvl || q.level) === setup.level; }) : list; }
   setup.topics = setup.topics.filter(function (id) { return TOPIC_BY_ID[id]; });
   if (!setup.topics.length) setup.topics = [TOPICS[0].id];
 
   function bestKey() {
-    var lv = setup.level ? ":L" + setup.level : "";
-    if (setup.subject === "tajwid") return setup.tjMode === "topic"
-      ? "best:tajwid:" + tjTopicList().slice().sort().join("+") + ":" + setup.count
-      : "best:tajwid:mixed" + lv + ":" + setup.count;
+    var lv = setup.level ? ":L" + setup.level : "", S = curSub();
+    if (S) {
+      var st = setup.sub[setup.subject];
+      return st.mode === "topic"
+        ? "best:" + setup.subject + ":" + subTopics(setup.subject).slice().sort().join("+") + ":" + setup.count + (S.topicLevel ? lv : "")
+        : "best:" + setup.subject + ":mixed" + lv + ":" + setup.count;
+    }
     return (setup.mode === "mixed" ? "best:mixed:" + setup.count : "best:" + setup.topics.slice().sort().join("+") + ":" + setup.count) + lv;
   }
 
@@ -389,21 +434,25 @@
     $("#quiz-play").hidden = true;
     $("#quiz-result").hidden = true;
 
-    var tj = setup.subject === "tajwid", tjTopic = tj && setup.tjMode === "topic";
-    var topics = tj ? tjTopicList() : setup.topics, groups = tj ? tajwidGroups() : GROUPS;
+    var S = curSub(), st = S ? setup.sub[setup.subject] : null, subTopic = !!S && st.mode === "topic";
+    var topics = S ? subTopics(setup.subject) : setup.topics, groups = S ? S.groups() : GROUPS;
     $all("[data-subject]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-subject") === setup.subject)); });
-    $all("[data-tjmode]").forEach(function (b) {
-    b.addEventListener("click", function () { setup.tjMode = b.getAttribute("data-tjmode"); renderSetup(); });
-  });
-  $all("[data-level]").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-level") === setup.level)); });
-    $("#quiz-eyebrow").textContent = tj ? T("Taǧwīd-Quiz") : T("Fiqh-Quiz");
-    $("#mode-step").hidden = tj;
-    $("#tj-mode-step").hidden = !tj;
-    $all("[data-tjmode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-tjmode") === setup.tjMode)); });
-    $("#tajwid-note").hidden = !tj || tjTopic;
-    /* the levels belong to Fiqh and to „Regel erkennen“; the chapter questions have none */
-    $("#level-step").hidden = tjTopic;
-    var lvBase = tj ? tajwidQs() : setup.mode === "mixed" ? QUESTIONS : QUESTIONS.filter(function (q) { return setup.topics.indexOf(q.t) !== -1; });
+    $all("[data-level]").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-level") === setup.level)); });
+    $("#quiz-eyebrow").textContent = T(S ? S.eyebrow : "Fiqh-Quiz");
+    $("#mode-step").hidden = !!S;
+    $("#sub-mode-step").hidden = !S;
+    if (S) {
+      $all("[data-submode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-submode") === st.mode)); });
+      $("#sub-topic-desc").textContent = T(S.topicDesc);
+      $("#sub-mixed-desc").textContent = T(S.mixedDesc);
+    }
+    $("#tajwid-note").hidden = setup.subject !== "tajwid" || subTopic;
+    $("#arabic-note").hidden = setup.subject !== "arabisch";
+    /* the Taǧwīd chapters have no levels of their own; in the mixed quiz they take the chapter's */
+    var showLevel = !subTopic || S.topicLevel;
+    $("#level-step").hidden = !showLevel;
+    var lvBase = S ? (st.mode === "mixed" ? S.all() : S.topicQs().filter(function (q) { return topics.indexOf(S.key(q)) !== -1; }))
+      : setup.mode === "mixed" ? QUESTIONS : QUESTIONS.filter(function (q) { return setup.topics.indexOf(q.t) !== -1; });
     $all("[data-level-count]").forEach(function (el) {
       var l = +el.getAttribute("data-level-count");
       var n = l ? lvBase.filter(function (q) { return (q.lvl || q.level) === l; }).length : lvBase.length;
@@ -412,13 +461,13 @@
     $all("[data-mode]").forEach(function (b) {
       b.setAttribute("aria-pressed", b.getAttribute("data-mode") === setup.mode ? "true" : "false");
     });
-    $("#topic-picker").hidden = tj ? !tjTopic : setup.mode !== "topic";
-    $("#topic-picker .step-label").textContent = tj ? T("Kapitel") : T("Themengebiete");
-    $("#mixed-note").hidden = tj || setup.mode !== "mixed";
+    $("#topic-picker").hidden = S ? !subTopic : setup.mode !== "topic";
+    $("#topic-picker .step-label").textContent = T(S ? S.topicLabel : "Themengebiete");
+    $("#mixed-note").hidden = !!S || setup.mode !== "mixed";
 
     var chips = $("#topic-chips");
-    var tjCount = {};
-    if (tj) tajwidTopicQs().forEach(function (q) { tjCount[q.chapter] = (tjCount[q.chapter] || 0) + 1; });
+    var subCount = {};
+    if (S) S.topicQs().forEach(function (q) { var k = S.key(q); subCount[k] = (subCount[k] || 0) + 1; });
     chips.innerHTML = groups.map(function (g, gi) {
       var allOn = g.topics.every(function (t) { return topics.indexOf(t.id) !== -1; });
       return '<div class="chip-group"><div class="chip-group-head"><span>' + esc(T(g.name)) + "</span>" +
@@ -427,7 +476,7 @@
           var on = topics.indexOf(t.id) !== -1;
           return '<button type="button" class="chip" data-chip="' + t.id + '" aria-pressed="' + on + '">' +
             '<span class="chip-check" aria-hidden="true"></span>' + esc(t.title) +
-            '<span class="chip-count">' + (tj ? tjCount[t.id] || 0 : countFor(t.id)) + "</span></button>";
+            '<span class="chip-count">' + (S ? subCount[t.id] || 0 : countFor(t.id)) + "</span></button>";
         }).join("") + "</div></div>";
     }).join("");
     $all("[data-chip-group]", chips).forEach(function (b) {
@@ -456,37 +505,44 @@
     });
 
     var pool = poolFor();
-    var mixed = !tj && setup.mode === "mixed";
+    var mixed = !S && setup.mode === "mixed";
     var startBtn = $("#start-quiz");
     var ok = mixed || pool.length > 0;
     startBtn.disabled = !ok;
     var all = byLevel(QUESTIONS);
     var n = mixed ? Math.min(setup.count, all.length) : Math.min(setup.count, pool.length);
     var paused = mixed ? all.length - pool.length : 0;
-    var TJ = window.FIQH_TAJWID;
-    $("#setup-summary").textContent = tj && !TJ ? T("Taǧwīd wird noch geladen …")
-      : tjTopic ? (ok ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
-          from: topics.length === 1 ? T("„{t}“", { t: (tajwidGroups().map(function (g) { return g.topics; }).reduce(function (a, b) { return a.concat(b); }, [])
-            .filter(function (t) { return t.id === topics[0]; })[0] || {}).title }) : T("{n} Kapiteln", { n: topics.length }) })
-        : T("Wähle mindestens ein Kapitel."))
-      : tj ? (ok ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length, from: T("allen Kapiteln und „Regel erkennen“") }) : T("Auf diesem Niveau gibt es keine Fragen."))
+    var topicTitle = function (id) {
+      var hit = null;
+      groups.forEach(function (g) { g.topics.forEach(function (t) { if (t.id === id) hit = t; }); });
+      return hit ? hit.title : id;
+    };
+    $("#setup-summary").textContent = S && !S.ready() ? T(S.loading)
+      : S ? (ok ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
+          from: st.mode === "mixed" ? T(S.mixedFrom) : topics.length === 1 ? T("„{t}“", { t: topicTitle(topics[0]) }) : T(S.many, { n: topics.length }) })
+        : subTopic && !topics.length ? T(S.none) : T("Auf diesem Niveau gibt es keine Fragen."))
       : ok
       ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
           from: setup.mode === "mixed" ? T("allen {n} Themengebieten", { n: TOPICS.length }) :
             setup.topics.length === 1 ? T("„{t}“", { t: TOPIC_BY_ID[setup.topics[0]].title }) : T("{n} Themengebieten", { n: setup.topics.length }) })
       : T("Wähle mindestens ein Themengebiet.");
-    if (ok && setup.level && !tjTopic) $("#setup-summary").textContent += " · " + T(LEVEL_NAMES[setup.level]);
+    if (ok && setup.level && showLevel) $("#setup-summary").textContent += " · " + T(LEVEL_NAMES[setup.level]);
     if (ok && paused) $("#setup-summary").textContent += " · " + T("{k} kürzlich gestellt (2 Std. Pause)", { k: paused });
 
     var best = store(bestKey());
     $("#setup-best").textContent = best ? T("Dein Bestwert hier: {s} Punkte ({c}/{t})", { s: best.score, c: best.correct, t: best.total }) : T("Noch kein Bestwert für diese Auswahl.");
 
     store("mode", setup.mode); store("topics", setup.topics); store("count", setup.count); store("subject", setup.subject); store("level", setup.level);
-    store("tjmode", setup.tjMode); if (TJ) store("tjtopics", topics);
+    store("tjmode", setup.sub.tajwid.mode); store("armode", setup.sub.arabisch.mode);
+    if (SUBS.tajwid.ready() && setup.sub.tajwid.topics) store("tjtopics", setup.sub.tajwid.topics);
+    if (SUBS.arabisch.ready() && setup.sub.arabisch.topics) store("artopics", setup.sub.arabisch.topics);
   }
 
   $all("[data-mode]").forEach(function (b) {
     b.addEventListener("click", function () { setup.mode = b.getAttribute("data-mode"); renderSetup(); });
+  });
+  $all("[data-submode]").forEach(function (b) {
+    b.addEventListener("click", function () { if (curSub()) setup.sub[setup.subject].mode = b.getAttribute("data-submode"); renderSetup(); });
   });
   $all("[data-count]").forEach(function (b) {
     b.addEventListener("click", function () { setup.count = +b.getAttribute("data-count"); renderSetup(); });
@@ -498,12 +554,13 @@
     b.addEventListener("click", function () { setup.level = +b.getAttribute("data-level"); renderSetup(); });
   });
   $("#select-all").addEventListener("click", function () {
-    if (setup.subject === "tajwid") setup.tjTopics = tajwidGroups().reduce(function (a, g) { return a.concat(g.topics.map(function (t) { return t.id; })); }, []);
+    var S = curSub();
+    if (S) setup.sub[setup.subject].topics = S.groups().reduce(function (a, g) { return a.concat(g.topics.map(function (t) { return t.id; })); }, []);
     else setup.topics = TOPICS.map(function (t) { return t.id; });
     renderSetup();
   });
   $("#select-none").addEventListener("click", function () {
-    if (setup.subject === "tajwid") setup.tjTopics = []; else setup.topics = [];
+    if (curSub()) setup.sub[setup.subject].topics = []; else setup.topics = [];
     renderSetup();
   });
 
@@ -522,10 +579,13 @@
     store("mixseen", seen);
   }
   function poolFor() {
-    if (setup.subject === "tajwid") {
-      if (setup.tjMode === "mixed") return byLevel(tajwidQs());
-      var on = tjTopicList();
-      return tajwidTopicQs().filter(function (q) { return on.indexOf(q.chapter) !== -1; });
+    var S = curSub();
+    if (S) {
+      var st = setup.sub[setup.subject];
+      if (st.mode === "mixed") return byLevel(S.all());
+      var on = subTopics(setup.subject);
+      var list = S.topicQs().filter(function (q) { return on.indexOf(S.key(q)) !== -1; });
+      return S.topicLevel ? byLevel(list) : list;
     }
     if (setup.mode === "mixed") {
       var seen = mixSeen();
@@ -545,7 +605,7 @@
      With a seeded rnd everyone gets the same set (weekly competition). */
   function pickQuestions(pool, n, rnd) {
     var byTopic = {};
-    shuffle(pool, rnd).forEach(function (q) { var k = q.chapter || q.t; (byTopic[k] = byTopic[k] || []).push(q); });
+    shuffle(pool, rnd).forEach(function (q) { var k = q.chapter || q.lesson || q.t; (byTopic[k] = byTopic[k] || []).push(q); });
     var order = shuffle(Object.keys(byTopic).sort(), rnd);
     var out = [];
     while (out.length < n) {
@@ -592,13 +652,13 @@
       qs = preset.questions.map(function (q) { return withOptions(q, preset.rnd); });
     } else {
       var pool = poolFor();
-      var extra = setup.subject !== "tajwid" && setup.mode === "mixed" ? mixFill(pool, setup.count) : [];
+      var extra = setup.subject === "fiqh" && setup.mode === "mixed" ? mixFill(pool, setup.count) : [];
       if (!pool.length && !extra.length) return;
       qs = shuffle(pickQuestions(pool, Math.min(setup.count, pool.length)).concat(extra))
         .map(function (q) { return withOptions(q); });
     }
     game = { qs: qs, i: 0, score: 0, correct: 0, streak: 0, bestStreak: 0, joker: true, answers: [], key: preset ? null : bestKey(), preset: preset || null,
-      mixed: !preset && setup.subject !== "tajwid" && setup.mode === "mixed" };
+      mixed: !preset && setup.subject === "fiqh" && setup.mode === "mixed" };
     showPlay();
     renderQuestion();
     window.scrollTo(0, 0);
