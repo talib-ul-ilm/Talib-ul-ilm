@@ -271,6 +271,44 @@ window.TAJWID_REGELN = {
     { s: "وَمَا يَعْلَمُ تَأْوِيلَهُ إِلَّا اللَّهُ", m: "تَأْوِيلَهُ", r: "Madd aṣ-ṣila kubrā", f: "das Hāʾ", v: "3:7", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach die Hamza von إِلَّا → ṣila kubrā, 4–5 Ḥarakāt." },
     { s: "إِنَّ الْإِنْسَانَ لِرَبِّهِ لَكَنُودٌ", m: "الْإِنْسَانَ", r: "Lām qamariyya", f: "das Lām des Artikels", v: "100:6", e: "Hamza ist ein Mondbuchstabe → das Lām wird gesprochen." },
     { s: "آلْآنَ وَقَدْ كُنْتُمْ بِهِ تَسْتَعْجِلُونَ", m: "آلْآنَ", r: "Madd lāzim kalimī muḫaffaf", f: "das erste ā", v: "10:51", e: "Eine der beiden Stellen im Qurʾān: nach dem Alif ein ursprüngliches Sukūn ohne Šadda → kalimī muḫaffaf, 6 Ḥarakāt." },
-    { s: "وَمَا مِنْ دَابَّةٍ فِي الْأَرْضِ إِلَّا عَلَى اللَّهِ رِزْقُهَا", m: "دَابَّةٍ", r: "Madd lāzim kalimī muṯaqqal", f: "das Alif", v: "11:6", e: "Nach dem Alif ein Bāʾ mit Šadda → kalimī muṯaqqal, 6 Ḥarakāt." }
-  ]
+    { s: "وَمَا مِنْ دَابَّةٍ فِي الْأَرْضِ إِلَّا عَلَى اللَّهِ رِزْقُهَا", m: "دَابَّةٍ", r: "Madd lāzim kalimī muṯaqqal", f: "das Alif", v: "11:6", e: "Nach dem Alif ein Bāʾ mit Šadda → kalimī muṯaqqal, 6 Ḥarakāt." },
+    /* Ergänzung: mindestens fünf Stellen je Regel (soweit der Qurʾān sie hergibt), damit jede Lektion genug Übung hat */
+    { s: "قُلْ نَعَمْ وَأَنْتُمْ دَاخِرُونَ", m: "قُلْ نَعَمْ", r: "Lām des Verbs (deutlich)", f: "das Lām von قُلْ", v: "37:18", e: "Lām sākin im Verb قُلْ vor Nūn → deutlich. Verschmolzen wird das Lām des Verbs nur vor Lām und Rāʾ (قُلْ رَبِّ)." },
+    { s: "وَجَعَلْنَا اللَّيْلَ لِبَاسًا", m: "وَجَعَلْنَا", r: "Lām des Verbs (deutlich)", f: "das Lām vor dem Nūn", v: "78:10", e: "Das Lām gehört zum Verb جَعَلَ; vor ـنَا bleibt es deutlich – ein häufiger Fehler ist, es ins Nūn zu ziehen." },
+    { s: "فَالْتَقَمَهُ الْحُوتُ وَهُوَ مُلِيمٌ", m: "فَالْتَقَمَهُ", r: "Lām des Verbs (deutlich)", f: "das Lām vor dem Tāʾ", v: "37:142", e: "Das Lām ist Teil des Verbs اِلْتَقَمَ, kein Artikel – es bleibt deutlich, auch vor Tāʾ." },
+    { s: "وَأَلْقِ عَصَاكَ", m: "وَأَلْقِ", r: "Lām des Verbs (deutlich)", f: "das Lām vor dem Qāf", v: "27:10", e: "Lām sākin im Befehl أَلْقِ (von أَلْقَى) → deutlich." },
+    { s: "إِنَّا فَتَحْنَا لَكَ فَتْحًا مُبِينًا", m: "مُبِينًا", r: "Madd al-ʿiwaḍ", f: "beim Anhalten am Versende", v: "48:1", e: "Beim Anhalten wird das Tanwīn mit Fatḥa zu einem Alif → 2 Ḥarakāt (ʿiwaḍ = Ersatz)." },
+    { s: "وَبَنَيْنَا فَوْقَكُمْ سَبْعًا شِدَادًا", m: "شِدَادًا", r: "Madd al-ʿiwaḍ", f: "beim Anhalten am Versende", v: "78:12", e: "Tanwīn mit Fatḥa am Versende → beim Anhalten ein Alif, 2 Ḥarakāt." },
+    { s: "وَجَعَلْنَا سِرَاجًا وَهَّاجًا", m: "وَهَّاجًا", r: "Madd al-ʿiwaḍ", f: "beim Anhalten am Versende", v: "78:13", e: "Tanwīn mit Fatḥa am Versende → beim Anhalten ein Alif, 2 Ḥarakāt." },
+    { s: "مَالِكِ يَوْمِ الدِّينِ", m: "الدِّينِ", r: "Madd ʿāriḍ li-s-sukūn", f: "beim Anhalten am Versende", v: "1:4", e: "Yāʾ als Dehnungsbuchstabe vor dem Nūn, das erst durch das Anhalten sākin wird → 2, 4 oder 6 Ḥarakāt." },
+    { s: "الرَّحْمَٰنِ الرَّحِيمِ", m: "الرَّحِيمِ", r: "Madd ʿāriḍ li-s-sukūn", f: "beim Anhalten am Versende", v: "1:3", e: "Yāʾ als Dehnungsbuchstabe vor dem Mīm, das beim Anhalten sākin wird → 2, 4 oder 6 Ḥarakāt." },
+    { s: "قُلْ أَعُوذُ بِرَبِّ النَّاسِ", m: "النَّاسِ", r: "Madd ʿāriḍ li-s-sukūn", f: "beim Anhalten am Versende", v: "114:1", e: "Alif vor dem Sīn, das beim Anhalten sākin wird → 2, 4 oder 6 Ḥarakāt." },
+    { s: "مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ", m: "عِنْدَهُ", r: "Madd aṣ-ṣila kubrā", f: "das Hāʾ am Wortende", v: "2:255", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach Hamza (إِلَّا) → Ṣila kubrā, 4–5 Ḥarakāt wie munfaṣil." },
+    { s: "وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ", m: "عِلْمِهِ", r: "Madd aṣ-ṣila kubrā", f: "das Hāʾ am Wortende", v: "2:255", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach Hamza → Ṣila kubrā, 4–5 Ḥarakāt." },
+    { s: "إِنَّهُ هُوَ السَّمِيعُ الْبَصِيرُ", m: "إِنَّهُ", r: "Madd aṣ-ṣila ṣuġrā", f: "das Hāʾ am Wortende", v: "17:1", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach keine Hamza → Ṣila ṣuġrā, 2 Ḥarakāt." },
+    { s: "وَأَمَّا مَنْ أُوتِيَ كِتَابَهُ بِشِمَالِهِ", m: "كِتَابَهُ", r: "Madd aṣ-ṣila ṣuġrā", f: "das Hāʾ am Wortende", v: "69:25", e: "Hāʾ des Pronomens zwischen zwei Vokalen, danach Bāʾ → Ṣila ṣuġrā, 2 Ḥarakāt." },
+    { s: "المر تِلْكَ آيَاتُ الْكِتَابِ", m: "المر", r: "Madd lāzim ḥarfī muṯaqqal", f: "der Buchstabenname Lām", v: "13:1", e: "لَامْ: nach dem Alif ein Mīm, das im folgenden Mīm (مِيمْ) aufgeht → ḥarfī muṯaqqal, 6 Ḥarakāt." },
+    { s: "الم أَحَسِبَ النَّاسُ أَنْ يُتْرَكُوا", m: "الم", r: "Madd lāzim ḥarfī muṯaqqal", f: "der Buchstabenname Lām", v: "29:1–2", e: "لَامْ مِيمْ: das Mīm von لَامْ geht im Mīm von مِيمْ auf → ḥarfī muṯaqqal, 6 Ḥarakāt." },
+    { s: "وَاللَّيْلِ إِذَا يَسْرِ", m: "يَسْرِ", r: "Rāʾ: beides erlaubt", f: "das Rāʾ beim Anhalten", v: "89:4", e: "Beim Anhalten ist das Rāʾ sākin; das weggefallene Yāʾ (يَسْرِي) spricht für dünn → beides erlaubt, dünn bevorzugt." },
+    { s: "فَكَيْفَ كَانَ عَذَابِي وَنُذُرِ", m: "وَنُذُرِ", r: "Rāʾ: beides erlaubt", f: "das Rāʾ beim Anhalten", v: "54:16", e: "Beim Anhalten: das Yāʾ von نُذُرِي ist weggefallen → beide Aussprachen erlaubt, dünn bevorzugt." },
+    { s: "وَقُلْ رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا", m: "وَقُلْ رَبِّ", r: "Idġām mutaqāribayn", f: "das Lām von قُلْ", v: "17:24", e: "Lām sākin vor Rāʾ – nahe Austrittsstellen → das Lām geht im Rāʾ auf (ohne Ġunna)." },
+    { s: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً", m: "الدُّنْيَا", r: "Iẓhār muṭlaq", f: "das Nūn vor dem Yāʾ", v: "2:201", e: "Nūn sākin vor Yāʾ im selben Wort → kein Idġām, deutlich. Nur vier Wörter: الدُّنْيَا، بُنْيَانٌ، قِنْوَانٌ، صِنْوَانٌ." },
+    { s: "مُحَمَّدٌ رَسُولُ اللَّهِ", m: "رَسُولُ اللَّهِ", r: "Lām in „Allah“ dick", v: "48:29", e: "Vor „Allah“ steht Ḍamma (رَسُولُ) → Lām dick." },
+    { s: "وَمِنَ النَّاسِ مَنْ يَقُولُ آمَنَّا بِاللَّهِ", m: "بِاللَّهِ", r: "Lām in „Allah“ dünn", v: "2:8", e: "Vor „Allah“ steht Kasra (بِـ) → Lām dünn." }
+  ],
+  /* In welcher Lektion (Kapitel) wird die Regel gelernt? Die Stellen kommen dort zusätzlich in die Übung. */
+  CHAPTER: {
+    "Iẓhār ḥalqī": ["nun"], "Idġām mit Ġunna": ["nun"], "Idġām ohne Ġunna": ["nun"], "Iqlāb": ["nun"], "Iḫfāʾ": ["nun"], "Iẓhār muṭlaq": ["nun"],
+    "Idġām miṯlayn mit Ġunna (Nūn in Nūn)": ["nun", "idgham"],
+    "Iḫfāʾ šafawī": ["mim"], "Iẓhār šafawī": ["mim"], "Idġām miṯlayn mit Ġunna (Mīm in Mīm)": ["mim", "idgham"],
+    "Ġunna (Nūn/Mīm mit Šadda)": ["ghunna"],
+    "Madd ṭabīʿī": ["madd"], "Madd muttaṣil": ["madd"], "Madd munfaṣil": ["madd"], "Madd ʿāriḍ li-s-sukūn": ["madd"], "Madd al-līn": ["madd"],
+    "Madd al-badal": ["madd"], "Madd aṣ-ṣila ṣuġrā": ["madd"], "Madd aṣ-ṣila kubrā": ["madd"], "Madd al-ʿiwaḍ": ["madd"],
+    "Madd lāzim kalimī muṯaqqal": ["lazim"], "Madd lāzim kalimī muḫaffaf": ["lazim"], "Madd lāzim ḥarfī muṯaqqal": ["lazim"], "Madd lāzim ḥarfī muḫaffaf": ["lazim"],
+    "Idġām miṯlayn (ohne Ġunna)": ["idgham"], "Idġām mutaǧānisayn": ["idgham"], "Idġām mutaqāribayn": ["idgham"],
+    "Lām šamsiyya": ["lam"], "Lām qamariyya": ["lam"], "Lām in „Allah“ dick": ["lam"], "Lām in „Allah“ dünn": ["lam"], "Lām des Verbs (deutlich)": ["lam"],
+    "Rāʾ dick": ["ra"], "Rāʾ dünn": ["ra"], "Rāʾ: beides erlaubt": ["ra"],
+    "Qalqala ṣuġrā": ["sifat"], "Qalqala kubrā": ["sifat"],
+    "Sakt": ["sakt"]
+  }
 };

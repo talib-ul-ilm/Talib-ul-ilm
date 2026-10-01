@@ -1,4 +1,4 @@
-/* Taǧwīd-Begriffe: [Umschrift, Arabisch, Gruppe, Fachbedeutung, wörtliche Bedeutung]
+/* Taǧwīd-Begriffe: [Umschrift, Arabisch, Gruppe, Fachbedeutung, wörtliche Bedeutung, (weitere Suchwörter, klein und ohne Zeichen, mit | getrennt)]
    – tajwid.js zeigt die Liste im Taǧwīd-Bereich und fragt die Begriffe ab
      („Was bedeutet …?“ und „Wie heißt …?“; falsche Antworten aus derselben Gruppe).
    – glossar.js erklärt die Begriffe unter jeder Taǧwīd-Frage („Begriffe in dieser Frage“).
@@ -28,17 +28,25 @@ window.TAJWID_BEGRIFFE = {
     ["Madd muttaṣil", "الْمَدُّ الْمُتَّصِلُ", "madd", "Dehnungsbuchstabe und Hamza im selben Wort, 4–5 Ḥarakāt (Pflicht)", "verbundene Dehnung"],
     ["Madd munfaṣil", "الْمَدُّ الْمُنْفَصِلُ", "madd", "Dehnungsbuchstabe am Wortende, Hamza am Anfang des nächsten Wortes, 4–5 Ḥarakāt (erlaubt)", "getrennte Dehnung"],
     ["Madd lāzim", "الْمَدُّ اللَّازِمُ", "madd", "Nach dem Dehnungsbuchstaben ein ursprüngliches Sukūn oder eine Šadda, immer 6 Ḥarakāt", "notwendige Dehnung"],
+    ["Madd lāzim kalimī muṯaqqal", "الْمَدُّ اللَّازِمُ الْكَلِمِيُّ الْمُثَقَّلُ", "madd", "Madd lāzim im Wort: nach dem Dehnungsbuchstaben eine Šadda (الضَّالِّينَ) – 6 Ḥarakāt", "schwer, im Wort"],
+    ["Madd lāzim kalimī muḫaffaf", "الْمَدُّ اللَّازِمُ الْكَلِمِيُّ الْمُخَفَّفُ", "madd", "Madd lāzim im Wort: nach dem Dehnungsbuchstaben ein Sukūn ohne Šadda – nur آلْآنَ (Yūnus 10:51 und 10:91), 6 Ḥarakāt", "leicht, im Wort"],
+    ["Madd lāzim ḥarfī muṯaqqal", "الْمَدُّ اللَّازِمُ الْحَرْفِيُّ الْمُثَقَّلُ", "madd", "Im Namen eines Buchstabens am Sūra-Anfang, dessen Sukūn im nächsten Buchstaben aufgeht (لَامْ in الم) – 6 Ḥarakāt", "schwer, im Buchstaben"],
+    ["Madd lāzim ḥarfī muḫaffaf", "الْمَدُّ اللَّازِمُ الْحَرْفِيُّ الْمُخَفَّفُ", "madd", "Im Namen eines Buchstabens am Sūra-Anfang, ohne Idġām (مِيمْ am Ende von الم, قَافْ in ق) – 6 Ḥarakāt", "leicht, im Buchstaben"],
     ["Madd ʿāriḍ li-s-sukūn", "الْمَدُّ الْعَارِضُ لِلسُّكُونِ", "madd", "Dehnung vor einem Sukūn, das erst beim Anhalten entsteht, 2, 4 oder 6 Ḥarakāt", "Dehnung wegen vorübergehenden Sukūns"],
     ["Madd al-līn", "مَدُّ اللِّينِ", "madd", "Wāw oder Yāʾ sākin nach Fatḥa, beim Anhalten gedehnt, 2, 4 oder 6 Ḥarakāt", "Dehnung der Weichheit"],
     ["Madd al-badal", "مَدُّ الْبَدَلِ", "madd", "Hamza vor dem Dehnungsbuchstaben im selben Wort, 2 Ḥarakāt", "Dehnung des Ersatzes"],
     ["Madd al-ʿiwaḍ", "مَدُّ الْعِوَضِ", "madd", "Alif statt Tanwīn mit Fatḥa beim Anhalten, 2 Ḥarakāt", "Dehnung als Ausgleich"],
     ["Madd aṣ-ṣila", "مَدُّ الصِّلَةِ", "madd", "Dehnung des Hāʾ des Pronomens zwischen zwei Vokalen", "Dehnung der Verbindung"],
+    ["Madd aṣ-ṣila ṣuġrā", "مَدُّ الصِّلَةِ الصُّغْرَى", "madd", "Hāʾ des Pronomens zwischen zwei Vokalen, danach keine Hamza – 2 Ḥarakāt (إِنَّهُ هُوَ)", "kleine Verbindung"],
+    ["Madd aṣ-ṣila kubrā", "مَدُّ الصِّلَةِ الْكُبْرَى", "madd", "Hāʾ des Pronomens zwischen zwei Vokalen, danach eine Hamza – 4–5 Ḥarakāt (مَالَهُ أَخْلَدَهُ)", "große Verbindung"],
     ["Ḥurūf al-madd", "حُرُوفُ الْمَدِّ", "madd", "Die drei Dehnungsbuchstaben ا و ي – gesammelt in نُوحِيهَا", "Buchstaben der Dehnung"],
     /* Nūn, Mīm, Idġām */
     ["Iẓhār", "الْإِظْهَارُ", "nun", "Deutliches Sprechen des Nūn oder Mīm ohne zusätzliche Ġunna", "Deutlichmachen"],
     ["Idġām", "الْإِدْغَامُ", "nun", "Einen Buchstaben ohne Vokal in den folgenden übergehen lassen, sodass beide einer mit Šadda werden", "Hineinstecken, Verschmelzen"],
     ["Iqlāb", "الْإِقْلَابُ", "nun", "Nūn sākina oder Tanwīn vor Bāʾ wird zu einem verborgenen Mīm mit Ġunna", "Umwandeln"],
     ["Iḫfāʾ", "الْإِخْفَاءُ", "nun", "Zustand zwischen Iẓhār und Idġām, ohne Šadda, mit Ġunna – vor 15 Buchstaben", "Verbergen"],
+    ["Idġām mit Ġunna", "الْإِدْغَامُ بِغُنَّةٍ", "nun", "Nūn sākina oder Tanwīn geht in ي ن م و über, mit Ġunna (يَنْمُو)", "Verschmelzen mit Näseln"],
+    ["Idġām ohne Ġunna", "الْإِدْغَامُ بِلَا غُنَّةٍ", "nun", "Nūn sākina oder Tanwīn geht ganz in ل oder ر über, ohne Ġunna", "Verschmelzen ohne Näseln"],
     ["Ġunna", "الْغُنَّةُ", "nun", "Nasalklang aus dem Nasenraum, ohne Mitwirkung der Zunge", "Näseln"],
     ["Iẓhār ḥalqī", "الْإِظْهَارُ الْحَلْقِيُّ", "nun", "Nūn deutlich vor den sechs Kehllauten ء ه ع ح غ خ", "Deutlichmachen an der Kehle"],
     ["Iẓhār šafawī", "الْإِظْهَارُ الشَّفَوِيُّ", "nun", "Mīm sākin deutlich vor allen Buchstaben außer م und ب", "Deutlichmachen an den Lippen"],
@@ -49,12 +57,16 @@ window.TAJWID_BEGRIFFE = {
     ["Idġām mutaqāribayn", "إِدْغَامُ الْمُتَقَارِبَيْنِ", "nun", "Idġām zweier Buchstaben mit nahen Austrittsstellen oder Eigenschaften (ل–ر, ق–ك)", "Verschmelzen zweier Naher"],
     ["Iẓhār muṭlaq", "الْإِظْهَارُ الْمُطْلَقُ", "nun", "Nūn sākin vor ي oder و im selben Wort bleibt deutlich (الدُّنْيَا)", "unbedingtes Deutlichmachen"],
     /* Lām, Rāʾ, dick/dünn */
-    ["Tafḫīm", "التَّفْخِيمُ", "lam", "Dicke Aussprache: der Mundraum füllt sich mit dem Laut", "Dickmachen"],
-    ["Tarqīq", "التَّرْقِيقُ", "lam", "Dünne Aussprache: der Laut bleibt schmal", "Dünnmachen"],
+    ["Tafḫīm", "التَّفْخِيمُ", "lam", "Dicke Aussprache: der Mundraum füllt sich mit dem Laut", "Dickmachen", "dick"],
+    ["Tarqīq", "التَّرْقِيقُ", "lam", "Dünne Aussprache: der Laut bleibt schmal", "Dünnmachen", "dunn"],
     ["Lām šamsiyya", "اللَّامُ الشَّمْسِيَّةُ", "lam", "Lām des Artikels, das vor 14 Buchstaben nicht gesprochen wird (الشَّمْسُ)", "Sonnen-Lām"],
     ["Lām qamariyya", "اللَّامُ الْقَمَرِيَّةُ", "lam", "Lām des Artikels, das vor 14 Buchstaben deutlich gesprochen wird (الْقَمَرُ)", "Mond-Lām"],
-    ["Lafẓ al-Ǧalāla", "لَفْظُ الْجَلَالَةِ", "lam", "Der Name „Allah“ – sein Lām ist nach Fatḥa/Ḍamma dick, nach Kasra dünn", "das Wort der Majestät"],
+    ["Lafẓ al-Ǧalāla", "لَفْظُ الْجَلَالَةِ", "lam", "Der Name „Allah“ – sein Lām ist nach Fatḥa/Ḍamma dick, nach Kasra dünn", "das Wort der Majestät", "lam in „allah“"],
+    ["Lām al-fiʿl", "لَامُ الْفِعْلِ", "lam", "Lām im Verb (قُلْ، جَعَلْنَا، الْتَقَى) – immer deutlich, außer vor Lām und Rāʾ", "Lām des Verbs", "lam des verbs"],
+    ["Ǧawāz al-waǧhayn", "جَوَازُ الْوَجْهَيْنِ", "lam", "Beide Aussprachen sind erlaubt – beim Rāʾ z. B. in فِرْقٍ، مِصْرَ، الْقِطْرِ", "beide Weisen erlaubt", "beides erlaubt"],
     ["Qalqala", "الْقَلْقَلَةُ", "lam", "Hörbarer Nachstoß bei ق ط ب ج د, wenn sie sākin sind", "Erschütterung"],
+    ["Qalqala ṣuġrā", "الْقَلْقَلَةُ الصُّغْرَى", "lam", "Qalqala mitten im Wort oder beim Weiterlesen – leichter Nachstoß (يَجْعَلُونَ)", "kleine Erschütterung"],
+    ["Qalqala kubrā", "الْقَلْقَلَةُ الْكُبْرَى", "lam", "Qalqala am Wortende beim Anhalten – stärkster Nachstoß (الْفَلَقِ)", "große Erschütterung"],
     /* Eigenschaften */
     ["Hams", "الْهَمْسُ", "sifat", "Der Atem strömt beim Buchstaben weiter – 10 Buchstaben „فَحَثَّهُ شَخْصٌ سَكَتَ“", "Flüstern"],
     ["Ǧahr", "الْجَهْرُ", "sifat", "Der Atem stockt beim Buchstaben – Gegenteil von Hams", "Lautwerden"],

@@ -95,6 +95,13 @@
         q: T("Welche Taǧwīd-Regel gilt an der markierten Stelle?") + (x.f ? " (" + x.f + ")" : ""),
         ar: x.s, arMark: mark.length === 1 ? mark[0] : mark, a: [x.r].concat(wrong), e: x.e, level: lvl });
     });
+    /* the passages also go into the lesson where the rule is taught, to deepen it there
+       (same question objects, so the progress is shared with „Regel erkennen“) */
+    if (RG.CHAPTER) RULE_QS.forEach(function (q) {
+      var chs = RG.CHAPTER[q.a[0]] || [];
+      if (chs.length) q.ruleCh = chs[0];
+      chs.forEach(function (id) { if (SETS[id]) SETS[id].push(q); });
+    });
     SETS.regeln = RULE_QS;
     [1, 2, 3].forEach(function (n) { SETS["regeln" + n] = RULE_QS.filter(function (q) { return q.level === n; }); });
     QS = QS.concat(RULE_QS);
