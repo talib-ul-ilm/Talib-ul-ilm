@@ -1282,8 +1282,11 @@ dialog.auth { border-radius: 20px; }
 .tj-levels { flex-basis: 100%; display: grid; gap: 8px; }
 .tj-level { display: flex; gap: 12px; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
 .tj-level > div { display: grid; gap: 4px; flex: 1; min-width: 0; }
+.tj-level strong { font-size: .98rem; }
 .tj-level p { margin: 0; font-size: .88rem; color: var(--muted); }
 .tj-level .btn { flex: none; }
+.segmented.levels { display: grid; grid-template-columns: 1fr 1fr; width: 100%; max-width: 460px; }
+.segmented.levels button { padding: 9px 10px; }
 .tj-badge { font: 700 .68rem/1 var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 3px 7px; }
 .tj-terms { flex-basis: 100%; }
 .tj-terms > summary { cursor: pointer; font-weight: 700; color: var(--primary); }
@@ -1590,12 +1593,29 @@ dialog.auth { border-radius: 20px; }
 
       <div id="quiz-setup" class="panel setup">
         <div>
-          <p class="eyebrow">Fiqh-Quiz</p>
+          <p class="eyebrow" id="quiz-eyebrow">Fiqh-Quiz</p>
           <h2>Teste dein Wissen</h2>
           <p class="setup-folder">Falsch beantwortete Fragen landen im <button type="button" class="linkish" data-open-mistakes>Fehlerordner<span data-mistakes-count></span></button>.</p>
         </div>
 
         <div>
+          <p class="step-label">Fach</p>
+          <div class="segmented" role="group" aria-label="Fach">
+            <button type="button" data-subject="fiqh" aria-pressed="true">Fiqh</button>
+            <button type="button" data-subject="tajwid" aria-pressed="false">Taǧwīd</button>
+          </div>
+        </div>
+        <div>
+          <p class="step-label">Niveau</p>
+          <div class="segmented levels" role="group" aria-label="Niveau">
+            <button type="button" data-level="1" aria-pressed="false">Anfänger</button>
+            <button type="button" data-level="2" aria-pressed="false">Fortgeschritten / Ṭālib</button>
+            <button type="button" data-level="3" aria-pressed="false">Lehrer / Ustāḏ</button>
+            <button type="button" data-level="0" aria-pressed="true">Alle</button>
+          </div>
+        </div>
+        <p class="note" id="tajwid-note" hidden>Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Taǧwīd-Regel gilt dort? Die Stellen stammen aus „Regel erkennen“ im Fach Taǧwīd.</p>
+        <div id="mode-step">
           <p class="step-label">Modus</p>
           <div class="modes">
             <button type="button" class="mode" data-mode="topic" aria-pressed="true">

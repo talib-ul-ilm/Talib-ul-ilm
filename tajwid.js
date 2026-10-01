@@ -139,7 +139,7 @@
   var lastRound = null;
   function listOf(id) { return id && SETS[id] ? SETS[id] : QS; }
   var LEVELS = [[1, "Anfänger", "Die Grundregeln an klaren Stellen: Nūn und Mīm sākina, Ġunna, Madd ṭabīʿī, muttaṣil und munfaṣil, Qalqala, Lām."],
-    [2, "Fortgeschritten", "Weitere Regeln: Madd lāzim, ʿāriḍ, līn, badal, ṣila, Rāʾ, die Idġām-Arten, Iẓhār muṭlaq."],
+    [2, "Fortgeschritten / Ṭālib", "Weitere Regeln: Madd lāzim, ʿāriḍ, līn, badal, ṣila, Rāʾ, die Idġām-Arten, Iẓhār muṭlaq."],
     [3, "Lehrer / Ustāḏ", "Fallen und Feinheiten: wegfallende Dehnungsbuchstaben, zwei Madd-Ursachen, Buchstabennamen, Sakt, unvollständiger Idġām, Ausnahmen."]];
   function levelName(n) { return T(LEVELS[n - 1][1]); }
   function labelOf(id) { var lv = /^regeln([123])$/.exec(id || ""); if (lv) return T("Taǧwīd · Regel erkennen") + " · " + levelName(+lv[1]);
@@ -191,12 +191,11 @@
     if (!RULE_QS.length) return "";
     var s = stats(RULE_QS);
     return '<div class="panel tj-quizcard"><div><p class="eyebrow">' + T("Allgemeines Taǧwīd-Quiz") + "</p><h3>" + T("Regel erkennen") + "</h3><p>" +
-      T("Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Regel gilt dort? {n} Stellen in drei Stufen.", { n: RULE_QS.length }) + "</p>" + bar(s) +
-      '<small class="lt-meta">' + (s.learned ? T("{n} von {m} gelernt", { n: s.learned, m: s.total }) : T("noch nicht begonnen")) + "</small></div>" +
+      T("Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Regel gilt dort? Drei Stufen; auch im Quiz-Tab mit Punkten und Zeit.") + "</p></div>" +
       '<div class="tj-levels">' + LEVELS.map(function (l) {
         var list = SETS["regeln" + l[0]], ls = stats(list);
-        return '<div class="tj-level"><div><strong>' + T(l[1]) + '</strong> <small class="lt-meta">' + T("{n} Stellen", { n: list.length }) +
-          (ls.learned ? " · " + T("{n} % gelernt", { n: ls.pct }) : "") + "</small><p>" + mixed(T(l[2])) + "</p>" + bar(ls) + "</div>" +
+        return '<div class="tj-level" title="' + esc(T(l[2])) + '"><div><strong>' + T(l[1]) + '</strong><small class="lt-meta">' + T("{n} Stellen", { n: list.length }) +
+          (ls.learned ? " · " + T("{n} % gelernt", { n: ls.pct }) : "") + "</small>" + bar(ls) + "</div>" +
           '<button type="button" class="btn' + (l[0] === 1 ? " btn-primary" : "") + '" data-tj-learn="regeln' + l[0] + '">' +
           (ls.pct === 100 ? T("✓ Wiederholen") : ls.learned ? T("Weiter · {n} %", { n: ls.pct }) : T("Starten")) + "</button></div>";
       }).join("") + "</div></div>";
@@ -329,4 +328,6 @@
   render();
 
   window.FIQH_TAJWID = { questions: QS, chapters: CH, stats: function () { return stats(QS); } };
+  /* the Quiz tab offers Taǧwīd too – its setup was drawn before this file loaded */
+  if (APP.renderSetup && APP.isPlaying && !APP.isPlaying()) APP.renderSetup();
 })();

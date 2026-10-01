@@ -85,6 +85,10 @@ Wo die Inhalte stehen:
 - `buch/*.js`: Ergänzungen aus dem İlmihal. Sie hängen sich über `FIQH.addSections`, `FIQH.addTopic` und `FIQH.addQuestions` an.
 - `backend.js`: Verbindung zu Firebase, `auth.js`: Anmelden und Registrieren, `social.js`: Wettbewerb und Ranglisten, `chat.js`: Chat
 
+## Quiz: Fach und Niveau
+
+Im Quiz-Tab wählt man oben das **Fach** (Fiqh oder Taǧwīd) und das **Niveau**: Anfänger, Fortgeschritten / Ṭālib, Lehrer / Ustāḏ oder alle. Bei Taǧwīd kommen die Stellen aus „Regel erkennen“ (mit deren Stufen), mit Punkten, Zeitbonus und Joker wie bei Fiqh. Die Fiqh-Fragen werden in `app.js` automatisch eingestuft (`q.lvl`): Fragen zu Meinungsunterschieden der Imame, Fatwa-Meinungen, Uṣūl-Begriffen oder genauen Maßen → Lehrer / Ustāḏ; die Fragen aus dem Unterricht und die Begriffsfragen aus dem Buch → Anfänger; die übrigen Vertiefungsfragen aus dem Buch → Fortgeschritten (rund 200 / 340 / 160). Bestwerte gelten je Fach, Auswahl und Niveau.
+
 ## Quellenangaben im Quiz
 
 Jede Fiqh-Frage verweist mit `s` auf den Abschnitt ihres Themas (Index in `sections`). Abschnitte aus dem Unterricht tragen `u: "Unterricht N"`, Abschnitte aus dem İlmihal `src: "İlmihal S. …"`. Nach der Antwort, in der Auswertung und im Fehlerordner steht deshalb z. B. „Quelle: İlmihal (H. Döndüren), S. 143–150 · Wuḍūʾ – Gebetswaschung › Vertiefung: Mest, Socken und Verband“. Der Knopf in der Auswertung springt direkt zu diesem Abschnitt. Neue Fragen brauchen ebenfalls ein `s`.
