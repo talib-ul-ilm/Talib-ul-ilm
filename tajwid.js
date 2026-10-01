@@ -140,7 +140,7 @@
   function listOf(id) { return id && SETS[id] ? SETS[id] : QS; }
   var LEVELS = [[1, "Anfänger / Mubtadiʾ", "Die Grundregeln an klaren Stellen: Nūn und Mīm sākina, Ġunna, Madd ṭabīʿī, muttaṣil und munfaṣil, Qalqala, Lām."],
     [2, "Fortgeschritten / Ṭālibu l-ʿIlm", "Weitere Regeln: Madd lāzim, ʿāriḍ, līn, badal, ṣila, Rāʾ, die Idġām-Arten, Iẓhār muṭlaq."],
-    [3, "Lehrer / Ustāḏ", "Fallen und Feinheiten: wegfallende Dehnungsbuchstaben, zwei Madd-Ursachen, Buchstabennamen, Sakt, unvollständiger Idġām, Ausnahmen."]];
+    [3, "Experte / Ustāḏ", "Fallen und Feinheiten: wegfallende Dehnungsbuchstaben, zwei Madd-Ursachen, Buchstabennamen, Sakt, unvollständiger Idġām, Ausnahmen."]];
   function levelName(n) { return T(LEVELS[n - 1][1]); }
   function labelOf(id) { var lv = /^regeln([123])$/.exec(id || ""); if (lv) return T("Taǧwīd · Regel erkennen") + " · " + levelName(+lv[1]);
     return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id === "begriffe" ? T("Taǧwīd · Begriffe") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
