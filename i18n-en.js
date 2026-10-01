@@ -80,6 +80,7 @@ window.I18N_EN = {
  "Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Taǧwīd-Regel gilt dort? Die Stellen stammen aus „Regel erkennen“ im Fach Taǧwīd.": "A passage from the Qurʾān with one part marked – which tajwīd rule applies there? The passages come from “Spot the rule” in the subject Tajwīd.",
  "Eine Stelle aus dem Qurʾān, ein Teil ist markiert – welche Regel gilt dort? Drei Stufen; auch im Quiz-Tab mit Punkten und Zeit.": "A passage from the Qurʾān with one part marked – which rule applies there? Three levels; also in the Quiz tab with points and time.",
  "Anfänger": "Beginner",
+ "Anfänger / Mubtadiʾ": "Beginner / Mubtadiʾ",
  "Fortgeschritten": "Advanced",
  "Lehrer / Ustāḏ": "Teacher / Ustādh",
  "Die Grundregeln an klaren Stellen: Nūn und Mīm sākina, Ġunna, Madd ṭabīʿī, muttaṣil und munfaṣil, Qalqala, Lām.": "The basic rules in clear passages: nūn and mīm sākina, ghunna, madd ṭabīʿī, muttaṣil and munfaṣil, qalqala, lām.",
