@@ -23,7 +23,7 @@
         return [[ls.length, T("Lektionen")], [ls.reduce(function (n, l) { return n + l.vocab.length; }, 0), T("Vokabeln")]];
       },
       stats: function () { return AR ? AR.stats() : null; },
-      actions: [{ label: T("Lektionen öffnen"), view: "arabisch", primary: true }] },
+      actions: [{ label: T("Nachschlagen"), view: "arabisch", tab: "nachschlagen", primary: true }, { label: T("Lernen"), view: "arabisch", tab: "lektionen", progress: true }] },
     { id: "tajwid", name: "Taǧwīd", ar: "التَّجْوِيدُ",
       text: T("Den Qurʾān richtig lesen: Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen."),
       meta: function () { return TJ ? [[TJ.chapters.length, T("Kapitel")], [TJ.questions.length, T("Übungen")]] : []; },
@@ -69,11 +69,20 @@
         (started ? '<div class="subject-progress">' + bar(s) + "<small>" + (s.pct === 100 ? T("✓ alles gelernt") : T("{n} % gelernt", { n: s.pct })) + "</small></div>" : "") +
         '<div class="subject-actions">' + sub.actions.map(function (a) {
           var label = a.label + (a.progress && started ? " · " + s.pct + " %" : "");
-          return '<button type="button" class="btn' + (a.primary ? " btn-primary" : "") + '" data-open="' + a.view + '">' + esc(label) + "</button>";
+          return '<button type="button" class="btn' + (a.primary ? " btn-primary" : "") + '" data-open="' + a.view + '"' + (a.tab ? ' data-tab="' + a.tab + '"' : "") + ">" + esc(label) + "</button>";
         }).join("") + "</div></article>";
     }).join("") + (folderDone ? "" : folderHtml());
     Array.prototype.forEach.call(box.querySelectorAll("[data-open]"), function (b) {
-      b.addEventListener("click", function () { APP.showView(b.getAttribute("data-open")); window.scrollTo(0, 0); });
+      b.addEventListener("click", function () {
+        var tab = b.getAttribute("data-tab");
+        APP.showView(b.getAttribute("data-open")); window.scrollTo(0, 0);
+        /* Arabisch: straight to a tab (Nachschlagen or the lessons) */
+        if (tab && window.FIQH_ARABIC_RENDER) {
+          window.FIQH_ARABIC_RENDER(tab);
+          var tabs = document.getElementById("ar-tabs");
+          if (tab === "nachschlagen" && tabs) tabs.scrollIntoView({ block: "start" });
+        }
+      });
     });
   }
 
