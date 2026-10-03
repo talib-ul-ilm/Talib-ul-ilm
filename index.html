@@ -1242,6 +1242,40 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .league-tabs [lang="ar"] { font-family: var(--arabic); }
 @media (max-width: 560px) { .league-tabs { width: 100%; } .league-tabs button { flex: 1; } }
 
+/* ---------- Nachschlagen (Arabisch) ---------- */
+.lk-pane { display: grid; gap: 14px; }
+.lk-search { display: grid; gap: 12px; padding: 18px 20px; }
+.lk-label { font: 700 1.05rem/1.3 var(--body); }
+.lk-input { width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); font: 400 1rem/1.4 var(--body); }
+.lk-input:focus { outline: 2px solid var(--primary); outline-offset: 1px; }
+.lk-kinds { margin: 0; }
+.lk-topics { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; font-size: .9rem; color: var(--muted); }
+.lk-topics .linkish { font-size: .9rem; }
+.lk-h { margin: 6px 0 0; font: 600 1.15rem/1.3 var(--display); }
+.lk-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lk-card { padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); display: grid; gap: 6px; }
+.lk-card h3 { margin: 0; font: 600 1.1rem/1.4 var(--display); }
+.lk-ar { font: 400 1.05rem/1.6 var(--arabic); color: var(--muted); }
+.lk-tag { margin: 0; font: 700 .72rem/1 var(--body); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lk-text p { margin: 0 0 6px; }
+.lk-text p:last-child { margin-bottom: 0; }
+.lk-where { justify-self: start; font-size: .88rem; }
+.lk-ex summary { cursor: pointer; font-size: .9rem; color: var(--primary); font-weight: 600; }
+.lk-forms { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 6px; margin-top: 8px; }
+.lk-form { display: grid; gap: 2px; padding: 6px 10px; border-radius: 10px; background: var(--surface-2); text-align: right; }
+.lk-form small { font: 400 .85rem/1.5 var(--arabic); color: var(--muted); }
+.lk-form b { font: 400 1.25rem/1.6 var(--arabic); }
+.lk-lesson { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.lk-lesson > summary { display: flex; justify-content: space-between; gap: 10px; padding: 12px 16px; cursor: pointer; font-weight: 600; }
+.lk-lesson > summary small { color: var(--muted); font-weight: 500; }
+.lk-lesson[open] > summary { border-bottom: 1px solid var(--line); }
+.lk-lesson .lk-list { padding: 10px; }
+.lk-lesson .lk-card { border: 0; padding: 8px 6px; background: none; }
+.lk-lesson .lk-card + .lk-card { border-top: 1px solid var(--line); border-radius: 0; }
+.lk-count, .lk-none { margin: 0; color: var(--muted); }
+.ar-tab-ico { display: none; }
+@media (max-width: 560px) { .ar-tab-long { display: none; } .ar-tab-ico { display: inline; } .ar-tab[data-ar-tab="nachschlagen"] { flex: 0 0 44px; } .lk-search { padding: 16px; } }
+
 /* ---------- Sprache ---------- */
 .lang-select { margin-left: auto; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 8px; font: 700 .8rem/1 var(--body); cursor: pointer; }
 .lang-select + .acc-btn { margin-left: 0; }
@@ -1558,6 +1592,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
         <button type="button" class="ar-tab" role="tab" data-ar-tab="vokabeln" aria-selected="false">Vokabeln</button>
         <button type="button" class="ar-tab" role="tab" data-ar-tab="irab" aria-selected="false">Iʿrāb</button>
         <button type="button" class="ar-tab" role="tab" data-ar-tab="sarf" aria-selected="false">Sarf</button>
+        <button type="button" class="ar-tab" role="tab" data-ar-tab="nachschlagen" aria-selected="false" aria-label="Nachschlagen"><span class="ar-tab-ico" aria-hidden="true">🔎</span> <span class="ar-tab-long">Nachschlagen</span></button>
       </div>
       <div id="ar-body" aria-live="polite"></div>
       <div class="learn-foot">
@@ -2196,9 +2231,11 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 <script src="arabisch/grammatik-plus.js"></script>
 <script src="arabisch/texte.js"></script>
 <script src="arabisch/pruefen.js"></script>
+<script src="arabisch/sarf-regeln.js"></script>
 <script src="irabgen.js"></script>
 <script src="sarf.js"></script>
 <script src="arabic.js"></script>
+<script src="nachschlagen.js"></script>
 <script src="tajwid/inhalt.js"></script>
 <script src="tajwid/ergaenzung.js"></script>
 <script src="tajwid/regeln.js"></script>

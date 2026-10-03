@@ -467,4 +467,11 @@
     });
     return out;
   };
+  /* all terms of one scope as [name, meaning] – for the lookup (nachschlagen.js);
+     scope "a" also lists the Arabic grammar words */
+  window.FIQH_GLOSSAR_LIST = function (scope) {
+    var out = latin.filter(function (e) { return e.scope === scope; }).map(function (e) { return [e.name, e.mean]; });
+    if (scope === "a") arabic.forEach(function (e) { out.push([e.name, e.mean]); });
+    return out;
+  };
 })();
