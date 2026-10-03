@@ -342,6 +342,7 @@
     renderRound();
     var body = $("#ar-body");
     if (state.tab === "sarf" && S) { body.innerHTML = S.pane(); S.wire(body, render); return; }
+    if (state.tab === "nachschlagen" && window.FIQH_LOOKUP) { body.innerHTML = window.FIQH_LOOKUP.pane(); window.FIQH_LOOKUP.wire(body); return; }
     if (lock) { body.innerHTML = lockPane(); wire(body); return; }
     if (state.tab === "vokabeln") body.innerHTML = vocabPane();
     else if (state.tab === "irab") body.innerHTML = irabPane();
@@ -730,6 +731,13 @@
   /* questions/lessons: book 1 only (the Arabic league); allQuestions/allLessons: both books */
   window.FIQH_ARABIC = { questions: QS.filter(function (q) { return qBook(q) === 1; }), lessons: BOOKS[1],
     allQuestions: QS, allLessons: LESSONS, book2Open: function () { return book2Open(); },
+    rich: rich,
+    /* open a lesson (used by the lookup) */
+    openLesson: function (id) {
+      var l = BY_ID[id];
+      if (!l) return;
+      state.book = bookOf(l); state.tab = "lektionen"; state.lesson = id; remember(); render(); scrollToPane();
+    },
     /* overall progress: book 2 counts only once it is open */
     stats: function () { return stats(book2Open() ? QS : QS.filter(function (q) { return qBook(q) === 1; })); } };
   /* the Quiz tab offers Arabisch as a subject too */
