@@ -85,6 +85,10 @@ Wo die Inhalte stehen:
 - `buch/*.js`: Ergänzungen aus dem İlmihal. Sie hängen sich über `FIQH.addSections`, `FIQH.addTopic` und `FIQH.addQuestions` an.
 - `backend.js`: Verbindung zu Firebase, `auth.js`: Anmelden und Registrieren, `social.js`: Wettbewerb und Ranglisten, `chat.js`: Chat
 
+## Sarf: Was möchtest du üben?
+
+Im Sarf-Bereich wählt man über „Was möchtest du üben?“, welche Tabellen „Weiter üben“ nimmt: alle Formen, Vergangenheit & Gegenwart, **nur Passiv** (Vergangenheit Passiv, Gegenwart Passiv, Partizip Passiv – nur transitive Verben), Befehl & Verbot, Verneinung (lam, lan) oder Partizipien (`FOCUS` in `sarf.js`, gemerkt in `fiqh:sarffocus`). Prozentzahl und Rundenergebnis beziehen sich dann auf diese Auswahl; in der Ansicht eines Verbs übt „Offene Tabellen üben“ ebenfalls nur die gewählten Formen.
+
 ## Nachschlagen (Arabisch)
 
 Im Fach Arabisch gibt es den Reiter **Nachschlagen** (auf dem Handy die Lupe). `nachschlagen.js` sammelt die Grammatikregeln aller Madina-Lektionen (`grammar`, Buch 2 erst wenn es offen ist), die Ṣarf-Regeln aus `arabisch/sarf-regeln.js` (Wurzel und Mīzān, die sechs Abwāb, Māḍī, Muḍāriʿ, die fünf Verbformen, manṣūb und maǧzūm, Befehl, Verbot, Passiv, Partizipien, Idġām, die 14 Personen – mit den Formen von نَصَرَ als Beispiel aus `sarf.js`) und die Grammatikbegriffe aus `glossar.js` (`FIQH_GLOSSAR_LIST("a")`). Die Suche vergleicht ohne Groß/Klein, Vokalzeichen und Umschriftzeichen (Genitiv, مفعول, mafʿul …); Filter Alles / Grammatik / Ṣarf / Begriffe und Themen-Knöpfe. Ohne Suchwort stehen die Ṣarf-Regeln und die Grammatik nach Lektion (aufklappbar); ein Treffer aus einer Lektion öffnet diese Lektion (`FIQH_ARABIC.openLesson`).

@@ -248,16 +248,29 @@
   }
 
   /* ---------- learning (tab "Sarf" in Arabisch) ---------- */
-  var state = { verb: null, last: null };
+  var state = { verb: null, last: null, focus: "all" };
+  /* what to practise: all forms, or only one group (e.g. only the passive) */
+  var FOCUS = [
+    ["all", "Alle Formen", function () { return true; }],
+    ["core", "Vergangenheit & Gegenwart", function (f) { return !!f.core; }],
+    ["passiv", "Nur Passiv", function (f) { return !!f.passive; }],
+    ["amr", "Befehl & Verbot", function (f) { return f.id === "amr" || f.id === "nahy"; }],
+    ["neg", "Verneinung (lam, lan)", function (f) { return f.id === "lam" || f.id === "lan"; }],
+    ["part", "Partizipien", function (f) { return f.rows === "n"; }]
+  ];
+  try { var fsaved = localStorage.getItem("fiqh:sarffocus"); if (fsaved && FOCUS.some(function (x) { return x[0] === fsaved; })) state.focus = fsaved; } catch (e) {}
+  function focusedBy(x) { return TABLES.filter(function (t) { return x[2](t.f); }); }
+  function focusOf() { for (var i = 0; i < FOCUS.length; i++) if (FOCUS[i][0] === state.focus) return FOCUS[i]; return FOCUS[0]; }
+  function focused(list) { var f = focusOf()[2]; return (list || TABLES).filter(function (t) { return f(t.f); }); }
   function learnTables(list, label) {
     if (!list.length) return;
-    var before = stats(TABLES);
+    var scope = focused(), before = stats(scope);
     play({
       tables: list, label: label, tab: "start",
       onTable: function (res) { return L.recordId(res.table.id, res.correct === res.total); },
       onFinish: function (results) {
         if (!results.length) return;
-        state.last = { n: results.length, perfect: results.filter(function (r) { return r.correct === r.total; }).length, before: before, after: stats(TABLES) };
+        state.last = { n: results.length, perfect: results.filter(function (r) { return r.correct === r.total; }).length, before: before, after: stats(scope) };
         L.sync();
       },
       onLeave: function () { APP.showView("arabisch"); if (window.FIQH_ARABIC_RENDER) window.FIQH_ARABIC_RENDER("sarf"); window.scrollTo(0, 0); }
@@ -285,13 +298,13 @@
       block(nouns, [0, 1, 2, 3, 4, 5], function (i) { return NOUN_ROWS[i]; });
   }
   function pane() {
-    var all = stats(TABLES), core = stats(TABLES.filter(function (t) { return t.f.core; }));
+    var all = stats(TABLES), core = stats(TABLES.filter(function (t) { return t.f.core; })), fs = stats(focused());
     var v = state.verb && BY_ID[state.verb];
     var html = '<div class="sarf-pane">';
     if (state.last) {
       var r = state.last;
       html += '<div class="panel learn-round"><h3>' + T(r.n === 1 ? "{p} von {n} Tabelle fehlerfrei" : "{p} von {n} Tabellen fehlerfrei", { p: r.perfect, n: r.n }) + "</h3>" +
-        "<p>" + T("Sarf gesamt:") + " <b>" + r.before.pct + " % → " + r.after.pct + " %</b></p>" +
+        "<p>" + (state.focus === "all" ? T("Sarf gesamt:") : esc(T(focusOf()[1])) + ":") + " <b>" + r.before.pct + " % → " + r.after.pct + " %</b></p>" +
         '<div class="lr-actions"><button type="button" class="btn btn-primary" data-sarf-next>' + T("Weiter üben") + '</button><button type="button" class="linkish" data-sarf-close>' + T("Schließen") + "</button></div></div>";
     }
     if (!v) {
@@ -299,7 +312,12 @@
         "<p>" + T("{v} Verben aus allen sechs Abwāb, je bis zu {f} Formen: Vergangenheit und Gegenwart, Passiv, Befehl, Verbot, Verneinung mit lam und lan, Partizip Aktiv und Passiv.", { v: VERBS.length, f: FORMS.length }) + " " +
         T("Eine Tabelle ist gelernt, wenn du sie fehlerfrei ordnest – nach einem Fehler zweimal hintereinander.") + "</p>" +
         '<div class="learn-stats"><span>' + T("<b>{n}</b> von {m} Tabellen gelernt", { n: all.learned, m: all.total }) + "</span><span>" + T("<b>{n} %</b> Vergangenheit &amp; Gegenwart", { n: core.pct }) + "</span></div></div>" +
-        '<div class="ar-irab-actions"><button type="button" class="btn btn-primary" data-sarf-next>' + (all.learned ? T("Weiter üben") : T("Loslegen")) + " · " + all.pct + " %</button></div></div>";
+        '<div class="sarf-focus"><p class="step-label">' + T("Was möchtest du üben?") + '</p><div class="chips">' + FOCUS.map(function (x) {
+          var n = focusedBy(x).length;
+          return '<button type="button" class="chip" data-sarf-focus="' + x[0] + '" aria-pressed="' + (state.focus === x[0]) + '">' + esc(T(x[1])) + '<span class="chip-count">' + n + "</span></button>";
+        }).join("") + "</div></div>" +
+        '<div class="ar-irab-actions"><button type="button" class="btn btn-primary" data-sarf-next>' + (fs.learned ? T("Weiter üben") : T("Loslegen")) +
+          (state.focus === "all" ? "" : " · " + esc(T(focusOf()[1]))) + " · " + fs.pct + " %</button></div></div>";
       html += ABWAB.map(function (b) {
         var vs = VERBS.filter(function (x) { return x.bab === b; });
         return '<section class="lg"><h3 class="lg-head"><span>Bāb ' + b.n + ' <span lang="ar" dir="rtl" class="sarf-bab">' + esc(b.model) + "</span></span><small>" + esc(b.w) + "</small></h3>" +
@@ -323,7 +341,7 @@
           return '<button type="button" class="ar-part' + (l === 2 ? " is-done" : "") + '" data-sarf-table="' + t.id + '"><strong>' + esc(T(t.f.de)) + "</strong>" + bar(s) +
             "<small>" + (l === 2 ? T("✓ gelernt") : l === 1 ? T("fast – noch 1× fehlerfrei") : l === -1 ? T("nochmal üben") : T("offen")) + "</small></button>";
         }).join("") + "</div>" +
-        '<div class="lr-actions"><button type="button" class="btn btn-primary" data-sarf-verb-all>' + T("Alle offenen Tabellen üben") + "</button></div></div>" +
+        '<div class="lr-actions"><button type="button" class="btn btn-primary" data-sarf-verb-all>' + (state.focus !== "all" && focused(ts).length ? T("Offene Tabellen üben: {f}", { f: T(focusOf()[1]) }) : T("Alle offenen Tabellen üben")) + "</button></div></div>" +
         '<section class="ar-block"><h3>' + T("Die ganze Tabelle") + "</h3>" + fullTable(v) + "</section></div>";
     }
     return html + "</div>";
@@ -335,7 +353,14 @@
     var back = $("[data-sarf-back]", body);
     if (back) back.addEventListener("click", function () { state.verb = null; rerender(); });
     $all("[data-sarf-next]", body).forEach(function (b) {
-      b.addEventListener("click", function () { state.last = null; learnTables(nextTables(TABLES, 3), "Sarf"); });
+      b.addEventListener("click", function () { state.last = null; learnTables(nextTables(focused(), 3), state.focus === "all" ? "Sarf" : "Sarf · " + T(focusOf()[1])); });
+    });
+    $all("[data-sarf-focus]", body).forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.focus = b.getAttribute("data-sarf-focus");
+        try { localStorage.setItem("fiqh:sarffocus", state.focus); } catch (e) {}
+        rerender();
+      });
     });
     var close = $("[data-sarf-close]", body);
     if (close) close.addEventListener("click", function () { state.last = null; rerender(); });
@@ -348,6 +373,7 @@
     var va = $("[data-sarf-verb-all]", body);
     if (va) va.addEventListener("click", function () {
       var ts = TABLES.filter(function (t) { return t.v.id === state.verb; });
+      if (focused(ts).length) ts = focused(ts);
       var open = nextTables(ts, ts.length);
       learnTables(open.length ? open : ts, "Sarf");
     });
