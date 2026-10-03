@@ -1022,6 +1022,9 @@ dialog.auth { border-radius: 20px; }
 /* ---------- Arabisch ---------- */
 [lang="ar"], .ar-in, .opt-ar, .q-text.is-ar { font-family: var(--arabic); }
 .ar-in { font-size: 1.12em; line-height: 1.5; unicode-bidi: isolate; }
+/* Arabic inside German text stays one block: a phrase like سَيَّارَةُ الْمُدِيرِ is never split at the line end
+   (that turns the word order around). A long run wraps inside its own block, still right to left. */
+bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align: baseline; text-indent: 0; }
 .q-text.is-ar { font-size: clamp(1.6rem, 4vw, 2rem); line-height: 1.6; }
 .opt-text { flex: 1; min-width: 0; }
 .opt-ar { font-size: 1.35rem; line-height: 1.55; text-align: right; padding-top: 0; }
