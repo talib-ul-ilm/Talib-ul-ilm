@@ -107,6 +107,8 @@ window.I18N_EN = {
  "Verneinung (lam, lan)": "Negation (lam, lan)",
  "Partizipien": "Participles",
  "Offene Tabellen üben: {f}": "Practise open tables: {f}",
+ "{n} von {m} Formen richtig": "{n} of {m} forms right",
+ "zuletzt {n} von {m} richtig": "last time {n} of {m} right",
  "Alle Niveaus": "All levels",
  "Niveau": "Level",
  "Taǧwīd-Quiz": "Tajwīd quiz",

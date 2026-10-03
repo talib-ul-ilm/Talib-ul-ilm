@@ -267,7 +267,7 @@
     var scope = focused(), before = stats(scope);
     play({
       tables: list, label: label, tab: "start",
-      onTable: function (res) { return L.recordId(res.table.id, res.correct === res.total); },
+      onTable: function (res) { saveLast(res.table.id, res.correct, res.total); return L.recordId(res.table.id, res.correct === res.total); },
       onFinish: function (results) {
         if (!results.length) return;
         state.last = { n: results.length, perfect: results.filter(function (r) { return r.correct === r.total; }).length, before: before, after: stats(scope) };
@@ -275,6 +275,25 @@
       },
       onLeave: function () { APP.showView("arabisch"); if (window.FIQH_ARABIC_RENDER) window.FIQH_ARABIC_RENDER("sarf"); window.scrollTo(0, 0); }
     });
+  }
+  /* the last try of each table (how many forms were right) – so one wrong form shows as a small red part, not a red bar */
+  var LAST = {};
+  try { LAST = JSON.parse(localStorage.getItem("fiqh:sarflast") || "{}") || {}; } catch (e) { LAST = {}; }
+  function saveLast(id, ok, total) {
+    LAST[id] = [ok, total];
+    try { localStorage.setItem("fiqh:sarflast", JSON.stringify(LAST)); } catch (e) {}
+  }
+  /* bar and line for one table in the verb view */
+  function tableBar(t) {
+    var l = lv(t), last = LAST[t.id];
+    if (l === 2) return { bar: bar({ total: 1, learned: 1, almost: 0, wrong: 0 }), text: T("✓ gelernt") };
+    var text = l === 1 ? T("fast – noch 1× fehlerfrei") : l === -1 ? T("nochmal üben") : T("offen");
+    if (!last || !l) return { bar: bar({ total: 1, learned: 0, almost: 0, wrong: 0 }), text: text };
+    var ok = last[0], total = last[1];
+    var b = '<span class="lbar" role="img" aria-label="' + T("{n} von {m} Formen richtig", { n: ok, m: total }) + '">' +
+      (ok ? '<span class="lb-' + (l === 1 ? "mid" : "ok") + '" style="width:' + (ok / total * 100) + '%"></span>' : "") +
+      (total - ok ? '<span class="lb-bad" style="width:' + ((total - ok) / total * 100) + '%"></span>' : "") + "</span>";
+    return { bar: b, text: text + (ok < total ? " · " + T("zuletzt {n} von {m} richtig", { n: ok, m: total }) : "") };
   }
   function bar(s) {
     function seg(n, cls) { return n ? '<span class="lb-' + cls + '" style="width:' + (n / s.total * 100) + '%"></span>' : ""; }
@@ -337,9 +356,9 @@
         '<div class="panel sarf-verb-head"><h3><span lang="ar" dir="rtl" class="sarf-verb">' + esc(v.past) + " " + esc(v.pres) + "</span> " + esc(T(v.de)) + "</h3>" +
         "<p>Bāb " + v.bab.n + ' <span lang="ar" dir="rtl">' + esc(v.bab.w) + "</span> · " + T("wie") + ' <span lang="ar" dir="rtl">' + esc(v.bab.model) + "</span>" + (v.t ? "" : " · " + T("intransitiv, daher ohne Passiv")) + "</p>" +
         '<div class="ar-parts">' + ts.map(function (t) {
-          var l = lv(t), s = { total: 1, learned: l === 2 ? 1 : 0, almost: l === 1 ? 1 : 0, wrong: l === -1 ? 1 : 0 };
-          return '<button type="button" class="ar-part' + (l === 2 ? " is-done" : "") + '" data-sarf-table="' + t.id + '"><strong>' + esc(T(t.f.de)) + "</strong>" + bar(s) +
-            "<small>" + (l === 2 ? T("✓ gelernt") : l === 1 ? T("fast – noch 1× fehlerfrei") : l === -1 ? T("nochmal üben") : T("offen")) + "</small></button>";
+          var l = lv(t), tb = tableBar(t);
+          return '<button type="button" class="ar-part' + (l === 2 ? " is-done" : "") + '" data-sarf-table="' + t.id + '"><strong>' + esc(T(t.f.de)) + "</strong>" + tb.bar +
+            "<small>" + tb.text + "</small></button>";
         }).join("") + "</div>" +
         '<div class="lr-actions"><button type="button" class="btn btn-primary" data-sarf-verb-all>' + (state.focus !== "all" && focused(ts).length ? T("Offene Tabellen üben: {f}", { f: T(focusOf()[1]) }) : T("Alle offenen Tabellen üben")) + "</button></div></div>" +
         '<section class="ar-block"><h3>' + T("Die ganze Tabelle") + "</h3>" + fullTable(v) + "</section></div>";
