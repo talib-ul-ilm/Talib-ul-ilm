@@ -1221,6 +1221,10 @@ dialog.auth { border-radius: 20px; }
 .sarf-verb-head p { margin: 0; color: var(--muted); }
 .sarf-table th small { display: block; text-transform: none; letter-spacing: 0; font-weight: 500; }
 .sarf-table th [lang="ar"] { font: 400 1rem/1.3 var(--arabic); text-transform: none; letter-spacing: 0; color: var(--ink); }
+/* column heads: the Arabic names wrap into two or three lines – give the vowel signs room so they do not run into each other */
+.sarf-table thead th { vertical-align: bottom; min-width: 7.5em; padding-top: 14px; padding-bottom: 12px; }
+.sarf-table thead th [lang="ar"] { display: block; line-height: 2.1; margin-bottom: 4px; }
+.sarf-table thead th small { line-height: 1.35; }
 .sarf-table td { font: 400 1.15rem/1.4 var(--arabic); white-space: nowrap; text-align: right; }
 .sarf-table tbody th { background: none; white-space: nowrap; }
 .sarf-pane { display: grid; gap: 14px; }
