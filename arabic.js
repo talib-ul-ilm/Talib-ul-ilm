@@ -150,6 +150,25 @@
       add(s.irab, base("ar-i-" + hash(pre + it.s + "|" + it.w), { q: T("Iʿrāb des markierten Wortes:"), ar: it.s, arMark: it.w, a: window.IRAB_OPTIONS ? window.IRAB_OPTIONS(it.a, pre + it.s + "|" + it.w) : it.a, e: strip(it.e), why: whyList(why.i && why.i[i]) }));
     });
   });
+  /* Quiz tab (area Übersetzen): „Was bedeutet dieser Satz?“ for the example sentences of every lesson;
+     wrong answers are other sentences of the same lesson, then of the same book. Not part of the lessons'
+     progress – only the Quiz and the Fehlerordner use them (ids ar-u-…). */
+  var EXTRA = [];
+  LESSONS.forEach(function (l) {
+    var b2 = bookOf(l) === 2, pre = b2 ? "b2|" : "";
+    var tt = (b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n })) + " · " + T("Übersetzen");
+    var srcText = T("Quelle: Madina-Buch {b}, Lektion {n}", { b: bookOf(l), n: l.n }) + " – " + l.title;
+    var same = l.examples.map(function (e) { return e[1]; });
+    var book = BOOKS[bookOf(l)].reduce(function (a, x) { return a.concat(x.examples.map(function (e) { return e[1]; })); }, []);
+    l.examples.forEach(function (e) {
+      var key = hash(pre + e[0]), rnd = seeded("u|" + key);
+      var wrong = pickOthers(same, [e[1]], 2, rnd);
+      wrong = wrong.concat(pickOthers(book, [e[1]].concat(wrong), 3 - wrong.length, rnd));
+      if (wrong.length < 3) return;
+      EXTRA.push({ t: "arabisch", area: "uebersetzen", tt: tt, srcText: srcText, c: 0, lesson: l.id, _lid: "ar-u-" + key,
+        q: T("Was bedeutet dieser Satz?"), ar: e[0], a: [e[1]].concat(wrong), e: e[0] + " = " + e[1] });
+    });
+  });
   function lessonQs(id) { var s = SETS[id]; return s.vocab.concat(s.gram, s.irab); }
   /* ALL_IRAB: book 1 plus the generated sentences (irabgen.js works with the book-1 vocabulary) */
   var ALL_IRAB = [], IRAB2 = [];
@@ -732,6 +751,8 @@
   window.FIQH_ARABIC = { questions: QS.filter(function (q) { return qBook(q) === 1; }), lessons: BOOKS[1],
     allQuestions: QS, allLessons: LESSONS, book2Open: function () { return book2Open(); },
     rich: rich,
+    /* more questions for the Quiz tab only: Übersetzen (lessons) and Ṣarf (sarf.js) */
+    extraQuestions: function () { return EXTRA.concat(S && S.quizQuestions ? S.quizQuestions() : []); },
     /* open a lesson (used by the lookup) */
     openLesson: function (id) {
       var l = BY_ID[id];

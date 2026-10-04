@@ -104,9 +104,11 @@
       make: function (v, i) { return past(v, i, true); } },
     { id: "mudari_p", de: "Gegenwart Passiv", ar: "الْمُضَارِعُ الْمَجْهُولُ", rows: "p", passive: 1,
       make: function (v, i) { return present(v, i, IND, true); } },
-    { id: "amr", de: "Befehl", ar: "الْأَمْرُ الْحَاضِرُ", rows: "2",
-      make: function (v, i) { return imperative(v, i); } },
-    { id: "nahy", de: "Verbot (lā)", ar: "النَّهْيُ الْحَاضِرُ", rows: "2",
+    /* the command for all 14 persons as in the Emsile: 2nd person اُنْصُرْ (الْأَمْرُ الْحَاضِرُ),
+       3rd and 1st person with lām al-amr لِيَنْصُرْ، لِأَنْصُرْ (الْأَمْرُ الْغَائِبُ) */
+    { id: "amr", de: "Befehl", ar: "الْأَمْرُ", rows: "p",
+      make: function (v, i) { return SECOND.indexOf(i) !== -1 ? imperative(v, i) : "لِ" + present(v, i, JUS, false); } },
+    { id: "nahy", de: "Verbot (lā)", ar: "النَّهْيُ", rows: "p",
       make: function (v, i) { return "لَا " + present(v, i, JUS, false); } },
     { id: "lam", de: "Verneinte Vergangenheit (lam)", ar: "الْجَحْدُ الْمُطْلَقُ", rows: "p",
       make: function (v, i) { return "لَمْ " + present(v, i, JUS, false); } },
@@ -398,7 +400,61 @@
     });
   }
 
+  /* ---------- multiple-choice questions for the Quiz tab (subject Arabisch, area Ṣarf) ----------
+     „Wie lautet …?“ (build a form) and „Welche Form ist das?“ (recognise a form); always the same set,
+     only forms that are unambiguous within the verb's table. Level: past/present 1, other forms 2, recognising 3. */
+  var QUIZ = null;
+  function quizQuestions() {
+    if (QUIZ) return QUIZ;
+    QUIZ = [];
+    var hash = L.hash;
+    function seeded(str) { var h = parseInt(hash(str), 36) || 1; return function () { h = (h * 1103515245 + 12345) & 0x7fffffff; return h / 0x7fffffff; }; }
+    function pick(pool, avoid, n, rnd) {
+      var seen = {}, out = [], copy = pool.slice();
+      avoid.forEach(function (a) { seen[a] = 1; });
+      while (out.length < n && copy.length) { var x = copy.splice(Math.floor(rnd() * copy.length), 1)[0]; if (!seen[x]) { seen[x] = 1; out.push(x); } }
+      return out;
+    }
+    function label(f, i) { var r = rowLabel(f, i); return r[0] + " (" + T(r[1]) + ")"; }
+    VERBS.forEach(function (v, vi) {
+      var fs = formsFor(v), all = [], count = {};
+      fs.forEach(function (f) { rowIdx(f).forEach(function (i) { var w = f.make(v, i); all.push({ f: f, i: i, w: w }); count[w] = (count[w] || 0) + 1; }); });
+      var src = T("Ṣarf") + ": " + v.past + " " + v.pres + " · Bāb " + v.bab.n;
+      fs.forEach(function (f, fi) {
+        var rows = rowIdx(f), rnd = seeded(v.id + "|" + f.id);
+        /* build: two persons per form */
+        [0, 1].forEach(function (k) {
+          var i = rows[(vi * 3 + fi * 5 + k * 7) % rows.length], right = f.make(v, i);
+          var near = conj(v, f).filter(function (w, j) { return w !== right; });
+          var other = fs.filter(function (g) { return g !== f && rowIdx(g).indexOf(i) !== -1; }).map(function (g) { return g.make(v, i); });
+          var wrong = pick(near, [right], 2, rnd);
+          wrong = wrong.concat(pick(other.concat(near), [right].concat(wrong), 3 - wrong.length, rnd));
+          if (wrong.length < 3) return;
+          QUIZ.push({ t: "arabisch", area: "sarf", lvl: f.core ? 1 : 2, tt: T("Arabisch · Ṣarf"), srcText: src, c: 0,
+            _lid: "ar-sq-" + hash(v.id + "|" + f.id + "|" + i + "|b"),
+            q: T("Wie lautet „{f}“ für {p}?", { f: T(f.de), p: label(f, i) }), ar: v.past + " " + v.pres,
+            a: [right].concat(wrong), e: T("{f} von {v}, {p}: {w}", { f: T(f.de), v: v.past, p: label(f, i), w: right }) });
+        });
+        /* recognise: one form per table that is unique in the whole table of the verb */
+        var uniq = rows.filter(function (i) { return count[f.make(v, i)] === 1; });
+        if (!uniq.length) return;
+        var ri = uniq[(vi + fi) % uniq.length], word = f.make(v, ri);
+        var labels = all.filter(function (x) { return x.w !== word && count[x.w] === 1; }).map(function (x) { return T(x.f.de) + " · " + label(x.f, x.i); });
+        var sameForm = labels.filter(function (x) { return x.indexOf(T(f.de) + " · ") === 0; });
+        var wrongL = pick(sameForm, [], 1, rnd);
+        wrongL = wrongL.concat(pick(labels, wrongL, 3 - wrongL.length, rnd));
+        if (wrongL.length < 3) return;
+        QUIZ.push({ t: "arabisch", area: "sarf", lvl: 3, tt: T("Arabisch · Ṣarf"), srcText: src, c: 0,
+          _lid: "ar-sq-" + hash(v.id + "|" + f.id + "|" + ri + "|r"),
+          q: T("Welche Form ist das?"), ar: word,
+          a: [T(f.de) + " · " + label(f, ri)].concat(wrongL), e: T("{w} ist {f} von {v}, {p}.", { w: word, f: T(f.de), v: v.past, p: label(f, ri) }) });
+      });
+    });
+    return QUIZ;
+  }
+
   window.FIQH_SARF = {
+    quizQuestions: quizQuestions,
     VERBS: VERBS, FORMS: FORMS, FORM_BY_ID: FORM_BY_ID, PERSONS: PERSONS, TABLES: TABLES,
     conj: conj, formsFor: formsFor, play: play, pane: pane, wire: wire, stats: function () { return stats(TABLES); },
     table: function (verbId, formId) { var v = BY_ID[verbId]; return { v: v, f: FORM_BY_ID[formId], id: tid(v, FORM_BY_ID[formId]) }; }

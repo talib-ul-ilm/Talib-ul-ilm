@@ -31,11 +31,15 @@
     /* Arabic questions grow (new Iʿrāb sentences), so its folders are built when needed */
     if (AR) SUBJECTS.push({ id: "arabisch", name: T("Arabisch"), back: "arabisch", make: function () {
       var byLesson = {};
-      (AR.allQuestions || AR.questions).forEach(function (q) { (byLesson[q.lesson] = byLesson[q.lesson] || []).push(q); });
+      var extra = AR.extraQuestions ? AR.extraQuestions() : [];
+      (AR.allQuestions || AR.questions).concat(extra.filter(function (q) { return q.lesson; }))
+        .forEach(function (q) { (byLesson[q.lesson] = byLesson[q.lesson] || []).push(q); });
       var out = (AR.allLessons || AR.lessons).filter(function (l) { return byLesson[l.id]; }).map(function (l) {
         return { key: "a-" + l.id, title: (l.book === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + l.title, ar: l.ar, qs: byLesson[l.id] };
       });
       if (byLesson.gen) out.push({ key: "a-gen", title: T("Iʿrāb · neue Sätze"), ar: "إِعْرَابٌ", qs: byLesson.gen });
+      var sarfQs = extra.filter(function (q) { return q.area === "sarf"; });
+      if (sarfQs.length) out.push({ key: "a-sarf", title: T("Ṣarf (Quiz)"), ar: "صَرْفٌ", qs: sarfQs });
       return out;
     } });
     if (TJ) SUBJECTS.push({ id: "tajwid", name: "Taǧwīd", back: "tajwid", folders: TJ.chapters.map(function (c) {

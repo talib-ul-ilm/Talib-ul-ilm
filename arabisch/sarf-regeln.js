@@ -52,11 +52,13 @@ window.SARF_REGELN = [
     text: [
       "Der Befehl kommt vom **Jussiv der 2. Person**: تَنْصُرْ → die Vorsilbe تَـ fällt weg → نْصُرْ.",
       "Weil man nicht mit Sukūn beginnen kann, kommt eine **Hamzat al-waṣl** davor: **اُ** wenn der 2. Radikal Ḍamma hat (اُنْصُرْ، اُكْتُبْ), sonst **اِ** (اِضْرِبْ، اِفْتَحْ، اِعْلَمْ).",
-      "Formen: أَنْتَ اُنْصُرْ · أَنْتُمَا اُنْصُرَا · أَنْتُمْ اُنْصُرُوا · أَنْتِ اُنْصُرِي · أَنْتُنَّ اُنْصُرْنَ."
+      "Formen: أَنْتَ اُنْصُرْ · أَنْتُمَا اُنْصُرَا · أَنْتُمْ اُنْصُرُوا · أَنْتِ اُنْصُرِي · أَنْتُنَّ اُنْصُرْنَ.",
+      "Für **er, sie, ich, wir** gibt es den Befehl mit **لِـ** (لَامُ الْأَمْرِ) + Jussiv: لِيَنْصُرْ „er soll helfen“, لِيَنْصُرُوا „sie sollen helfen“, لِأَنْصُرْ, لِنَنْصُرْ „lasst uns helfen“ – in der Emsile **الْأَمْرُ الْغَائِبُ**. Nach وَ oder فَ wird das Lām sākin: فَلْيَنْصُرْ."
     ] },
   { id: "nahy", form: "nahy", title: "Verbot (Nahy)", ar: "النَّهْيُ", tags: "verbot nahy la nahiya",
     text: [
       "Verbot = **لَا** + Muḍāriʿ im **Jussiv**: لَا تَنْصُرْ „hilf nicht!“, لَا تَذْهَبُوا „geht nicht!“.",
+      "Es gilt für alle Personen: لَا يَنْصُرْ „er soll nicht helfen“, لَا أَنْصُرْ, لَا نَنْصُرْ.",
       "Dieses لَا heißt **لَا النَّاهِيَةُ**; das لَا, das nur verneint (لَا يَذْهَبُ „er geht nicht“), ändert die Endung nicht."
     ] },
   { id: "passiv_madi", form: "madi_p", title: "Passiv der Vergangenheit", ar: "الْمَاضِي الْمَجْهُولُ", tags: "passiv majhul fu'ila vergangenheit",
