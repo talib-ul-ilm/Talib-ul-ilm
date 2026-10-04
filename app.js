@@ -344,7 +344,7 @@
     /* Taǧwīd and Arabisch: Themenquiz (Kapitel / Lektionen) or gemischt, each with its own choice */
     sub: {
       tajwid: { mode: store("tjmode") === "mixed" ? "mixed" : "topic", topics: store("tjtopics") || null },
-      arabisch: { mode: store("armode") === "mixed" ? "mixed" : "topic", topics: store("artopics") || null }
+      arabisch: { mode: store("armode") === "mixed" ? "mixed" : "topic", topics: store("artopics") || null, areas: store("arareas") || null }
     }
   };
   var LEVEL_NAMES = ["Alle Niveaus", "Anfänger / Mubtadiʾ", "Fortgeschritten / Ṭālibu l-ʿIlm", "Experte / Ustāḏ"];
@@ -358,16 +358,19 @@
     TJ.questions.forEach(function (q) { if (!q.level && !q.lvl) q.lvl = TJ_LEVEL[q.chapter] || 2; });
     return TJ.questions;
   }
-  /* Arabisch: the questions of arabic.js (book 2 once it is open). Level by kind:
-     words (meaning, German → Arabic, plural) → Anfänger, grammar → Fortgeschritten, Iʿrāb → Experte */
+  /* Arabisch: the questions of arabic.js (book 2 once it is open) plus the quiz-only ones
+     (Übersetzen, Ṣarf). Each has an area (Wissenschaft) and a level: words → Anfänger,
+     grammar and translation → Fortgeschritten, Iʿrāb → Experte; Ṣarf brings its own. */
+  var AR_AREAS = [["vokabeln", "Vokabeln"], ["grammatik", "Grammatik (Naḥw)"], ["irab", "Iʿrāb"], ["sarf", "Ṣarf"], ["uebersetzen", "Übersetzen"]];
   function arabicQs() {
     var A = window.FIQH_ARABIC;
     if (!A) return [];
     var b2 = A.book2Open(), book = {};
     A.allLessons.forEach(function (l) { book[l.id] = l.book || 1; });
-    return A.allQuestions.filter(function (q) {
-      if (!q.lvl) q.lvl = /^ar-[vdp]-/.test(q._lid) ? 1 : /^ar-g-/.test(q._lid) ? 2 : 3;
-      return b2 || book[q.lesson] !== 2;
+    return A.allQuestions.concat(A.extraQuestions ? A.extraQuestions() : []).filter(function (q) {
+      if (!q.area) q.area = /^ar-[vdp]-/.test(q._lid) ? "vokabeln" : /^ar-g-/.test(q._lid) ? "grammatik" : "irab";
+      if (!q.lvl) q.lvl = q.area === "vokabeln" ? 1 : q.area === "grammatik" || q.area === "uebersetzen" ? 2 : 3;
+      return b2 || !q.lesson || book[q.lesson] !== 2;
     });
   }
   var SUBS = {
@@ -387,12 +390,16 @@
           { name: "Begriffe", topics: [{ id: "begriffe", title: T("Taǧwīd-Begriffe") }] }];
       } },
     arabisch: { eyebrow: "Arabisch-Quiz", loading: "Arabisch wird noch geladen …", topicLabel: "Lektionen", topicLevel: true,
+      topicName: "Nach Lektionen", mixedName: "Nach Wissenschaften",
       topicDesc: "Du wählst eine oder mehrere Lektionen aus dem Madina-Buch, z. B. nur Lektion 3 oder 1 bis 5.",
-      mixedDesc: "Fragen quer durch alle Lektionen: Wörter, Grammatik und Iʿrāb.",
+      mixedDesc: "Ohne Bindung an die Lektionen: Vokabeln, Grammatik, Iʿrāb, Ṣarf und Übersetzen – unten wählst du, welche.",
       mixedFrom: "allen Lektionen", many: "{n} Lektionen", none: "Wähle mindestens eine Lektion.",
+      areas: AR_AREAS,
+      /* a mixed round is spread over the areas, a lesson round over the lessons */
+      spread: function (mode) { return mode === "mixed" ? function (q) { return q.area; } : null; },
       ready: function () { return !!window.FIQH_ARABIC; },
       all: arabicQs,
-      topicQs: arabicQs,
+      topicQs: function () { return arabicQs().filter(function (q) { return q.lesson; }); },
       key: function (q) { return q.lesson; },
       defaults: function (ids) { return ids.slice(0, 1); },
       groups: function () {
@@ -405,6 +412,14 @@
       } }
   };
   function curSub() { return SUBS[setup.subject] || null; }
+  /* Arabisch: only the chosen areas (Wissenschaften); null = all */
+  function subAreas() {
+    var S = curSub(), st = S && setup.sub[setup.subject];
+    if (!S || !S.areas) return null;
+    if (!st.areas) st.areas = S.areas.map(function (a) { return a[0]; });
+    return st.areas;
+  }
+  function byArea(list) { var on = subAreas(); return on ? list.filter(function (q) { return on.indexOf(q.area) !== -1; }) : list; }
   /* the chosen topics of a subject, cleaned up against what exists (kept as the same array) */
   function subTopics(id) {
     var S = SUBS[id], st = setup.sub[id], ids = {}, list = [];
@@ -421,7 +436,8 @@
   function bestKey() {
     var lv = setup.level ? ":L" + setup.level : "", S = curSub();
     if (S) {
-      var st = setup.sub[setup.subject];
+      var st = setup.sub[setup.subject], ar = subAreas();
+      if (ar && ar.length < S.areas.length) lv = ":A" + ar.slice().sort().join("+") + lv;
       return st.mode === "topic"
         ? "best:" + setup.subject + ":" + subTopics(setup.subject).slice().sort().join("+") + ":" + setup.count + (S.topicLevel ? lv : "")
         : "best:" + setup.subject + ":mixed" + lv + ":" + setup.count;
@@ -445,13 +461,34 @@
       $all("[data-submode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-submode") === st.mode)); });
       $("#sub-topic-desc").textContent = T(S.topicDesc);
       $("#sub-mixed-desc").textContent = T(S.mixedDesc);
+      $("#sub-topic-name").textContent = T(S.topicName || "Themenquiz");
+      $("#sub-mixed-name").textContent = T(S.mixedName || "Gemischt");
+    }
+    /* Arabisch: which areas (Wissenschaften) – Vokabeln, Grammatik, Iʿrāb, Ṣarf, Übersetzen */
+    var areas = subAreas();
+    $("#area-step").hidden = !areas;
+    if (areas) {
+      var aBase = st.mode === "mixed" ? S.all() : S.topicQs().filter(function (q) { return topics.indexOf(S.key(q)) !== -1; }), aCount = {};
+      aBase.forEach(function (q) { aCount[q.area] = (aCount[q.area] || 0) + 1; });
+      $("#area-chips").innerHTML = S.areas.map(function (a) {
+        return '<button type="button" class="chip" data-area="' + a[0] + '" aria-pressed="' + (areas.indexOf(a[0]) !== -1) + '"' + (aCount[a[0]] ? "" : " disabled") + ">" +
+          '<span class="chip-check" aria-hidden="true"></span>' + esc(T(a[1])) + '<span class="chip-count">' + (aCount[a[0]] || 0) + "</span></button>";
+      }).join("");
+      $all("[data-area]", $("#area-chips")).forEach(function (b) {
+        b.addEventListener("click", function () {
+          var id = b.getAttribute("data-area"), i = areas.indexOf(id);
+          if (i === -1) areas.push(id); else areas.splice(i, 1);
+          renderSetup();
+        });
+      });
+      $("#area-note").hidden = st.mode === "mixed";
     }
     $("#tajwid-note").hidden = setup.subject !== "tajwid" || subTopic;
     $("#arabic-note").hidden = setup.subject !== "arabisch";
     /* the Taǧwīd chapters have no levels of their own; in the mixed quiz they take the chapter's */
     var showLevel = !subTopic || S.topicLevel;
     $("#level-step").hidden = !showLevel;
-    var lvBase = S ? (st.mode === "mixed" ? S.all() : S.topicQs().filter(function (q) { return topics.indexOf(S.key(q)) !== -1; }))
+    var lvBase = S ? byArea(st.mode === "mixed" ? S.all() : S.topicQs().filter(function (q) { return topics.indexOf(S.key(q)) !== -1; }))
       : setup.mode === "mixed" ? QUESTIONS : QUESTIONS.filter(function (q) { return setup.topics.indexOf(q.t) !== -1; });
     $all("[data-level-count]").forEach(function (el) {
       var l = +el.getAttribute("data-level-count");
@@ -519,8 +556,9 @@
     };
     $("#setup-summary").textContent = S && !S.ready() ? T(S.loading)
       : S ? (ok ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
-          from: st.mode === "mixed" ? T(S.mixedFrom) : topics.length === 1 ? T("„{t}“", { t: topicTitle(topics[0]) }) : T(S.many, { n: topics.length }) })
-        : subTopic && !topics.length ? T(S.none) : T("Auf diesem Niveau gibt es keine Fragen."))
+          from: st.mode === "mixed" ? (areas ? (areas.length === 1 ? T("„{t}“", { t: T(S.areas.filter(function (a) { return a[0] === areas[0]; })[0][1]) }) : areas.length === S.areas.length ? T("allen Wissenschaften") : T("{n} Bereichen", { n: areas.length })) : T(S.mixedFrom))
+            : topics.length === 1 ? T("„{t}“", { t: topicTitle(topics[0]) }) : T(S.many, { n: topics.length }) })
+        : subTopic && !topics.length ? T(S.none) : areas && !areas.length ? T("Wähle mindestens einen Bereich.") : T("Auf diesem Niveau gibt es keine Fragen."))
       : ok
       ? T("{n} Fragen aus {from} · {p} im Pool", { n: n, p: pool.length,
           from: setup.mode === "mixed" ? T("allen {n} Themengebieten", { n: TOPICS.length }) :
@@ -533,6 +571,7 @@
     $("#setup-best").textContent = best ? T("Dein Bestwert hier: {s} Punkte ({c}/{t})", { s: best.score, c: best.correct, t: best.total }) : T("Noch kein Bestwert für diese Auswahl.");
 
     store("mode", setup.mode); store("topics", setup.topics); store("count", setup.count); store("subject", setup.subject); store("level", setup.level);
+    if (setup.sub.arabisch.areas) store("arareas", setup.sub.arabisch.areas);
     store("tjmode", setup.sub.tajwid.mode); store("armode", setup.sub.arabisch.mode);
     if (SUBS.tajwid.ready() && setup.sub.tajwid.topics) store("tjtopics", setup.sub.tajwid.topics);
     if (SUBS.arabisch.ready() && setup.sub.arabisch.topics) store("artopics", setup.sub.arabisch.topics);
@@ -582,9 +621,9 @@
     var S = curSub();
     if (S) {
       var st = setup.sub[setup.subject];
-      if (st.mode === "mixed") return byLevel(S.all());
+      if (st.mode === "mixed") return byArea(byLevel(S.all()));
       var on = subTopics(setup.subject);
-      var list = S.topicQs().filter(function (q) { return on.indexOf(S.key(q)) !== -1; });
+      var list = byArea(S.topicQs().filter(function (q) { return on.indexOf(S.key(q)) !== -1; }));
       return S.topicLevel ? byLevel(list) : list;
     }
     if (setup.mode === "mixed") {
@@ -603,9 +642,9 @@
 
   /* Pick questions spread across topics so a mixed round really is mixed.
      With a seeded rnd everyone gets the same set (weekly competition). */
-  function pickQuestions(pool, n, rnd) {
+  function pickQuestions(pool, n, rnd, keyOf) {
     var byTopic = {};
-    shuffle(pool, rnd).forEach(function (q) { var k = q.chapter || q.lesson || q.t; (byTopic[k] = byTopic[k] || []).push(q); });
+    shuffle(pool, rnd).forEach(function (q) { var k = keyOf ? keyOf(q) : q.chapter || q.lesson || q.t; (byTopic[k] = byTopic[k] || []).push(q); });
     var order = shuffle(Object.keys(byTopic).sort(), rnd);
     var out = [];
     while (out.length < n) {
@@ -654,7 +693,8 @@
       var pool = poolFor();
       var extra = setup.subject === "fiqh" && setup.mode === "mixed" ? mixFill(pool, setup.count) : [];
       if (!pool.length && !extra.length) return;
-      qs = shuffle(pickQuestions(pool, Math.min(setup.count, pool.length)).concat(extra))
+      var S = curSub(), keyOf = S && S.spread ? S.spread(setup.sub[setup.subject].mode) : null;
+      qs = shuffle(pickQuestions(pool, Math.min(setup.count, pool.length), undefined, keyOf).concat(extra))
         .map(function (q) { return withOptions(q); });
     }
     game = { qs: qs, i: 0, score: 0, correct: 0, streak: 0, bestStreak: 0, joker: true, answers: [], key: preset ? null : bestKey(), preset: preset || null,

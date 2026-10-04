@@ -1673,17 +1673,22 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
           <p class="step-label">Modus</p>
           <div class="modes">
             <button type="button" class="mode" data-submode="topic" aria-pressed="true">
-              <strong>Themenquiz</strong>
+              <strong id="sub-topic-name">Themenquiz</strong>
               <span id="sub-topic-desc"></span>
             </button>
             <button type="button" class="mode" data-submode="mixed" aria-pressed="false">
-              <strong>Gemischt</strong>
+              <strong id="sub-mixed-name">Gemischt</strong>
               <span id="sub-mixed-desc"></span>
             </button>
           </div>
         </div>
+        <div id="area-step" hidden>
+          <p class="step-label">Bereiche</p>
+          <div class="chips" id="area-chips"></div>
+          <p class="note" id="area-note" hidden>Ṣarf hängt an keiner Lektion – du findest es unter „Nach Wissenschaften“.</p>
+        </div>
         <p class="note" id="tajwid-note" hidden>Die Fragen werden gleichmäßig über die Kapitel verteilt. Das Niveau richtet sich nach dem Kapitel; bei den Qurʾān-Stellen aus „Regel erkennen“ nach ihrer Stufe.</p>
-        <p class="note" id="arabic-note" hidden>Niveau bei Arabisch: Anfänger · Mubtadiʾ sind die Wörter (Bedeutung, Deutsch → Arabisch, Plural), Fortgeschritten · Ṭālibu l-ʿIlm die Grammatik, Experte · Ustāḏ der Iʿrāb.</p>
+        <p class="note" id="arabic-note" hidden>Niveau bei Arabisch: Anfänger · Mubtadiʾ sind die Wörter und die Grundformen im Ṣarf (Vergangenheit, Gegenwart), Fortgeschritten · Ṭālibu l-ʿIlm Grammatik, Übersetzen und die übrigen Ṣarf-Formen, Experte · Ustāḏ der Iʿrāb und das Erkennen von Ṣarf-Formen.</p>
         <div id="mode-step">
           <p class="step-label">Modus</p>
           <div class="modes">
