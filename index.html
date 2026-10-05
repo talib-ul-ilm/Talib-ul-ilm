@@ -1112,6 +1112,18 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .ar-word { font-size: 1.3rem; line-height: 1.5; white-space: nowrap; }
 .ar-irab { font-size: 1.08rem; line-height: 1.7; display: block; min-width: 14em; text-align: right; }
 .ar-irab-table td:last-child { color: var(--muted); min-width: 12em; }
+/* phone: word and Iʿrāb side by side, the explanation underneath – no sideways scrolling */
+@media (max-width: 560px) {
+  .ar-irab-table { min-width: 0 !important; width: 100%; }
+  .ar-irab-table thead { display: none; }
+  .ar-irab-table tr { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .ar-irab-table tr:last-child { border-bottom: 0; }
+  .ar-irab-table td { padding: 0 !important; border: 0 !important; }
+  .ar-irab-table td:last-child { grid-column: 1 / -1; min-width: 0; font-size: .9rem; }
+  .ar-irab-table .ar-irab { min-width: 0; }
+}
+.lr-models { margin-top: 12px; } .lr-models summary { cursor: pointer; font-weight: 600; color: var(--primary); }
+.lr-models .ar-model { margin-top: 10px; }
 .ar-lek { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
 .ar-vocab-head { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .ar-vocab-head .search { flex: 1 1 240px; }
