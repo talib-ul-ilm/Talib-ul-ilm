@@ -1025,13 +1025,15 @@ dialog.auth { border-radius: 20px; }
 /* Arabic inside German text stays one block: a phrase like سَيَّارَةُ الْمُدِيرِ is never split at the line end
    (that turns the word order around). A long run wraps inside its own block, still right to left. */
 bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align: baseline; text-indent: 0; }
-.q-text.is-ar { font-size: clamp(1.6rem, 4vw, 2rem); line-height: 1.6; }
+/* vowel signs above and below must not run into the next line (iOS fonts draw them tall) */
+.opt-text bdi[lang="ar"], .fb-why bdi[lang="ar"], .fb-terms bdi[lang="ar"] { line-height: 1.9; }
+.q-text.is-ar { font-size: clamp(1.6rem, 4vw, 2rem); line-height: 1.95; }
 .opt-text { flex: 1; min-width: 0; }
-.opt-ar { font-size: 1.35rem; line-height: 1.55; text-align: right; padding-top: 0; }
-#fb-text[lang="ar"] { font-size: 1.2rem; }
+.opt-ar { font-size: 1.35rem; line-height: 2.05; text-align: right; padding-top: 0; }
+#fb-text[lang="ar"] { font-size: 1.2rem; line-height: 2; }
 .q-ar {
   margin: 0; padding: 14px 18px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line);
-  font: 400 clamp(1.7rem, 5vw, 2.3rem)/1.8 var(--arabic); text-align: center; color: var(--ink);
+  font: 400 clamp(1.7rem, 5vw, 2.3rem)/2 var(--arabic); text-align: center; color: var(--ink);
 }
 .q-ar mark { background: color-mix(in srgb, var(--gold) 30%, transparent); color: inherit; border-radius: 6px; padding: 0 6px; box-shadow: inset 0 -2px 0 var(--gold); }
 .hero-ar h1 { max-width: 20ch; }
@@ -1110,7 +1112,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .ar-table td { padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .ar-table tr:last-child td { border-bottom: 0; }
 .ar-word { font-size: 1.3rem; line-height: 1.5; white-space: nowrap; }
-.ar-irab { font-size: 1.08rem; line-height: 1.7; display: block; min-width: 14em; text-align: right; }
+.ar-irab { font-size: 1.08rem; line-height: 2; display: block; min-width: 14em; text-align: right; }
 .ar-irab-table td:last-child { color: var(--muted); min-width: 12em; }
 /* phone: word and Iʿrāb side by side, the explanation underneath – no sideways scrolling */
 @media (max-width: 560px) {
