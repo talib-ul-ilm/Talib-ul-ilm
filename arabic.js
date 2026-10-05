@@ -169,6 +169,75 @@
         q: T("Was bedeutet dieser Satz?"), ar: e[0], a: [e[1]].concat(wrong), e: e[0] + " = " + e[1] });
     });
   });
+  /* „Ganzen Satz bestimmen“ (tab Iʿrāb): the model sentences of the lessons, every word in turn.
+     One question per word (ids ar-w-…), asked in the order of the sentence; wrong answers are other
+     Iʿrāb analyses of the model sentences – same case with another role, or same role with another case. */
+  var SATZ = [], SATZ_SENT = [];
+  (function () {
+    function plain(x) { return String(x).replace(/[\u064B-\u0652\u0670]/g, "").replace(/[أإآ]/g, "ا"); }
+    function bare(x) { return String(x).replace(/[.،؛؟!:]/g, ""); }
+    var CASES = ["مرفوع", "منصوب", "مجرور", "مجزوم", "مبني"];
+    function caseOf(x) { var p = plain(x); for (var i = 0; i < CASES.length; i++) if (p.indexOf(CASES[i]) !== -1) return CASES[i]; return ""; }
+    function roleOf(x) { return plain(x).split(" ")[0]; }
+    /* equal lengths (irab-optionen.js) – unless that would make two answers the same */
+    function balanced(a, key) {
+      var b = window.IRAB_OPTIONS ? window.IRAB_OPTIONS(a, key) : a, seen = {};
+      return b.every(function (x) { var k = plain(x); if (seen[k]) return false; seen[k] = 1; return true; }) ? b : a;
+    }
+    var POOL = [];
+    LESSONS.forEach(function (l) { l.model.forEach(function (m) { m.words.forEach(function (w) { if (POOL.indexOf(w[1]) === -1) POOL.push(w[1]); }); }); });
+    /* which tokens of the sentence belong to an analysed unit (a unit can be part of a token: لِ in لِلَّهِ, or two tokens: فِي الْمَطْبَخِ) */
+    function marks(m) {
+      var toks = m.s.split(/\s+/).map(bare), pos = 0;
+      return m.words.map(function (w) {
+        var parts = w[0].split(/\s+/);
+        if (parts.every(function (p, k) { return toks[pos + k] === p; })) { var r = parts.map(function (p, k) { return pos + k; }); pos += parts.length; return r; }
+        for (var i = pos; i < toks.length; i++) if (toks[i].indexOf(w[0]) !== -1) {
+          if (toks[i].slice(-w[0].length) === w[0]) pos = i + 1; else pos = i;
+          return [i];
+        }
+        return null;
+      });
+    }
+    LESSONS.forEach(function (l) {
+      var b2 = bookOf(l) === 2, pre = b2 ? "b2|" : "";
+      var tt = (b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n })) + " · " + T("ganzer Satz");
+      var srcText = T("Quelle: Madina-Buch {b}, Lektion {n}", { b: bookOf(l), n: l.n }) + " – " + l.title;
+      l.model.forEach(function (m) {
+        var mk = marks(m), qs = [];
+        if (mk.some(function (x) { return !x; })) return;
+        m.words.forEach(function (w, k) {
+          var key = pre + m.s + "|" + k, rnd = seeded("w|" + key), c = caseOf(w[1]), r = roleOf(w[1]);
+          var sameCase = POOL.filter(function (x) { return x !== w[1] && caseOf(x) === c && roleOf(x) !== r; });
+          var sameRole = POOL.filter(function (x) { return x !== w[1] && roleOf(x) === r && caseOf(x) !== c; });
+          var wrong = pickOthers(sameCase, [w[1]], 2, rnd);
+          wrong = wrong.concat(pickOthers(sameRole, [w[1]].concat(wrong), 1, rnd));
+          wrong = wrong.concat(pickOthers(POOL, [w[1]].concat(wrong), 3 - wrong.length, rnd));
+          var a = [w[1]].concat(wrong);
+          qs.push({ t: "arabisch", area: "irab", tt: tt, srcText: srcText, c: 0, lesson: l.id, _lid: "ar-w-" + hash(key), satz: m,
+            q: T("Ganzer Satz – Wort {k} von {n}: Iʿrāb von {w}", { k: k + 1, n: m.words.length, w: w[0] }),
+            ar: m.s, arMark: mk[k].length === 1 ? mk[k][0] : mk[k],
+            a: balanced(a, "w|" + key), e: w[0] + ": " + w[2] + " – " + m.de });
+        });
+        SATZ_SENT.push({ l: l, m: m, qs: qs });
+        SATZ = SATZ.concat(qs);
+      });
+    });
+  })();
+  function satzList() { return SATZ_SENT.filter(function (x) { return bookOf(x.l) === state.book; }); }
+  function satzQs() { return satzList().reduce(function (a, x) { return a.concat(x.qs); }, []); }
+  /* a round: the next two sentences that are not learned yet (or two at random), every word in order */
+  function startSatz() {
+    var list = satzList();
+    if (!list.length) return;
+    var open = list.filter(function (x) { return x.qs.some(function (q) { return lv(q) !== 2; }); });
+    var pick = (open.length ? open : APP.shuffle(list.slice())).slice(0, 2);
+    var qs = pick.reduce(function (a, x) { return a.concat(x.qs); }, []), all = satzQs();
+    var preset = roundPreset(all, qs, false, T("Ganzen Satz bestimmen"), { satz: true }, undefined, "satz", stats(all));
+    var finish = preset.onFinish;
+    preset.onFinish = function (p) { finish(p); if (lastRound) lastRound.models = pick.map(function (x) { return x.m; }); };
+    APP.startQuiz(preset);
+  }
   function lessonQs(id) { var s = SETS[id]; return s.vocab.concat(s.gram, s.irab); }
   /* ALL_IRAB: book 1 plus the generated sentences (irabgen.js works with the book-1 vocabulary) */
   var ALL_IRAB = [], IRAB2 = [];
@@ -291,6 +360,7 @@
     if (from === "vocab") return bookQs().filter(function (q) { return /^ar-[vdp]-/.test(q._lid); });
     if (from === "irab2") return IRAB2;
     if (from === "irab") return ALL_IRAB;
+    if (from === "satz") return satzQs();
     return null;
   }
   function roundPreset(list, qs, review, label, info, size, from, before) {
@@ -310,7 +380,7 @@
   }
   APP.onResume("ar-round", function (a, qs) {
     var info = a.info || {}, l = info.lesson && BY_ID[info.lesson];
-    var label = l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
+    var label = l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
     return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before);
   });
   function lessonLabel(l, part) {
@@ -383,9 +453,10 @@
       (gain > 0 ? " · " + T(gain === 1 ? "{n} Frage neu gelernt" : "{n} Fragen neu gelernt", { n: gain }) : "") + "</p>" +
       '<div class="lr-actions">' + (r.after.pct < 100 ? '<button type="button" class="btn btn-primary" data-ar-again>' + T("Nächste Runde") + "</button>" : "") +
       (r.wrong.length && window.FIQH_MISTAKES ? '<button type="button" class="btn" data-ar-wrong>' + T("Fehler dieser Runde wiederholen ({n})", { n: r.wrong.length }) + "</button>" : "") +
-      '<button type="button" class="linkish" data-ar-close>' + T("Schließen") + "</button></div>";
+      '<button type="button" class="linkish" data-ar-close>' + T("Schließen") + "</button></div>" +
+      (r.models ? '<details class="lr-models"><summary>' + T("Die ganze Analyse der Sätze") + "</summary>" + r.models.map(modelHtml).join("") + "</details>" : "");
     var again = $("[data-ar-again]", box);
-    if (again) again.addEventListener("click", function () { start(r.list, r.label, r.info, r.size); });
+    if (again) again.addEventListener("click", function () { if (r.info && r.info.satz) startSatz(); else start(r.list, r.label, r.info, r.size); });
     var wrongBtn = $("[data-ar-wrong]", box);
     if (wrongBtn) wrongBtn.addEventListener("click", function () { window.FIQH_MISTAKES.practice(r.wrong, T("Fehler dieser Runde"), "arabisch"); });
     $("[data-ar-close]", box).addEventListener("click", function () { lastRound = null; renderRound(); });
@@ -603,6 +674,9 @@
         : T("{n} Iʿrāb-Aufgaben aus allen Lektionen von Buch 2: Du siehst einen Satz mit einem markierten Wort und wählst die richtige Analyse.", { n: list.length })) + "</p>" + (b1 ? genNote() : "") + "</div>" +
       '<div class="ar-irab-actions"><button type="button" class="btn btn-primary" data-ar-irab-train>' + T("Iʿrāb-Training") + " · " + is.pct + " %</button>" +
       '<button type="button" class="btn" data-ar-irab-exam>' + T("Prüfung: 20 gemischte Sätze") + "</button></div></div>" +
+      (satzList().length ? '<div class="panel ar-irab-cta"><div><p class="eyebrow">' + T("Ganzen Satz bestimmen") + "</p><h3>" + T("Jedes Wort eines Satzes nacheinander") + "</h3>" +
+        "<p>" + T("{n} Mustersätze aus den Lektionen: Du bestimmst den Iʿrāb von jedem Wort des Satzes, eines nach dem anderen – am Ende siehst du die ganze Analyse.", { n: satzList().length }) + "</p></div>" +
+        '<div class="ar-irab-actions"><button type="button" class="btn btn-primary" data-ar-satz>' + T("Ganzen Satz bestimmen") + " · " + stats(satzQs()).pct + " %</button></div></div>" : "") +
       '<section class="ar-block"><h3>' + T("Einführung") + "</h3>" + M.irabIntro.map(function (sec, i) {
         return "<details class=\"ar-intro\"" + (i === 0 ? " open" : "") + "><summary>" + esc(sec.t) + "</summary>" +
           sec.p.map(function (p) { return "<p>" + rich(p) + "</p>"; }).join("") + "</details>";
@@ -685,6 +759,8 @@
       var useFresh = fresh && fresh.some(function (q) { return lv(q) !== 2; });
       start(useFresh ? fresh : ALL_IRAB, fresh ? T("Neue Iʿrāb-Sätze") : T("Iʿrāb-Training"), {}, undefined, useFresh ? "" : "irab");
     });
+    var sz = $("[data-ar-satz]", body);
+    if (sz) sz.addEventListener("click", startSatz);
     var ex = $("[data-ar-irab-exam]", body);
     if (ex) ex.addEventListener("click", function () {
       var pool = irabList(), qs = APP.shuffle(pool.slice()).slice(0, 20);
@@ -752,7 +828,7 @@
     allQuestions: QS, allLessons: LESSONS, book2Open: function () { return book2Open(); },
     rich: rich,
     /* more questions for the Quiz tab only: Übersetzen (lessons) and Ṣarf (sarf.js) */
-    extraQuestions: function () { return EXTRA.concat(S && S.quizQuestions ? S.quizQuestions() : []); },
+    extraQuestions: function () { return EXTRA.concat(SATZ, S && S.quizQuestions ? S.quizQuestions() : []); },
     /* open a lesson (used by the lookup) */
     openLesson: function (id) {
       var l = BY_ID[id];
