@@ -344,7 +344,7 @@
     /* Taǧwīd and Arabisch: Themenquiz (Kapitel / Lektionen) or gemischt, each with its own choice */
     sub: {
       tajwid: { mode: store("tjmode") === "mixed" ? "mixed" : "topic", topics: store("tjtopics") || null },
-      arabisch: { mode: store("armode") === "mixed" ? "mixed" : "topic", topics: store("artopics") || null, areas: store("arareas") || null }
+      arabisch: { mode: store("armode") === "mixed" ? "mixed" : "topic", topics: store("artopics") || null, areas: store("arareas") || null, book: +store("arbook") || 0 }
     }
   };
   var LEVEL_NAMES = ["Alle Niveaus", "Anfänger / Mubtadiʾ", "Fortgeschritten / Ṭālibu l-ʿIlm", "Experte / Ustāḏ"];
@@ -373,6 +373,19 @@
       return b2 || !q.lesson || book[q.lesson] !== 2;
     });
   }
+  /* Arabisch „Nach Wissenschaften“: only Madina-Buch 1 or 2 (0 = both). Ṣarf belongs to no book and stays;
+     the generated Iʿrāb sentences (lesson "gen") count as book 1. */
+  function bookOfQ(q) {
+    if (!q.lesson) return 0;
+    if (q.lesson === "gen") return 1;
+    var A = window.FIQH_ARABIC, l = A && A.allLessons.filter(function (x) { return x.id === q.lesson; })[0];
+    return l ? l.book || 1 : 1;
+  }
+  function byBook(list) {
+    var b = setup.sub.arabisch.book;
+    if (!b) return list;
+    return list.filter(function (q) { var k = q._book || (q._book = bookOfQ(q)); return !q.lesson || k === b; });
+  }
   var SUBS = {
     tajwid: { eyebrow: "Taǧwīd-Quiz", loading: "Taǧwīd wird noch geladen …", topicLabel: "Kapitel", topicLevel: false,
       topicDesc: "Du wählst ein oder mehrere Kapitel, z. B. nur Nūn sākina oder Madd und Maḫāriǧ.",
@@ -398,7 +411,7 @@
       /* a mixed round is spread over the areas, a lesson round over the lessons */
       spread: function (mode) { return mode === "mixed" ? function (q) { return q.area; } : null; },
       ready: function () { return !!window.FIQH_ARABIC; },
-      all: arabicQs,
+      all: function () { return byBook(arabicQs()); },
       topicQs: function () { return arabicQs().filter(function (q) { return q.lesson; }); },
       key: function (q) { return q.lesson; },
       defaults: function (ids) { return ids.slice(0, 1); },
@@ -440,7 +453,7 @@
       if (ar && ar.length < S.areas.length) lv = ":A" + ar.slice().sort().join("+") + lv;
       return st.mode === "topic"
         ? "best:" + setup.subject + ":" + subTopics(setup.subject).slice().sort().join("+") + ":" + setup.count + (S.topicLevel ? lv : "")
-        : "best:" + setup.subject + ":mixed" + lv + ":" + setup.count;
+        : "best:" + setup.subject + ":mixed" + (setup.subject === "arabisch" && setup.sub.arabisch.book ? ":B" + setup.sub.arabisch.book : "") + lv + ":" + setup.count;
     }
     return (setup.mode === "mixed" ? "best:mixed:" + setup.count : "best:" + setup.topics.slice().sort().join("+") + ":" + setup.count) + lv;
   }
@@ -458,7 +471,10 @@
     $("#mode-step").hidden = !!S;
     $("#sub-mode-step").hidden = !S;
     if (S) {
-      $all("[data-submode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-submode") === st.mode)); });
+      $all("[data-arbook]").forEach(function (b) {
+    b.addEventListener("click", function () { setup.sub.arabisch.book = +b.getAttribute("data-arbook"); renderSetup(); });
+  });
+  $all("[data-submode]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-submode") === st.mode)); });
       $("#sub-topic-desc").textContent = T(S.topicDesc);
       $("#sub-mixed-desc").textContent = T(S.mixedDesc);
       $("#sub-topic-name").textContent = T(S.topicName || "Themenquiz");
@@ -468,6 +484,15 @@
     var areas = subAreas();
     $("#area-step").hidden = !areas;
     if (areas) {
+      var A = window.FIQH_ARABIC, b2open = !!(A && A.book2Open());
+      if (!b2open && st.book === 2) st.book = 0;
+      $("#book-row").hidden = st.mode !== "mixed";
+      $all("[data-arbook]").forEach(function (b) {
+        var n = +b.getAttribute("data-arbook");
+        b.setAttribute("aria-pressed", String(n === st.book));
+        b.disabled = n === 2 && !b2open;
+        b.textContent = n === 0 ? T("Beide") : T("Buch {n}", { n: n }) + (n === 2 && !b2open ? " 🔒" : "");
+      });
       var aBase = st.mode === "mixed" ? S.all() : S.topicQs().filter(function (q) { return topics.indexOf(S.key(q)) !== -1; }), aCount = {};
       aBase.forEach(function (q) { aCount[q.area] = (aCount[q.area] || 0) + 1; });
       $("#area-chips").innerHTML = S.areas.map(function (a) {
@@ -564,6 +589,7 @@
           from: setup.mode === "mixed" ? T("allen {n} Themengebieten", { n: TOPICS.length }) :
             setup.topics.length === 1 ? T("„{t}“", { t: TOPIC_BY_ID[setup.topics[0]].title }) : T("{n} Themengebieten", { n: setup.topics.length }) })
       : T("Wähle mindestens ein Themengebiet.");
+    if (ok && areas && st.mode === "mixed" && st.book) $("#setup-summary").textContent += " · " + T("Madina-Buch {n}", { n: st.book });
     if (ok && setup.level && showLevel) $("#setup-summary").textContent += " · " + T(LEVEL_NAMES[setup.level]);
     if (ok && paused) $("#setup-summary").textContent += " · " + T("{k} kürzlich gestellt (2 Std. Pause)", { k: paused });
 
@@ -572,6 +598,7 @@
 
     store("mode", setup.mode); store("topics", setup.topics); store("count", setup.count); store("subject", setup.subject); store("level", setup.level);
     if (setup.sub.arabisch.areas) store("arareas", setup.sub.arabisch.areas);
+    store("arbook", setup.sub.arabisch.book);
     store("tjmode", setup.sub.tajwid.mode); store("armode", setup.sub.arabisch.mode);
     if (SUBS.tajwid.ready() && setup.sub.tajwid.topics) store("tjtopics", setup.sub.tajwid.topics);
     if (SUBS.arabisch.ready() && setup.sub.arabisch.topics) store("artopics", setup.sub.arabisch.topics);

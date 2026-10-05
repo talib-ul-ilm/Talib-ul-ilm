@@ -1124,6 +1124,8 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
   .ar-irab-table td:last-child { grid-column: 1 / -1; min-width: 0; font-size: .9rem; }
   .ar-irab-table .ar-irab { min-width: 0; }
 }
+#book-row { margin-bottom: 14px; } .book-note { margin: 6px 0 0; font-size: .85rem; }
+@media (max-width: 560px) { .book-seg { display: flex; width: 100%; } .book-seg button { flex: 1; padding: 9px 6px; font-size: .85rem; } }
 .lr-models { margin-top: 12px; } .lr-models summary { cursor: pointer; font-weight: 600; color: var(--primary); }
 .lr-models .ar-model { margin-top: 10px; }
 .ar-lek { color: var(--muted); font-variant-numeric: lining-nums tabular-nums; }
@@ -1697,6 +1699,15 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
           </div>
         </div>
         <div id="area-step" hidden>
+          <div id="book-row" hidden>
+            <p class="step-label">Madina-Buch</p>
+            <div class="segmented book-seg" role="group" aria-label="Madina-Buch">
+              <button type="button" data-arbook="0" aria-pressed="true">Beide</button>
+              <button type="button" data-arbook="1" aria-pressed="false">Buch 1</button>
+              <button type="button" data-arbook="2" aria-pressed="false">Buch 2</button>
+            </div>
+            <p class="note book-note">Gilt für Vokabeln, Grammatik, Iʿrāb und Übersetzen – Ṣarf gehört zu keinem Buch.</p>
+          </div>
           <p class="step-label">Bereiche</p>
           <div class="chips" id="area-chips"></div>
           <p class="note" id="area-note" hidden>Ṣarf hängt an keiner Lektion – du findest es unter „Nach Wissenschaften“.</p>
