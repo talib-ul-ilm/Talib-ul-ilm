@@ -402,7 +402,7 @@
     APP.startQuiz(roundPreset(list, r.qs, r.review, label, info, size, from, stats(list)));
   }
   function listFrom(from, info) {
-    if (info && info.lesson && SETS[info.lesson] && info.complete) return lessonQs(info.lesson).concat(SATZ.filter(function (q) { return q.lesson === info.lesson; }), transQs(info.lesson));
+    if (info && info.lesson && SETS[info.lesson] && info.complete) return completeQs(info.lesson, true);
     if (info && info.lesson && SETS[info.lesson]) return info.part ? partQs(info.lesson, info.part) : lessonSel(info.lesson);
     if (from === "vocab") return bookQs().filter(function (q) { return /^ar-[vdp]-/.test(q._lid); });
     if (from === "irab2") return IRAB2;
@@ -425,7 +425,7 @@
       onLeave: function () {
         APP.showView("arabisch");
         var l = info && info.lesson && BY_ID[info.lesson];
-        if (l && !info.part && (info.complete || partsOn.indexOf("trans") !== -1) && transItems(l).length) {
+        if (l && !info.part && partsOn.indexOf("trans") !== -1 && transItems(l).length) {
           state.tab = "lektionen"; state.lesson = l.id; remember();
           startTrans(l, !!info.complete);
           return;
@@ -446,17 +446,19 @@
   }
   /* „Lektion komplett durcharbeiten“: every question of the lesson in one go – Vokabeln, Grammatik, Iʿrāb,
      the model sentences word by word, Übersetzen – in this order, not in rounds of ROUND */
-  function completeQs(id) {
-    var s = SETS[id];
+  /* only the parts chosen under „In den Lektionen üben“; the model sentences word by word belong to Iʿrāb */
+  function completeQs(id, ordered) {
+    var s = SETS[id], on = function (p) { return partsOn.indexOf(p) !== -1; }, mix = ordered ? function (x) { return x; } : function (x) { return APP.shuffle(x.slice()); };
     var satz = SATZ.filter(function (q) { return q.lesson === id; });
-    return APP.shuffle(s.vocab.slice()).concat(APP.shuffle(s.gram.slice()), APP.shuffle(s.irab.slice()), satz, APP.shuffle(transQs(id).slice()));
+    return (on("vocab") ? mix(s.vocab) : []).concat(on("gram") ? mix(s.gram) : [], on("irab") ? mix(s.irab).concat(satz) : [], on("trans") ? mix(transQs(id)) : []);
   }
+  function partNames() { return partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", "); }
   function startComplete(id) {
     var l = BY_ID[id];
     if (!l || (bookOf(l) === 2 && !book2Open())) return;
     var qs = completeQs(id);
     if (!qs.length) return;
-    var label = (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett");
+    var label = (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") + (allPartsOn() && partsOn.indexOf("trans") === -1 ? "" : " (" + partNames() + ")");
     APP.startQuiz(roundPreset(qs, qs, false, label, { lesson: id, complete: true }, qs.length, "complete", stats(qs)));
   }
   /* a round over several parts: first two of each part (the open ones before the learned), then the rest
@@ -712,9 +714,10 @@
       '<button type="button" class="btn btn-primary" data-ar-learn="' + l.id + '">' + (allPartsOn() ? (s.pct === 100 ? T("✓ Ganze Lektion wiederholen") : T("Lektion in Runden lernen · {n} %", { n: s.pct }))
         : (s.pct === 100 ? T("✓ Auswahl wiederholen") : T("Lektion lernen: {p} · {n} %", { p: partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", "), n: s.pct }))) + "</button>" +
       (function () {
-        var all = lessonQs(l.id).concat(SATZ.filter(function (q) { return q.lesson === l.id; }), transQs(l.id)), cs = stats(all);
+        var all = completeQs(l.id, true), cs = stats(all), free = partsOn.indexOf("trans") !== -1 && transItems(l).length;
         return '<div class="ar-complete"><button type="button" class="btn" data-ar-complete="' + l.id + '">' + T("Lektion komplett durcharbeiten · {n} Fragen", { n: all.length }) + "</button>" +
-          '<small>' + T("Alles am Stück: Vokabeln, Grammatik, Iʿrāb, ganze Sätze und Übersetzen – {p} % gelernt", { p: cs.pct }) + "</small></div>";
+          '<small>' + T("Alles am Stück aus deiner Auswahl: {p} – {n} % gelernt", { p: partNames() + (partsOn.indexOf("irab") !== -1 ? " (" + T("mit ganzen Sätzen") + ")" : ""), n: cs.pct }) +
+          (free ? " · " + T("danach freies Übersetzen") : "") + "</small></div>";
       })() +
       '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + '<ul class="ar-grammar">' + l.grammar.map(function (g) { return "<li>" + rich(g) + "</li>"; }).join("") + "</ul></section>" +
       (l.examples.length ? '<section class="ar-block"><h3>' + T("Beispiele") + "</h3>" + '<ul class="ar-examples">' + l.examples.map(function (e) {
