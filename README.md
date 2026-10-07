@@ -91,6 +91,10 @@ Befehl und Verbot stehen in der Tabelle für alle 14 Personen wie in der Emsile:
 
 Im Sarf-Bereich wählt man über „Was möchtest du üben?“, welche Tabellen „Weiter üben“ nimmt: alle Formen, Vergangenheit & Gegenwart, **nur Passiv** (Vergangenheit Passiv, Gegenwart Passiv, Partizip Passiv – nur transitive Verben), Befehl & Verbot, Verneinung (lam, lan) oder Partizipien (`FOCUS` in `sarf.js`, gemerkt in `fiqh:sarffocus`). Prozentzahl und Rundenergebnis beziehen sich dann auf diese Auswahl; in der Ansicht eines Verbs übt „Offene Tabellen üben“ ebenfalls nur die gewählten Formen.
 
+## Arabisch: Was in den Lektionen geübt wird
+
+In der Lektionsliste und in jeder Lektion schaltet man unter „In den Lektionen üben“ Vokabeln, Grammatik, Iʿrāb und Übersetzen (Mehrfachauswahl zu den Beispielsätzen, `ar-u-…`) an oder aus (`fiqh:arparts`, mindestens ein Teil bleibt an). „Lektion lernen“, „Loslegen / Weiter: Lektion n“ und die Prozentzahlen der Lektionen richten sich danach; die Freischaltung von Buch 2 zählt weiterhin die ganze Lektion (Vokabeln, Grammatik, Iʿrāb).
+
 ## Iʿrāb: ganzen Satz bestimmen
 
 Im Iʿrāb-Bereich gibt es „Ganzen Satz bestimmen“: die Mustersätze der Lektionen (`model`, je Buch), jedes Wort der Reihe nach als eigene Frage (Kennung `ar-w-…`, gleiche Zählung wie alles andere im Lernstand). Eine Runde nimmt die nächsten zwei Sätze, die noch nicht sitzen; danach steht im Rundenergebnis die ganze Analyse der Sätze. Die falschen Antworten sind andere Analysen aus den Mustersätzen – gleicher Kasus mit anderer Rolle oder gleiche Rolle mit anderem Kasus –, in der Länge angeglichen (`IRAB_OPTIONS`). Teilwörter (لِ in لِلَّهِ) und Wortgruppen (فِي الْمَطْبَخِ) werden im Satz markiert. Die Fragen stehen auch im Quiz (Bereich Iʿrāb) und im Fehlerordner. Auf dem Handy stehen in der Iʿrāb-Tabelle Wort und Analyse nebeneinander, die Erklärung darunter.

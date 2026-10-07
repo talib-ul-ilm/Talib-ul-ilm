@@ -239,6 +239,21 @@
     APP.startQuiz(preset);
   }
   function lessonQs(id) { var s = SETS[id]; return s.vocab.concat(s.gram, s.irab); }
+  /* what a lesson round asks – Vokabeln, Grammatik, Iʿrāb, Übersetzen can be switched on or off
+     (fiqh:arparts). The lesson percentages follow the choice; the gate to book 2 always uses the whole lesson. */
+  var PARTS = [["vocab", "Vokabeln"], ["gram", "Grammatik"], ["irab", "Iʿrāb"], ["trans", "Übersetzen"]];
+  var partsOn = ["vocab", "gram", "irab"];
+  try { var ps = JSON.parse(localStorage.getItem("fiqh:arparts") || "null"); if (ps && ps.length) partsOn = ps.filter(function (p) { return PARTS.some(function (x) { return x[0] === p; }); }); } catch (e) {}
+  if (!partsOn.length) partsOn = ["vocab", "gram", "irab"];
+  function transQs(id) { return EXTRA.filter(function (q) { return q.lesson === id; }); }
+  function partQs(id, p) { return p === "trans" ? transQs(id) : SETS[id][p]; }
+  function lessonSel(id) { return partsOn.reduce(function (a, p) { return a.concat(partQs(id, p)); }, []); }
+  function allPartsOn() { return partsOn.length === 3 && partsOn.indexOf("trans") === -1; }
+  function partsHtml() {
+    return '<div class="ar-partsel"><span>' + T("In den Lektionen üben:") + '</span><div class="chips">' + PARTS.map(function (x) {
+      return '<button type="button" class="chip" data-ar-partsel="' + x[0] + '" aria-pressed="' + (partsOn.indexOf(x[0]) !== -1) + '"><span class="chip-check" aria-hidden="true"></span>' + esc(T(x[1])) + "</button>";
+    }).join("") + "</div></div>";
+  }
   /* ALL_IRAB: book 1 plus the generated sentences (irabgen.js works with the book-1 vocabulary) */
   var ALL_IRAB = [], IRAB2 = [];
   BOOKS[1].forEach(function (l) { ALL_IRAB = ALL_IRAB.concat(SETS[l.id].irab); });
@@ -356,7 +371,7 @@
     APP.startQuiz(roundPreset(list, r.qs, r.review, label, info, size, from, stats(list)));
   }
   function listFrom(from, info) {
-    if (info && info.lesson && SETS[info.lesson]) return info.part ? SETS[info.lesson][info.part] : lessonQs(info.lesson);
+    if (info && info.lesson && SETS[info.lesson]) return info.part ? partQs(info.lesson, info.part) : lessonSel(info.lesson);
     if (from === "vocab") return bookQs().filter(function (q) { return /^ar-[vdp]-/.test(q._lid); });
     if (from === "irab2") return IRAB2;
     if (from === "irab") return ALL_IRAB;
@@ -384,18 +399,19 @@
     return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before);
   });
   function lessonLabel(l, part) {
-    var names = { vocab: T("Vokabeln"), gram: T("Grammatik"), irab: "Iʿrāb" };
+    var names = { vocab: T("Vokabeln"), gram: T("Grammatik"), irab: "Iʿrāb", trans: T("Übersetzen") };
+    if (!part && !allPartsOn()) return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", ");
     return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + (part ? " · " + names[part] : "");
   }
   function startLesson(id, part) {
     var l = BY_ID[id], s = SETS[id];
     if (bookOf(l) === 2 && !book2Open()) return;
-    var list = part ? s[part] : lessonQs(id);
+    var list = part ? partQs(id, part) : lessonSel(id);
     start(list, lessonLabel(l, part), { lesson: id, part: part });
   }
   function nextLesson() {
     var ls = lessons();
-    for (var i = 0; i < ls.length; i++) if (stats(lessonQs(ls[i].id)).pct < 100) return ls[i];
+    for (var i = 0; i < ls.length; i++) if (stats(lessonSel(ls[i].id)).pct < 100) return ls[i];
     return null;
   }
 
@@ -415,7 +431,7 @@
     remember();
     var qs = bookQs(), all = stats(qs), irab = stats(irabList()), ls = lessons(), lock = locked();
     $("#ar-ring").innerHTML = ring(all.pct);
-    var done = ls.filter(function (l) { return stats(lessonQs(l.id)).pct === 100; }).length;
+    var done = ls.filter(function (l) { return stats(lessonSel(l.id)).pct === 100; }).length;
     $("#ar-stats").innerHTML =
       "<span>" + T("<b>{n}</b> von {m} Lektionen bei 100 %", { n: done, m: ls.length }) + "</span>" +
       "<span>" + T("<b>{n}</b> Vokabelfragen gelernt", { n: stats(qs.filter(function (q) { return q._lid.indexOf("ar-g-") && q._lid.indexOf("ar-i-"); })).learned }) + "</span>" +
@@ -463,8 +479,8 @@
   }
 
   function listPane() {
-    return '<ol class="ar-lessons">' + lessons().map(function (l) {
-      var s = stats(lessonQs(l.id)), st = s.pct === 100 ? "done" : s.learned + s.almost + s.wrong ? "busy" : "new";
+    return partsHtml() + '<ol class="ar-lessons">' + lessons().map(function (l) {
+      var s = stats(lessonSel(l.id)), st = s.pct === 100 ? "done" : s.learned + s.almost + s.wrong ? "busy" : "new";
       return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-ar-lesson="' + l.id + '">' +
         '<span class="ar-num">' + esc(l.n) + "</span>" +
         '<span class="lt-main"><span class="lt-title"><strong>' + esc(l.title) + "</strong>" + ar(l.ar, "lt-ar") + "</span>" + bar(s) +
@@ -606,13 +622,15 @@
     nextBtn.addEventListener("click", function () { r.pos++; render(); scrollToPane(); });
   }
   function lessonPane(l) {
-    var s = stats(lessonQs(l.id)), ls = BOOKS[bookOf(l)], idx = ls.indexOf(l);
+    var s = stats(lessonSel(l.id)), ls = BOOKS[bookOf(l)], idx = ls.indexOf(l);
     var prev = ls[idx - 1], next = ls[idx + 1];
     return '<div class="ar-lesson-view">' +
       '<button type="button" class="linkish ar-back" data-ar-back>← ' + T("Alle Lektionen") + "</button>" +
       '<header class="ar-lesson-head"><p class="eyebrow">' + (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + esc(l.n) + "</p>" + '<h2>' + esc(l.title) + "</h2>" + ar(l.ar, "ar-title") + "</header>" +
+      partsHtml() +
       '<div class="ar-parts">' + partBtn(l.id, "vocab", T("Vokabeln")) + partBtn(l.id, "gram", T("Grammatik")) + partBtn(l.id, "irab", "Iʿrāb") + transBtn(l) + "</div>" +
-      '<button type="button" class="btn btn-primary" data-ar-learn="' + l.id + '">' + (s.pct === 100 ? T("✓ Ganze Lektion wiederholen") : T("Ganze Lektion lernen · {n} %", { n: s.pct })) + "</button>" +
+      '<button type="button" class="btn btn-primary" data-ar-learn="' + l.id + '">' + (allPartsOn() ? (s.pct === 100 ? T("✓ Ganze Lektion wiederholen") : T("Ganze Lektion lernen · {n} %", { n: s.pct }))
+        : (s.pct === 100 ? T("✓ Auswahl wiederholen") : T("Lektion lernen: {p} · {n} %", { p: partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", "), n: s.pct }))) + "</button>" +
       '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + '<ul class="ar-grammar">' + l.grammar.map(function (g) { return "<li>" + rich(g) + "</li>"; }).join("") + "</ul></section>" +
       (l.examples.length ? '<section class="ar-block"><h3>' + T("Beispiele") + "</h3>" + '<ul class="ar-examples">' + l.examples.map(function (e) {
         return "<li>" + ar(e[0], "ar-ex") + '<span class="ar-de">' + esc(e[1]) + "</span></li>";
@@ -723,6 +741,15 @@
   }
 
   function wire(body) {
+    $all("[data-ar-partsel]", body).forEach(function (b) {
+      b.addEventListener("click", function () {
+        var p = b.getAttribute("data-ar-partsel"), i = partsOn.indexOf(p);
+        if (i === -1) partsOn.push(p); else if (partsOn.length > 1) partsOn.splice(i, 1);
+        partsOn.sort(function (a, c) { return PARTS.findIndex(function (x) { return x[0] === a; }) - PARTS.findIndex(function (x) { return x[0] === c; }); });
+        try { localStorage.setItem("fiqh:arparts", JSON.stringify(partsOn)); } catch (e) {}
+        var y = window.scrollY; render(); window.scrollTo(0, y);
+      });
+    });
     $all("[data-ar-gate]", body).forEach(function (b) {
       b.addEventListener("click", function () { state.book = 1; state.lesson = b.getAttribute("data-ar-gate"); state.tab = "lektionen"; remember(); render(); scrollToPane(); });
     });
