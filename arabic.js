@@ -686,9 +686,11 @@
       res.parts.forEach(function (ps) { ps.forEach(function (g) { if (g.k === 2 && miss.indexOf(g.t) < 0) miss.push(g.t); }); });
       out.className = "tr-res " + (res.verdict === "ok" ? "ok" : res.verdict === "close" ? "close" : "no");
       out.textContent = res.verdict === "ok" ? T("✓ Richtig! {h} von {n} Kernwörtern getroffen.", { h: res.hit, n: res.total })
-        : (res.verdict === "close" ? T("Fast – {h} von {n} Kernwörtern getroffen.", { h: res.hit, n: res.total }) : T("Noch nicht – nur {h} von {n} Kernwörtern getroffen.", { h: res.hit, n: res.total })) +
+        : (res.verdict === "close" ? (res.hit === res.total ? T("Fast – alle {n} Kernwörter sind da, aber etwas stimmt nicht.", { n: res.total }) : T("Fast – {h} von {n} Kernwörtern getroffen.", { h: res.hit, n: res.total })) : T("Noch nicht – nur {h} von {n} Kernwörtern getroffen.", { h: res.hit, n: res.total })) +
           (miss.length ? " " + T("Es fehlt: {w}", { w: miss.slice(0, 6).join(", ") }) : "") +
-          (res.neg ? " " + T("Achte auf die Verneinung (nicht / kein).") : "");
+          (res.neg ? " " + T("Achte auf die Verneinung (nicht / kein).") : "") +
+          (res.num ? " " + T("Achte auf die Zahl – sie stimmt nicht mit dem Satz überein.") : "") +
+          (res.extra && res.extra.length && (res.num || res.extra.length >= 2) ? " " + T("Nicht im Satz: {w}", { w: res.extra.slice(0, 5).join(", ") }) : "");
       inp.readOnly = true;
       save(res.verdict === "ok");
       solution(res);
