@@ -91,6 +91,12 @@ Befehl und Verbot stehen in der Tabelle für alle 14 Personen wie in der Emsile:
 
 Im Sarf-Bereich wählt man über „Was möchtest du üben?“, welche Tabellen „Weiter üben“ nimmt: alle Formen, Vergangenheit & Gegenwart, **nur Passiv** (Vergangenheit Passiv, Gegenwart Passiv, Partizip Passiv – nur transitive Verben), Befehl & Verbot, Verneinung (lam, lan) oder Partizipien (`FOCUS` in `sarf.js`, gemerkt in `fiqh:sarffocus`). Prozentzahl und Rundenergebnis beziehen sich dann auf diese Auswahl; in der Ansicht eines Verbs übt „Offene Tabellen üben“ ebenfalls nur die gewählten Formen.
 
+## Arabisch: Übersetzen
+
+- **Mit Antwortmöglichkeiten** („Was bedeutet dieser Satz?“, `ar-u-…`): Die falschen Antworten sind meist die richtige Übersetzung mit *einem* geänderten Detail – ein anderer Name, ein Gegensatz (nah/fern, neu/alt), ein ähnliches Nomen (Haus/Zimmer, Lehrer/Arzt), eine andere Zahl oder ein anderes Possessivpronomen (`SWAPS`, `NAMES` in `arabic.js`) – dazu der Satz des Buches mit den meisten gleichen arabischen Wörtern. Ein einzelnes bekanntes Wort verrät die Antwort so nicht mehr.
+- **Frei schreiben** (ab Buch 1, Lektion 12, und ganz Buch 2; `ar-t-…`): `arabisch/texte.js` hat je Lektion eine zusammenhängende kleine Geschichte aus fünf Sätzen. Sie wird Satz für Satz abgefragt, die Sätze davor stehen als Zusammenhang darüber; danach folgen die Beispielsätze. Jede Aufgabe ist damit ein Satz (3–9 Wörter).
+- **In der Lektion**: Ist „Übersetzen“ unter „In den Lektionen üben“ an, geht es nach der Runde mit Antwortmöglichkeiten direkt mit dem freien Übersetzen weiter; „Lektion komplett durcharbeiten“ endet ebenso damit. Eine Runde über mehrere Teile nimmt aus jedem gewählten Teil Fragen (abwechselnd), auch beim Wiederholen – Iʿrāb kommt also immer mit.
+
 ## Arabisch: Was in den Lektionen geübt wird
 
 In der Lektionsliste und in jeder Lektion schaltet man unter „In den Lektionen üben“ Vokabeln, Grammatik, Iʿrāb und Übersetzen (Mehrfachauswahl zu den Beispielsätzen, `ar-u-…`) an oder aus (`fiqh:arparts`, mindestens ein Teil bleibt an). „Lektion lernen“, „Loslegen / Weiter: Lektion n“ und die Prozentzahlen der Lektionen richten sich danach; die Freischaltung von Buch 2 zählt weiterhin die ganze Lektion (Vokabeln, Grammatik, Iʿrāb). Dazu gibt es in jeder Lektion „Lektion komplett durcharbeiten“: alle Fragen der Lektion am Stück statt in Runden zu 10 – Vokabeln, Grammatik, Iʿrāb, die Mustersätze Wort für Wort und Übersetzen, in dieser Reihenfolge („alles“ im Auswahlfeld schaltet außerdem alle Teile an).
