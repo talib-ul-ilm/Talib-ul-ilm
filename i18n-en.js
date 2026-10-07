@@ -628,6 +628,7 @@ window.I18N_EN = {
  "Meine Übersetzung stimmt auch": "My translation is also correct",
  "Text": "Text",
  "Satz {n}": "Sentence {n}",
+ "Satz {n} von {m}": "sentence {n} of {m}",
  "Deine Übersetzung …": "Your translation …",
  "Lösung zeigen": "Show solution",
  "✓ Richtig übersetzt": "✓ Translated correctly",

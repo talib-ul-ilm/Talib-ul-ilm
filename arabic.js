@@ -154,16 +154,47 @@
      wrong answers are other sentences of the same lesson, then of the same book. Not part of the lessons'
      progress – only the Quiz and the Fehlerordner use them (ids ar-u-…). */
   var EXTRA = [];
+  /* The wrong answers must not give themselves away by one known word: they are the right translation with
+     one detail changed (a name, an opposite, a similar noun, a number) – plus a sentence of the same book that
+     shares the most Arabic words. */
+  var SWAPS = [["nah", "fern"], ["groß", "klein"], ["neu", "alt"], ["neue", "alte"], ["neuen", "alten"], ["offen", "geschlossen"], ["hier", "dort"],
+    ["unter", "auf"], ["vor", "hinter"], ["rechts", "links"], ["viele", "wenige"], ["lang", "kurz"], ["heiß", "kalt"], ["sauber", "schmutzig"],
+    ["reich", "arm"], ["gut", "schlecht"], ["schwer", "leicht"], ["früh", "spät"], ["gestern", "morgen"], ["fleißig", "faul"], ["teuer", "billig"],
+    ["schön", "hässlich"], ["Junge", "Mann"], ["Mädchen", "Frau"], ["Lehrer", "Arzt"], ["Lehrerin", "Ärztin"], ["Vater", "Bruder"], ["Mutter", "Schwester"],
+    ["Sohn", "Onkel"], ["Tochter", "Tante"], ["Haus", "Zimmer"], ["Buch", "Heft"], ["Stift", "Schlüssel"], ["Moschee", "Schule"], ["Stuhl", "Tisch"],
+    ["Student", "Händler"], ["Studenten", "Händler"], ["Studentinnen", "Lehrerinnen"], ["Hund", "Esel"], ["Katze", "Henne"], ["Auto", "Fahrrad"],
+    ["Stadt", "Dorf"], ["Markt", "Bahnhof"], ["Imam", "Direktor"], ["Imams", "Direktors"], ["Universität", "Schule"], ["Bibliothek", "Klasse"],
+    ["Morgen", "Abend"], ["Samstag", "Freitag"], ["Kaffee", "Tee"], ["Wasser", "Milch"], ["Moscheen", "Schulen"], ["Bücher", "Hefte"], ["Zimmer", "Häuser"],
+    ["gegangen", "gekommen"], ["ging", "kam"], ["geht", "kommt"], ["hinaus", "hinein"], ["sitzt", "steht"], ["schreibt", "liest"], ["geschrieben", "gelesen"],
+    ["zwei", "drei"], ["drei", "vier"], ["vier", "fünf"], ["fünf", "sechs"], ["sechs", "sieben"], ["sieben", "acht"], ["acht", "neun"], ["neun", "zehn"], ["zehn", "zwölf"],
+    ["mein", "dein"], ["meine", "deine"], ["meinem", "deinem"], ["meinen", "deinen"], ["unser", "euer"], ["unsere", "eure"], ["seine", "ihre"], ["seinem", "ihrem"]];
+  var NAMES = [["Bilāl", "Ḥāmid", "Muḥammad", "ʿAlī", "Yāsir", "ʿAbbās", "Ibrāhīm", "ʿUthmān", "Aḥmad", "Saʿīd", "Ḫālid", "Ḥasan", "Muṣṭafā", "Hišām"],
+    ["Zainab", "Āmina", "Fāṭima", "Maryam", "ʿĀʾiša", "Ḫadīǧa"]];
+  function swapVariants(de) {
+    var out = [];
+    function tryWord(a, b) {
+      var re = new RegExp("(^|[^A-Za-zÄÖÜäöüßĀ-ž])" + a.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?=$|[^A-Za-zÄÖÜäöüßĀ-ž])");
+      if (re.test(de)) { var v = de.replace(re, function (m, pre) { return pre + b; }); if (v !== de && out.indexOf(v) === -1) out.push(v); }
+    }
+    SWAPS.forEach(function (p) { tryWord(p[0], p[1]); tryWord(p[1], p[0]); tryWord(p[0].charAt(0).toUpperCase() + p[0].slice(1), p[1].charAt(0).toUpperCase() + p[1].slice(1)); });
+    NAMES.forEach(function (g) { g.forEach(function (n) { if (de.indexOf(n) !== -1) g.forEach(function (m) { if (m !== n) tryWord(n, m); }); }); });
+    return out;
+  }
+  function arWords(x) { return String(x).replace(/[\u064B-\u0652\u0670.،؟!:]/g, "").replace(/[أإآ]/g, "ا").split(/\s+/).filter(Boolean); }
   LESSONS.forEach(function (l) {
     var b2 = bookOf(l) === 2, pre = b2 ? "b2|" : "";
     var tt = (b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n })) + " · " + T("Übersetzen");
     var srcText = T("Quelle: Madina-Buch {b}, Lektion {n}", { b: bookOf(l), n: l.n }) + " – " + l.title;
-    var same = l.examples.map(function (e) { return e[1]; });
-    var book = BOOKS[bookOf(l)].reduce(function (a, x) { return a.concat(x.examples.map(function (e) { return e[1]; })); }, []);
+    var book = BOOKS[bookOf(l)].reduce(function (a, x) { return a.concat(x.examples); }, []);
     l.examples.forEach(function (e) {
-      var key = hash(pre + e[0]), rnd = seeded("u|" + key);
-      var wrong = pickOthers(same, [e[1]], 2, rnd);
-      wrong = wrong.concat(pickOthers(book, [e[1]].concat(wrong), 3 - wrong.length, rnd));
+      var key = hash(pre + e[0]), rnd = seeded("u|" + key), words = arWords(e[0]);
+      var variants = pickOthers(swapVariants(e[1]), [e[1]], 2, rnd);
+      /* the sentences of the book with the most Arabic words in common */
+      var near = book.filter(function (x) { return x[1] !== e[1]; }).map(function (x) {
+        var w = arWords(x[0]), c = 0; w.forEach(function (y) { if (words.indexOf(y) !== -1) c++; });
+        return { de: x[1], c: c + rnd() * 0.5 };
+      }).sort(function (a, b) { return b.c - a.c; }).map(function (x) { return x.de; });
+      var wrong = variants.concat(near.filter(function (x) { return variants.indexOf(x) === -1; }).slice(0, 3 - variants.length));
       if (wrong.length < 3) return;
       EXTRA.push({ t: "arabisch", area: "uebersetzen", tt: tt, srcText: srcText, c: 0, lesson: l.id, _lid: "ar-u-" + key,
         q: T("Was bedeutet dieser Satz?"), ar: e[0], a: [e[1]].concat(wrong), e: e[0] + " = " + e[1] });
@@ -391,7 +422,16 @@
         lastRound = { label: label, info: info, answered: p.answered, correct: correct, before: before, after: stats(list), list: list, size: size, wrong: p.wrong || [] };
         L.sync();
       },
-      onLeave: function () { APP.showView("arabisch"); render(); window.scrollTo(0, 0); }
+      onLeave: function () {
+        APP.showView("arabisch");
+        var l = info && info.lesson && BY_ID[info.lesson];
+        if (l && !info.part && (info.complete || partsOn.indexOf("trans") !== -1) && transItems(l).length) {
+          state.tab = "lektionen"; state.lesson = l.id; remember();
+          startTrans(l, !!info.complete);
+          return;
+        }
+        render(); window.scrollTo(0, 0);
+      }
     };
   }
   APP.onResume("ar-round", function (a, qs) {
@@ -419,11 +459,24 @@
     var label = (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett");
     APP.startQuiz(roundPreset(qs, qs, false, label, { lesson: id, complete: true }, qs.length, "complete", stats(qs)));
   }
+  /* a round over several parts: first two of each part (the open ones before the learned), then the rest
+     in turn – a review round when everything is learned draws from every part as well */
+  function mixedRound(groups, size) {
+    var open = groups.map(function (g) { var r = roundFor(g, g.length); return r.review ? [] : r.qs; });
+    var review = open.every(function (g) { return !g.length; });
+    var pools = review ? groups.map(function (g) { return APP.shuffle(g.slice()); }) : open, out = [];
+    while (out.length < size && pools.some(function (p) { return p.length; }))
+      pools.forEach(function (p) { if (out.length < size && p.length) out.push(p.shift()); });
+    return { qs: APP.shuffle(out), review: review };
+  }
   function startLesson(id, part) {
-    var l = BY_ID[id], s = SETS[id];
+    var l = BY_ID[id];
     if (bookOf(l) === 2 && !book2Open()) return;
-    var list = part ? partQs(id, part) : lessonSel(id);
-    start(list, lessonLabel(l, part), { lesson: id, part: part });
+    if (part) { start(partQs(id, part), lessonLabel(l, part), { lesson: id, part: part }); return; }
+    var groups = partsOn.map(function (p) { return partQs(id, p); }).filter(function (g) { return g.length; });
+    var list = lessonSel(id), r = mixedRound(groups, ROUND);
+    if (!r.qs.length) return;
+    APP.startQuiz(roundPreset(list, r.qs, r.review, lessonLabel(l), { lesson: id, mixed: true }, undefined, "", stats(list)));
   }
   function nextLesson() {
     var ls = lessons();
@@ -491,6 +544,7 @@
     if (again) again.addEventListener("click", function () {
       if (r.info && r.info.satz) startSatz();
       else if (r.info && r.info.complete) startComplete(r.info.lesson);
+      else if (r.info && r.info.mixed) startLesson(r.info.lesson);
       else start(r.list, r.label, r.info, r.size);
     });
     var wrongBtn = $("[data-ar-wrong]", box);
@@ -541,15 +595,21 @@
   function transItems(l) {
     if (bookOf(l) === 1 && LESSONS.indexOf(l) < TRANS_FROM) return [];
     var out = [], t = TEXTE[l.id];
-    if (t) out.push({ id: "ar-t-" + hash(l.id + "|text"), title: t.t, s: t.s });
+    /* the lesson text is one small story; it is asked sentence by sentence, in its order, and the sentences
+       before stay visible as context – so every task has the length of one sentence */
+    if (t) t.s.forEach(function (p, k) {
+      out.push({ id: "ar-t-" + hash(l.id + "|text|" + k + "|" + p[0]), title: t.t, k: k, n: t.s.length, before: t.s.slice(0, k), s: [p] });
+    });
     l.examples.forEach(function (e) { out.push({ id: "ar-t-" + hash(l.id + "|" + e[0]), s: [e] }); });
     return out;
   }
   function trItemHtml(x, i, items) {
     var lv = L.levelOf(x.id), mark = lv === 2 ? '<span class="tr-mark ok">✓</span>' : lv === -1 ? '<span class="tr-mark again">↺</span>' : "";
-    return '<div class="tr-item" data-tr="' + i + '">' + '<p class="tr-title">' + mark + (x.title ? T("Text") + ": " + esc(x.title) : T("Satz {n}", { n: items[0].title ? i : i + 1 })) + "</p>" +
+    var textN = items.filter(function (y) { return y.title; }).length;
+    return '<div class="tr-item" data-tr="' + i + '">' + '<p class="tr-title">' + mark + (x.title ? T("Text") + ": " + esc(x.title) + " · " + T("Satz {n} von {m}", { n: x.k + 1, m: x.n }) : T("Satz {n}", { n: i - textN + 1 })) + "</p>" +
+      (x.before && x.before.length ? '<div class="tr-ctx" lang="ar" dir="rtl">' + x.before.map(function (p) { return esc(p[0]); }).join(" ") + "</div>" : "") +
       '<p class="tr-ar" lang="ar" dir="rtl">' + x.s.map(function (p) { return esc(p[0]); }).join(" ") + "</p>" +
-      '<textarea class="tr-in" rows="' + (x.s.length > 1 ? 5 : 2) + '" placeholder="' + esc(T("Deine Übersetzung …")) + '"></textarea>' +
+      '<textarea class="tr-in" rows="2" placeholder="' + esc(T("Deine Übersetzung …")) + '"></textarea>' +
       '<div class="tr-btns"><button type="button" class="btn btn-primary" data-tr-check>' + T("Prüfen") + '</button>' +
       '<button type="button" class="btn" data-tr-show>' + T("Lösung zeigen") + "</button></div>" +
       '<p class="tr-res" hidden></p>' +
