@@ -12,7 +12,7 @@
   var STOPSET = {}; STOP.forEach(function (w) { STOPSET[fold(w)] = 1; });
   var NUM = { zwei: 2, drei: 3, vier: 4, funf: 5, sechs: 6, sieben: 7, acht: 8, neun: 9, zehn: 10, elf: 11, zwolf: 12,
     dreizehn: 13, vierzehn: 14, funfzehn: 15, zwanzig: 20, funfundzwanzig: 25, dreissig: 30, hundert: 100, einhundert: 100,
-    zweihundert: 200, dreihundert: 300, tausend: 1000, eintausend: 1000, zweitausend: 2000, dreitausend: 3000, siebenmal: 7 };
+    zweihundert: 200, dreihundert: 300, funfhundert: 500, tausend: 1000, vierzig: 40, funfzig: 50, sechzig: 60, siebzig: 70, achtzig: 80, neunzig: 90, eintausend: 1000, zweitausend: 2000, dreitausend: 3000, siebenmal: 7 };
   // unregelmäßige Formen → gemeinsamer Stamm
   var FORMS = {
     geh: "ging gingen gingst gegangen gehst geht gehe gehen", fahr: "fuhr fuhren gefahren fahrt fahrst fahren",
@@ -86,6 +86,8 @@
     return k.length >= 5 && lev(k, u) <= 1;
   }
   function isNeg(w) { return !!NEG[w]; }
+  function numberish(w) { return /^\d+$/.test(w) || !!NUM[w] || /(zig|hundert|tausend|zehn)$/.test(w); }
+  function numVal(w) { return /^\d+$/.test(w) ? w : NUM[w] ? String(NUM[w]) : w; }
 
   function check(input, pairs) {
     var utoks = [];
@@ -107,8 +109,26 @@
     });
     var score = total ? hit / total : (words(input).length ? 1 : 0);
     var negBad = uneg !== rneg;
+    /* Not only what is missing counts, but also what is too much or different:
+       every number must agree (hundert ≠ hundert achtzig), and words that are not in the sentence at all lower the result */
+    var sol = [], solNums = [], inNums = [], extra = [];
+    pairs.forEach(function (p) {
+      words(p[1]).forEach(function (w) { split(w).forEach(function (x) {
+        if (isNeg(x) || STOPSET[x] || x === "ein" || x === "eins") return;
+        var k = stem(x); sol.push(k); if (numberish(x)) solNums.push(numVal(x));
+      }); });
+    });
+    words(input).forEach(function (w) { split(w).forEach(function (x) {
+      if (isNeg(x) || STOPSET[x] || x === "ein" || x === "eins" || x.length < 3 && !/^\d+$/.test(x)) return;
+      if (numberish(x)) inNums.push(numVal(x));
+      var u = stem(x);
+      if (!sol.some(function (k) { return same(k, u) || (k.length >= 4 && lev(k, u) <= 2); })) extra.push(x);
+    }); });
+    var numBad = solNums.slice().sort().join(",") !== inNums.slice().sort().join(",");
+    var tooMuch = extra.length >= 2 && extra.length > 0.3 * Math.max(total, 1);
     var verdict = negBad ? (score >= 0.5 ? "close" : "no") : score >= 0.9 ? "ok" : score >= 0.5 ? "close" : "no";
-    return { score: score, hit: hit, total: total, verdict: verdict, neg: negBad, parts: parts };
+    if (verdict === "ok" && (numBad || tooMuch)) verdict = "close";
+    return { score: score, hit: hit, total: total, verdict: verdict, neg: negBad, num: numBad, extra: extra, parts: parts };
   }
   window.TR_CHECK = check;
 })();
