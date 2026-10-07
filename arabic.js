@@ -252,7 +252,7 @@
   function partsHtml() {
     return '<div class="ar-partsel"><span>' + T("In den Lektionen üben:") + '</span><div class="chips">' + PARTS.map(function (x) {
       return '<button type="button" class="chip" data-ar-partsel="' + x[0] + '" aria-pressed="' + (partsOn.indexOf(x[0]) !== -1) + '"><span class="chip-check" aria-hidden="true"></span>' + esc(T(x[1])) + "</button>";
-    }).join("") + "</div></div>";
+    }).join("") + '<button type="button" class="linkish" data-ar-partsel="all">' + T("alles") + "</button></div></div>";
   }
   /* ALL_IRAB: book 1 plus the generated sentences (irabgen.js works with the book-1 vocabulary) */
   var ALL_IRAB = [], IRAB2 = [];
@@ -371,6 +371,7 @@
     APP.startQuiz(roundPreset(list, r.qs, r.review, label, info, size, from, stats(list)));
   }
   function listFrom(from, info) {
+    if (info && info.lesson && SETS[info.lesson] && info.complete) return lessonQs(info.lesson).concat(SATZ.filter(function (q) { return q.lesson === info.lesson; }), transQs(info.lesson));
     if (info && info.lesson && SETS[info.lesson]) return info.part ? partQs(info.lesson, info.part) : lessonSel(info.lesson);
     if (from === "vocab") return bookQs().filter(function (q) { return /^ar-[vdp]-/.test(q._lid); });
     if (from === "irab2") return IRAB2;
@@ -395,13 +396,28 @@
   }
   APP.onResume("ar-round", function (a, qs) {
     var info = a.info || {}, l = info.lesson && BY_ID[info.lesson];
-    var label = l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
+    var label = l && info.complete ? (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") : l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
     return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before);
   });
   function lessonLabel(l, part) {
     var names = { vocab: T("Vokabeln"), gram: T("Grammatik"), irab: "Iʿrāb", trans: T("Übersetzen") };
     if (!part && !allPartsOn()) return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", ");
     return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + (part ? " · " + names[part] : "");
+  }
+  /* „Lektion komplett durcharbeiten“: every question of the lesson in one go – Vokabeln, Grammatik, Iʿrāb,
+     the model sentences word by word, Übersetzen – in this order, not in rounds of ROUND */
+  function completeQs(id) {
+    var s = SETS[id];
+    var satz = SATZ.filter(function (q) { return q.lesson === id; });
+    return APP.shuffle(s.vocab.slice()).concat(APP.shuffle(s.gram.slice()), APP.shuffle(s.irab.slice()), satz, APP.shuffle(transQs(id).slice()));
+  }
+  function startComplete(id) {
+    var l = BY_ID[id];
+    if (!l || (bookOf(l) === 2 && !book2Open())) return;
+    var qs = completeQs(id);
+    if (!qs.length) return;
+    var label = (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett");
+    APP.startQuiz(roundPreset(qs, qs, false, label, { lesson: id, complete: true }, qs.length, "complete", stats(qs)));
   }
   function startLesson(id, part) {
     var l = BY_ID[id], s = SETS[id];
@@ -467,12 +483,16 @@
       : "<h3>" + T("Runde geschafft: {n} von {m} richtig", { n: r.correct, m: r.answered }) + "</h3>") +
       "<p>" + esc(r.label) + ": <b>" + r.before.pct + " % → " + r.after.pct + " %</b>" +
       (gain > 0 ? " · " + T(gain === 1 ? "{n} Frage neu gelernt" : "{n} Fragen neu gelernt", { n: gain }) : "") + "</p>" +
-      '<div class="lr-actions">' + (r.after.pct < 100 ? '<button type="button" class="btn btn-primary" data-ar-again>' + T("Nächste Runde") + "</button>" : "") +
+      '<div class="lr-actions">' + (r.after.pct < 100 ? '<button type="button" class="btn btn-primary" data-ar-again>' + (r.info && r.info.complete ? T("Nochmal komplett") : T("Nächste Runde")) + "</button>" : "") +
       (r.wrong.length && window.FIQH_MISTAKES ? '<button type="button" class="btn" data-ar-wrong>' + T("Fehler dieser Runde wiederholen ({n})", { n: r.wrong.length }) + "</button>" : "") +
       '<button type="button" class="linkish" data-ar-close>' + T("Schließen") + "</button></div>" +
       (r.models ? '<details class="lr-models"><summary>' + T("Die ganze Analyse der Sätze") + "</summary>" + r.models.map(modelHtml).join("") + "</details>" : "");
     var again = $("[data-ar-again]", box);
-    if (again) again.addEventListener("click", function () { if (r.info && r.info.satz) startSatz(); else start(r.list, r.label, r.info, r.size); });
+    if (again) again.addEventListener("click", function () {
+      if (r.info && r.info.satz) startSatz();
+      else if (r.info && r.info.complete) startComplete(r.info.lesson);
+      else start(r.list, r.label, r.info, r.size);
+    });
     var wrongBtn = $("[data-ar-wrong]", box);
     if (wrongBtn) wrongBtn.addEventListener("click", function () { window.FIQH_MISTAKES.practice(r.wrong, T("Fehler dieser Runde"), "arabisch"); });
     $("[data-ar-close]", box).addEventListener("click", function () { lastRound = null; renderRound(); });
@@ -629,8 +649,13 @@
       '<header class="ar-lesson-head"><p class="eyebrow">' + (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + esc(l.n) + "</p>" + '<h2>' + esc(l.title) + "</h2>" + ar(l.ar, "ar-title") + "</header>" +
       partsHtml() +
       '<div class="ar-parts">' + partBtn(l.id, "vocab", T("Vokabeln")) + partBtn(l.id, "gram", T("Grammatik")) + partBtn(l.id, "irab", "Iʿrāb") + transBtn(l) + "</div>" +
-      '<button type="button" class="btn btn-primary" data-ar-learn="' + l.id + '">' + (allPartsOn() ? (s.pct === 100 ? T("✓ Ganze Lektion wiederholen") : T("Ganze Lektion lernen · {n} %", { n: s.pct }))
+      '<button type="button" class="btn btn-primary" data-ar-learn="' + l.id + '">' + (allPartsOn() ? (s.pct === 100 ? T("✓ Ganze Lektion wiederholen") : T("Lektion in Runden lernen · {n} %", { n: s.pct }))
         : (s.pct === 100 ? T("✓ Auswahl wiederholen") : T("Lektion lernen: {p} · {n} %", { p: partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", "), n: s.pct }))) + "</button>" +
+      (function () {
+        var all = lessonQs(l.id).concat(SATZ.filter(function (q) { return q.lesson === l.id; }), transQs(l.id)), cs = stats(all);
+        return '<div class="ar-complete"><button type="button" class="btn" data-ar-complete="' + l.id + '">' + T("Lektion komplett durcharbeiten · {n} Fragen", { n: all.length }) + "</button>" +
+          '<small>' + T("Alles am Stück: Vokabeln, Grammatik, Iʿrāb, ganze Sätze und Übersetzen – {p} % gelernt", { p: cs.pct }) + "</small></div>";
+      })() +
       '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + '<ul class="ar-grammar">' + l.grammar.map(function (g) { return "<li>" + rich(g) + "</li>"; }).join("") + "</ul></section>" +
       (l.examples.length ? '<section class="ar-block"><h3>' + T("Beispiele") + "</h3>" + '<ul class="ar-examples">' + l.examples.map(function (e) {
         return "<li>" + ar(e[0], "ar-ex") + '<span class="ar-de">' + esc(e[1]) + "</span></li>";
@@ -744,7 +769,8 @@
     $all("[data-ar-partsel]", body).forEach(function (b) {
       b.addEventListener("click", function () {
         var p = b.getAttribute("data-ar-partsel"), i = partsOn.indexOf(p);
-        if (i === -1) partsOn.push(p); else if (partsOn.length > 1) partsOn.splice(i, 1);
+        if (p === "all") partsOn = PARTS.map(function (x) { return x[0]; });
+        else if (i === -1) partsOn.push(p); else if (partsOn.length > 1) partsOn.splice(i, 1);
         partsOn.sort(function (a, c) { return PARTS.findIndex(function (x) { return x[0] === a; }) - PARTS.findIndex(function (x) { return x[0] === c; }); });
         try { localStorage.setItem("fiqh:arparts", JSON.stringify(partsOn)); } catch (e) {}
         var y = window.scrollY; render(); window.scrollTo(0, y);
@@ -759,6 +785,9 @@
     wireTrans(body);
     var back = $("[data-ar-back]", body);
     if (back) back.addEventListener("click", function () { state.lesson = null; render(); scrollToPane(); });
+    $all("[data-ar-complete]", body).forEach(function (b) {
+      b.addEventListener("click", function () { startComplete(b.getAttribute("data-ar-complete")); });
+    });
     $all("[data-ar-learn]", body).forEach(function (b) {
       b.addEventListener("click", function () { startLesson(b.getAttribute("data-ar-learn"), b.getAttribute("data-part")); });
     });
