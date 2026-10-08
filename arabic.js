@@ -281,14 +281,16 @@
   function lessonQs(id) { var s = SETS[id]; return s.vocab.concat(s.gram, s.irab); }
   /* what a lesson round asks – Vokabeln, Grammatik, Iʿrāb, Übersetzen can be switched on or off
      (fiqh:arparts). The lesson percentages follow the choice; the gate to book 2 always uses the whole lesson. */
-  var PARTS = [["vocab", "Vokabeln"], ["gram", "Grammatik"], ["irab", "Iʿrāb"], ["trans", "Übersetzen"]];
+  var PARTS = [["vocab", "Vokabeln"], ["gram", "Grammatik"], ["irab", "Iʿrāb"], ["trans", "Übersetzen"], ["zahlen", "Zahlen"]];
   var partsOn = ["vocab", "gram", "irab"];
   try { var ps = JSON.parse(localStorage.getItem("fiqh:arparts") || "null"); if (ps && ps.length) partsOn = ps.filter(function (p) { return PARTS.some(function (x) { return x[0] === p; }); }); } catch (e) {}
   if (!partsOn.length) partsOn = ["vocab", "gram", "irab"];
   function transQs(id) { return EXTRA.filter(function (q) { return q.lesson === id && q.area === "uebersetzen"; }); }
-  function partQs(id, p) { return p === "trans" ? transQs(id) : SETS[id][p]; }
+  /* „Zahlen“ (arabisch/zahlen.js): only in the lessons that teach numbers */
+  function zahlenQs(id) { return EXTRA.filter(function (q) { return q.area === "zahlen" && (!id || q.lesson === id); }); }
+  function partQs(id, p) { return p === "trans" ? transQs(id) : p === "zahlen" ? zahlenQs(id) : SETS[id][p]; }
   function lessonSel(id) { return partsOn.reduce(function (a, p) { return a.concat(partQs(id, p)); }, []); }
-  function allPartsOn() { return partsOn.length === 3 && partsOn.indexOf("trans") === -1; }
+  function allPartsOn() { return partsOn.length === 3 && ["vocab", "gram", "irab"].every(function (p) { return partsOn.indexOf(p) !== -1; }); }
   function partsHtml() {
     return '<div class="ar-partsel"><span>' + T("In den Lektionen üben:") + '</span><div class="chips">' + PARTS.map(function (x) {
       return '<button type="button" class="chip" data-ar-partsel="' + x[0] + '" aria-pressed="' + (partsOn.indexOf(x[0]) !== -1) + '"><span class="chip-check" aria-hidden="true"></span>' + esc(T(x[1])) + "</button>";
@@ -417,6 +419,7 @@
     if (from === "irab2") return IRAB2;
     if (from === "irab") return ALL_IRAB;
     if (from === "satz") return satzQs();
+    if (from === "zahlen") return zahlenQs().filter(function (q) { return bookOf(BY_ID[q.lesson]) === state.book; });
     return null;
   }
   function roundPreset(list, qs, review, label, info, size, from, before) {
@@ -445,11 +448,11 @@
   }
   APP.onResume("ar-round", function (a, qs) {
     var info = a.info || {}, l = info.lesson && BY_ID[info.lesson];
-    var label = l && info.complete ? (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") : l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
+    var label = l && info.complete ? (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") : l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from === "zahlen" ? T("Zahlen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
     return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before);
   });
   function lessonLabel(l, part) {
-    var names = { vocab: T("Vokabeln"), gram: T("Grammatik"), irab: "Iʿrāb", trans: T("Übersetzen") };
+    var names = { vocab: T("Vokabeln"), gram: T("Grammatik"), irab: "Iʿrāb", trans: T("Übersetzen"), zahlen: T("Zahlen") };
     if (!part && !allPartsOn()) return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", ");
     return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + (part ? " · " + names[part] : "");
   }
@@ -459,7 +462,7 @@
   function completeQs(id, ordered) {
     var s = SETS[id], on = function (p) { return partsOn.indexOf(p) !== -1; }, mix = ordered ? function (x) { return x; } : function (x) { return APP.shuffle(x.slice()); };
     var satz = SATZ.filter(function (q) { return q.lesson === id; });
-    return (on("vocab") ? mix(s.vocab) : []).concat(on("gram") ? mix(s.gram) : [], on("irab") ? mix(s.irab).concat(satz) : [], on("trans") ? mix(transQs(id)) : []);
+    return (on("vocab") ? mix(s.vocab) : []).concat(on("gram") ? mix(s.gram) : [], on("irab") ? mix(s.irab).concat(satz) : [], on("zahlen") ? mix(zahlenQs(id)) : [], on("trans") ? mix(transQs(id)) : []);
   }
   function partNames() { return partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", "); }
   function startComplete(id) {
@@ -563,8 +566,16 @@
     $("[data-ar-close]", box).addEventListener("click", function () { lastRound = null; renderRound(); });
   }
 
+  function zahlenCard() {
+    var list = listFrom("zahlen"), s = stats(list);
+    if (!list.length) return "";
+    var ls = []; list.forEach(function (q) { var n = BY_ID[q.lesson].n; if (ls.indexOf(n) === -1) ls.push(n); });
+    return '<div class="panel ar-zahlen"><div><p class="eyebrow">' + T("Zahlen") + " · الْأَعْدَادُ</p><h3>" + T("Die Zahlen dieses Buches üben") + "</h3>" +
+      "<p>" + T("{n} Aufgaben aus den Lektionen {l}: Zahl und Gezähltes, Geschlecht, Fall, Ordnungszahlen.", { n: list.length, l: ls.join(", ") }) + "</p></div>" +
+      '<button type="button" class="btn btn-primary" data-ar-zahlen>' + T("Zahlen üben") + " · " + s.pct + " %</button></div>";
+  }
   function listPane() {
-    return partsHtml() + '<ol class="ar-lessons">' + lessons().map(function (l) {
+    return partsHtml() + zahlenCard() + '<ol class="ar-lessons">' + lessons().map(function (l) {
       var s = stats(lessonSel(l.id)), st = s.pct === 100 ? "done" : s.learned + s.almost + s.wrong ? "busy" : "new";
       return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-ar-lesson="' + l.id + '">' +
         '<span class="ar-num">' + esc(l.n) + "</span>" +
@@ -576,7 +587,7 @@
   }
 
   function partBtn(id, part, label) {
-    var s = stats(SETS[id][part]);
+    var s = stats(partQs(id, part));
     if (!s.total) return "";
     return '<button type="button" class="ar-part' + (s.pct === 100 ? " is-done" : "") + '" data-ar-learn="' + id + '" data-part="' + part + '">' +
       "<strong>" + label + "</strong>" + bar(s) + "<small>" + (s.pct === 100 ? T("✓ gelernt") : T("{n} von {m} gelernt", { n: s.learned, m: s.total })) + "</small></button>";
@@ -721,13 +732,13 @@
       '<button type="button" class="linkish ar-back" data-ar-back>← ' + T("Alle Lektionen") + "</button>" +
       '<header class="ar-lesson-head"><p class="eyebrow">' + (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + esc(l.n) + "</p>" + '<h2>' + esc(l.title) + "</h2>" + ar(l.ar, "ar-title") + "</header>" +
       partsHtml() +
-      '<div class="ar-parts">' + partBtn(l.id, "vocab", T("Vokabeln")) + partBtn(l.id, "gram", T("Grammatik")) + partBtn(l.id, "irab", "Iʿrāb") + transBtn(l) + "</div>" +
+      '<div class="ar-parts">' + partBtn(l.id, "vocab", T("Vokabeln")) + partBtn(l.id, "gram", T("Grammatik")) + partBtn(l.id, "irab", "Iʿrāb") + partBtn(l.id, "zahlen", T("Zahlen")) + transBtn(l) + "</div>" +
       '<button type="button" class="btn btn-primary" data-ar-learn="' + l.id + '">' + (allPartsOn() ? (s.pct === 100 ? T("✓ Ganze Lektion wiederholen") : T("Lektion in Runden lernen · {n} %", { n: s.pct }))
         : (s.pct === 100 ? T("✓ Auswahl wiederholen") : T("Lektion lernen: {p} · {n} %", { p: partsOn.map(function (p) { return T(PARTS.filter(function (x) { return x[0] === p; })[0][1]); }).join(", "), n: s.pct }))) + "</button>" +
       (function () {
         var all = completeQs(l.id, true), cs = stats(all), free = partsOn.indexOf("trans") !== -1 && transItems(l).length;
         return '<div class="ar-complete"><button type="button" class="btn" data-ar-complete="' + l.id + '">' + T("Lektion komplett durcharbeiten · {n} Fragen", { n: all.length }) + "</button>" +
-          '<small>' + T("Alles am Stück aus deiner Auswahl: {p} – {n} % gelernt", { p: partNames() + (partsOn.indexOf("irab") !== -1 ? " (" + T("mit ganzen Sätzen") + ")" : ""), n: cs.pct }) +
+          '<small>' + T("Alles am Stück aus deiner Auswahl: {p} – {n} % gelernt", { p: partNames().replace("Iʿrāb", "Iʿrāb (" + T("mit ganzen Sätzen") + ")"), n: cs.pct }) +
           (free ? " · " + T("danach freies Übersetzen") : "") + "</small></div>";
       })() +
       '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + '<ul class="ar-grammar">' + l.grammar.map(function (g) { return "<li>" + rich(g) + "</li>"; }).join("") + "</ul></section>" +
@@ -889,6 +900,8 @@
       var useFresh = fresh && fresh.some(function (q) { return lv(q) !== 2; });
       start(useFresh ? fresh : ALL_IRAB, fresh ? T("Neue Iʿrāb-Sätze") : T("Iʿrāb-Training"), {}, undefined, useFresh ? "" : "irab");
     });
+    var zb = $("[data-ar-zahlen]", body);
+    if (zb) zb.addEventListener("click", function () { start(listFrom("zahlen"), T("Zahlen"), {}, undefined, "zahlen"); });
     var sz = $("[data-ar-satz]", body);
     if (sz) sz.addEventListener("click", startSatz);
     var ex = $("[data-ar-irab-exam]", body);
