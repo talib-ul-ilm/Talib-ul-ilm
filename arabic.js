@@ -200,6 +200,15 @@
         q: T("Was bedeutet dieser Satz?"), ar: e[0], a: [e[1]].concat(wrong), e: e[0] + " = " + e[1] });
     });
   });
+  /* Kategorie „Zahlen“ (arabisch/zahlen.js): the numbers of the book, each tied to the lesson that teaches it */
+  if (window.MADINA_ZAHLEN) window.MADINA_ZAHLEN().forEach(function (x) {
+    var l = BY_ID[x.lesson];
+    if (!l) return;
+    var b2 = bookOf(l) === 2;
+    EXTRA.push({ t: "arabisch", area: "zahlen", lvl: x.lvl, lesson: l.id, c: 0, _lid: "ar-z-" + hash(x.key),
+      tt: T("Arabisch · Zahlen"), srcText: T("Quelle: Madina-Buch {b}, Lektion {n}", { b: bookOf(l), n: l.n }) + " – " + l.title,
+      q: T(x.q), ar: x.ar, a: x.a, e: x.e });
+  });
   /* „Ganzen Satz bestimmen“ (tab Iʿrāb): the model sentences of the lessons, every word in turn.
      One question per word (ids ar-w-…), asked in the order of the sentence; wrong answers are other
      Iʿrāb analyses of the model sentences – same case with another role, or same role with another case. */
@@ -276,7 +285,7 @@
   var partsOn = ["vocab", "gram", "irab"];
   try { var ps = JSON.parse(localStorage.getItem("fiqh:arparts") || "null"); if (ps && ps.length) partsOn = ps.filter(function (p) { return PARTS.some(function (x) { return x[0] === p; }); }); } catch (e) {}
   if (!partsOn.length) partsOn = ["vocab", "gram", "irab"];
-  function transQs(id) { return EXTRA.filter(function (q) { return q.lesson === id; }); }
+  function transQs(id) { return EXTRA.filter(function (q) { return q.lesson === id && q.area === "uebersetzen"; }); }
   function partQs(id, p) { return p === "trans" ? transQs(id) : SETS[id][p]; }
   function lessonSel(id) { return partsOn.reduce(function (a, p) { return a.concat(partQs(id, p)); }, []); }
   function allPartsOn() { return partsOn.length === 3 && partsOn.indexOf("trans") === -1; }
