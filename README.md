@@ -99,7 +99,9 @@ Im Sarf-Bereich wählt man über „Was möchtest du üben?“, welche Tabellen 
 
 ## Arabisch: Was in den Lektionen geübt wird
 
-In der Lektionsliste und in jeder Lektion schaltet man unter „In den Lektionen üben“ Vokabeln, Grammatik, Iʿrāb und Übersetzen (Mehrfachauswahl zu den Beispielsätzen, `ar-u-…`) an oder aus (`fiqh:arparts`, mindestens ein Teil bleibt an). „Lektion lernen“, „Loslegen / Weiter: Lektion n“ und die Prozentzahlen der Lektionen richten sich danach; die Freischaltung von Buch 2 zählt weiterhin die ganze Lektion (Vokabeln, Grammatik, Iʿrāb). Dazu gibt es in jeder Lektion „Lektion komplett durcharbeiten“: alle Fragen der gewählten Teile am Stück statt in Runden zu 10 – in der Reihenfolge Vokabeln, Grammatik, Iʿrāb (mit den Mustersätzen Wort für Wort), Übersetzen; nur mit „Übersetzen“ folgt danach das freie Übersetzen („alles“ im Auswahlfeld schaltet außerdem alle Teile an).
+Über der Lektionsliste steht die Karte „Die Zahlen dieses Buches üben“ (alle Zahlen-Aufgaben des gewählten Buches, Runden wie sonst); in Lektionen mit Zahlen gibt es zusätzlich die Karte „Zahlen“.
+
+In der Lektionsliste und in jeder Lektion schaltet man unter „In den Lektionen üben“ Vokabeln, Grammatik, Iʿrāb, Zahlen (nur in den Lektionen, die Zahlen lehren, aus `arabisch/zahlen.js`) und Übersetzen (Mehrfachauswahl zu den Beispielsätzen, `ar-u-…`) an oder aus (`fiqh:arparts`, mindestens ein Teil bleibt an). „Lektion lernen“, „Loslegen / Weiter: Lektion n“ und die Prozentzahlen der Lektionen richten sich danach; die Freischaltung von Buch 2 zählt weiterhin die ganze Lektion (Vokabeln, Grammatik, Iʿrāb). Dazu gibt es in jeder Lektion „Lektion komplett durcharbeiten“: alle Fragen der gewählten Teile am Stück statt in Runden zu 10 – in der Reihenfolge Vokabeln, Grammatik, Iʿrāb (mit den Mustersätzen Wort für Wort), Übersetzen; nur mit „Übersetzen“ folgt danach das freie Übersetzen („alles“ im Auswahlfeld schaltet außerdem alle Teile an).
 
 ## Iʿrāb: ganzen Satz bestimmen
 
