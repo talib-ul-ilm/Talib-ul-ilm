@@ -361,7 +361,11 @@
   /* Arabisch: the questions of arabic.js (book 2 once it is open) plus the quiz-only ones
      (Übersetzen, Ṣarf). Each has an area (Wissenschaft) and a level: words → Anfänger,
      grammar and translation → Fortgeschritten, Iʿrāb → Experte; Ṣarf brings its own. */
-  var AR_AREAS = [["vokabeln", "Vokabeln"], ["grammatik", "Grammatik (Naḥw)"], ["irab", "Iʿrāb"], ["sarf", "Ṣarf"], ["uebersetzen", "Übersetzen"]];
+  var AR_AREAS = [["vokabeln", "Vokabeln"], ["grammatik", "Grammatik (Naḥw)"], ["irab", "Iʿrāb"], ["sarf", "Ṣarf"], ["uebersetzen", "Übersetzen"], ["zahlen", "Zahlen"]];
+  /* „Zahlen“ also takes the number words and the number questions of the lessons that teach the numbers */
+  var NUM_LESSONS = ["m18", "m19", "m20", "b2-03", "b2-06", "b2-10", "b2-23", "b2-24"];
+  var NUM_WORD = /= (eins|zwei|drei|vier|fünf|sechs|sieben|acht|neun|zehn|elf|zwölf|zwanzig|dreißig|vierzig|fünfzig|sechzig|siebzig|achtzig|neunzig|hundert|zweihundert|dreihundert|tausend|zweitausend|Tausende|erster|ein Drittel|die Hälfte|halb)\b/;
+  var NUM_Q = /Zahl|Gezählt|\d|drei|vier|fünf|sechs|sieben|acht |neun|zehn|elf|zwölf|zwanzig|dreißig|hundert|tausend|dritter|ein Buch|zwei Schwestern|كَمْ|wie viele|mabnī|عَشَرَة|سِتُّونَ/i;
   function arabicQs() {
     var A = window.FIQH_ARABIC;
     if (!A) return [];
@@ -369,6 +373,8 @@
     A.allLessons.forEach(function (l) { book[l.id] = l.book || 1; });
     return A.allQuestions.concat(A.extraQuestions ? A.extraQuestions() : []).filter(function (q) {
       if (!q.area) q.area = /^ar-[vdp]-/.test(q._lid) ? "vokabeln" : /^ar-g-/.test(q._lid) ? "grammatik" : "irab";
+      if (q.also === undefined) q.also = (q.area === "vokabeln" && NUM_WORD.test(q.e || "")) ||
+        (q.area === "grammatik" && NUM_LESSONS.indexOf(q.lesson) !== -1 && NUM_Q.test(q.q)) ? "zahlen" : "";
       if (!q.lvl) q.lvl = q.area === "vokabeln" ? 1 : q.area === "grammatik" || q.area === "uebersetzen" ? 2 : 3;
       return b2 || !q.lesson || book[q.lesson] !== 2;
     });
@@ -432,7 +438,7 @@
     if (!st.areas) st.areas = S.areas.map(function (a) { return a[0]; });
     return st.areas;
   }
-  function byArea(list) { var on = subAreas(); return on ? list.filter(function (q) { return on.indexOf(q.area) !== -1; }) : list; }
+  function byArea(list) { var on = subAreas(); return on ? list.filter(function (q) { return on.indexOf(q.area) !== -1 || (q.also && on.indexOf(q.also) !== -1); }) : list; }
   /* the chosen topics of a subject, cleaned up against what exists (kept as the same array) */
   function subTopics(id) {
     var S = SUBS[id], st = setup.sub[id], ids = {}, list = [];
@@ -494,7 +500,7 @@
         b.textContent = n === 0 ? T("Beide") : T("Buch {n}", { n: n }) + (n === 2 && !b2open ? " 🔒" : "");
       });
       var aBase = st.mode === "mixed" ? S.all() : S.topicQs().filter(function (q) { return topics.indexOf(S.key(q)) !== -1; }), aCount = {};
-      aBase.forEach(function (q) { aCount[q.area] = (aCount[q.area] || 0) + 1; });
+      aBase.forEach(function (q) { aCount[q.area] = (aCount[q.area] || 0) + 1; if (q.also) aCount[q.also] = (aCount[q.also] || 0) + 1; });
       $("#area-chips").innerHTML = S.areas.map(function (a) {
         return '<button type="button" class="chip" data-area="' + a[0] + '" aria-pressed="' + (areas.indexOf(a[0]) !== -1) + '"' + (aCount[a[0]] ? "" : " disabled") + ">" +
           '<span class="chip-check" aria-hidden="true"></span>' + esc(T(a[1])) + '<span class="chip-count">' + (aCount[a[0]] || 0) + "</span></button>";
