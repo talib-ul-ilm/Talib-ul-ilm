@@ -119,9 +119,9 @@ Im Quiz-Tab wählt man oben das **Fach** (Fiqh, Taǧwīd oder Arabisch) und das 
 
 Jede Fiqh-Frage verweist mit `s` auf den Abschnitt ihres Themas (Index in `sections`). Abschnitte aus dem Unterricht tragen `u: "Unterricht N"`, Abschnitte aus dem İlmihal `src: "İlmihal S. …"`. Nach der Antwort, in der Auswertung und im Fehlerordner steht deshalb z. B. „Quelle: İlmihal (H. Döndüren), S. 143–150 · Wuḍūʾ – Gebetswaschung › Vertiefung: Mest, Socken und Verband“. Der Knopf in der Auswertung springt direkt zu diesem Abschnitt. Neue Fragen brauchen ebenfalls ein `s`.
 
-## Gemischter Modus: 2 Stunden Pause
+## Quiz: keine Wiederholung, bis alle Fragen dran waren
 
-Im Quiz-Modus „Gemischt“ merkt sich `app.js` in `localStorage` („fiqh:mixseen“), wann eine Frage gestellt wurde. Fragen der letzten zwei Stunden kommen nicht wieder. Bleiben zu wenige übrig, wird die Runde mit den am längsten zurückliegenden aufgefüllt. Themen-Quiz, Lernen und Wettbewerb sind davon nicht betroffen.
+In jeder Quiz-Runde (Fiqh, Taǧwīd und Arabisch, Themen- wie gemischter Modus) merkt sich `app.js` in `localStorage` („fiqh:mixseen“), wann eine Frage gestellt wurde. Eine Frage der letzten zwei Stunden kommt erst wieder, wenn alle anderen Fragen der gewählten Auswahl (Themen, Bereiche, Buch, Niveau) gestellt wurden; dann füllen die am längsten zurückliegenden die Runde auf. Nach zwei Stunden gilt eine Frage wieder als neu. Die Einstellungsübersicht zeigt, wie viele Fragen gerade pausieren. Lektionsrunden (eigene Reihenfolge nach Lernstand) und Wettbewerb sind davon nicht betroffen.
 
 ## Arabisch-Liga: jede Woche gleich schwer
 

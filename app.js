@@ -573,13 +573,11 @@
     });
 
     var pool = poolFor();
-    var mixed = !S && setup.mode === "mixed";
     var startBtn = $("#start-quiz");
-    var ok = mixed || pool.length > 0;
+    var ok = pool.length > 0;
     startBtn.disabled = !ok;
-    var all = byLevel(QUESTIONS);
-    var n = mixed ? Math.min(setup.count, all.length) : Math.min(setup.count, pool.length);
-    var paused = mixed ? all.length - pool.length : 0;
+    var n = Math.min(setup.count, pool.length);
+    var seenNow = mixSeen(), paused = pool.filter(function (q) { return seenNow[qid(q)]; }).length;
     var topicTitle = function (id) {
       var hit = null;
       groups.forEach(function (g) { g.topics.forEach(function (t) { if (t.id === id) hit = t; }); });
@@ -597,7 +595,7 @@
       : T("Wähle mindestens ein Themengebiet.");
     if (ok && areas && st.mode === "mixed" && st.book) $("#setup-summary").textContent += " · " + T("Madina-Buch {n}", { n: st.book });
     if (ok && setup.level && showLevel) $("#setup-summary").textContent += " · " + T(LEVEL_NAMES[setup.level]);
-    if (ok && paused) $("#setup-summary").textContent += " · " + T("{k} kürzlich gestellt (2 Std. Pause)", { k: paused });
+    if (ok && paused) $("#setup-summary").textContent += " · " + T(paused === pool.length ? "alle schon gestellt – die ältesten kommen zuerst wieder" : "{k} kürzlich gestellt – erst wieder, wenn alle anderen dran waren (oder nach 2 Std.)", { k: paused });
 
     var best = store(bestKey());
     $("#setup-best").textContent = best ? T("Dein Bestwert hier: {s} Punkte ({c}/{t})", { s: best.score, c: best.correct, t: best.total }) : T("Noch kein Bestwert für diese Auswahl.");
@@ -636,8 +634,9 @@
     renderSetup();
   });
 
-  /* Mixed mode: a question that was asked in the last two hours is left out.
-     Only if too few remain are the longest-ago ones used to fill the round. */
+  /* Every quiz round (Fiqh, Taǧwīd, Arabisch – not the lesson rounds, they have their own order):
+     a question asked in the last two hours only comes again once all other questions of the
+     chosen pool were asked; then the longest-ago ones fill the round. */
   var MIX_PAUSE = 2 * 60 * 60 * 1000;
   function qid(q) { return q._lid || q.t + "|" + (q.q_de || q.q); }
   function mixSeen() {
@@ -659,18 +658,15 @@
       var list = byArea(S.topicQs().filter(function (q) { return on.indexOf(S.key(q)) !== -1; }));
       return S.topicLevel ? byLevel(list) : list;
     }
-    if (setup.mode === "mixed") {
-      var seen = mixSeen();
-      return byLevel(QUESTIONS).filter(function (q) { return !seen[qid(q)]; });
-    }
+    if (setup.mode === "mixed") return byLevel(QUESTIONS);
     return byLevel(QUESTIONS).filter(function (q) { return setup.topics.indexOf(q.t) !== -1; });
   }
-  function mixFill(pool, n) {
-    if (pool.length >= n) return [];
-    var seen = mixSeen();
-    return byLevel(QUESTIONS).filter(function (q) { return seen[qid(q)]; })
-      .sort(function (a, b) { return seen[qid(a)] - seen[qid(b)]; })
-      .slice(0, n - pool.length);
+  function freshFirst(pool, n, keyOf) {
+    var seen = mixSeen(), fresh = pool.filter(function (q) { return !seen[qid(q)]; });
+    var picked = pickQuestions(fresh, Math.min(n, fresh.length), undefined, keyOf);
+    var old = pool.filter(function (q) { return seen[qid(q)]; })
+      .sort(function (a, b) { return seen[qid(a)] - seen[qid(b)]; });
+    return shuffle(picked.concat(old.slice(0, n - picked.length)));
   }
 
   /* Pick questions spread across topics so a mixed round really is mixed.
@@ -724,11 +720,9 @@
       qs = preset.questions.map(function (q) { return withOptions(q, preset.rnd); });
     } else {
       var pool = poolFor();
-      var extra = setup.subject === "fiqh" && setup.mode === "mixed" ? mixFill(pool, setup.count) : [];
-      if (!pool.length && !extra.length) return;
+      if (!pool.length) return;
       var S = curSub(), keyOf = S && S.spread ? S.spread(setup.sub[setup.subject].mode) : null;
-      qs = shuffle(pickQuestions(pool, Math.min(setup.count, pool.length), undefined, keyOf).concat(extra))
-        .map(function (q) { return withOptions(q); });
+      qs = freshFirst(pool, Math.min(setup.count, pool.length), keyOf).map(function (q) { return withOptions(q); });
     }
     game = { qs: qs, i: 0, score: 0, correct: 0, streak: 0, bestStreak: 0, joker: true, answers: [], key: preset ? null : bestKey(), preset: preset || null,
       mixed: !preset && setup.subject === "fiqh" && setup.mode === "mixed" };
@@ -754,7 +748,7 @@
     game.answered = false;
     game.hidden = [];
     game.startedAt = Date.now();
-    if (game.mixed) markMixSeen(item.src);
+    if (!game.preset) markMixSeen(item.src);
 
     $("#q-progress-text").textContent = (game.preset ? game.preset.label + " · " : "") + T("Frage {n} von {m}", { n: game.i + 1, m: game.qs.length });
     $("#q-bar").style.width = (game.i / game.qs.length * 100) + "%";
