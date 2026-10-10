@@ -14,6 +14,10 @@
   var esc = APP.esc, hash = L.hash, T = window.T || function (s, v) { return v ? String(s).replace(/\{(\w+)\}/g, function (m, k) { return v[k] !== undefined ? v[k] : m; }) : s; };
   var ROUND = 10;
   var LESSONS = M.lessons;
+  /* book 2: more and longer Iʿrāb sentences (arabisch/irab2-saetze.js) – flagged plus, after the book's own model */
+  LESSONS.forEach(function (l) {
+    ((window.MADINA_IRAB2 || {})[l.id] || []).forEach(function (m) { l.model.push({ s: m.s, de: m.de, words: m.words, plus: true }); });
+  });
   var BY_ID = {};
   LESSONS.forEach(function (l) { BY_ID[l.id] = l; });
   function bookOf(l) { return l.book || 1; }
@@ -241,7 +245,7 @@
     }
     LESSONS.forEach(function (l) {
       var b2 = bookOf(l) === 2, pre = b2 ? "b2|" : "";
-      var tt = (b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n })) + " · " + T("ganzer Satz");
+      var tt1 = b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n }), tt = tt1 + " · " + T("ganzer Satz");
       var srcText = T("Quelle: Madina-Buch {b}, Lektion {n}", { b: bookOf(l), n: l.n }) + " – " + l.title;
       l.model.forEach(function (m) {
         var mk = marks(m), qs = [];
@@ -254,6 +258,14 @@
           wrong = wrong.concat(pickOthers(sameRole, [w[1]].concat(wrong), 1, rnd));
           wrong = wrong.concat(pickOthers(POOL, [w[1]].concat(wrong), 3 - wrong.length, rnd));
           var a = [w[1]].concat(wrong);
+          if (m.plus && w[3]) {
+            var rnd1 = seeded("i|" + key), wrong1 = pickOthers(sameCase, [w[1]], 2, rnd1);
+            wrong1 = wrong1.concat(pickOthers(sameRole, [w[1]].concat(wrong1), 1, rnd1));
+            wrong1 = wrong1.concat(pickOthers(POOL, [w[1]].concat(wrong1), 3 - wrong1.length, rnd1));
+            add(SETS[l.id].irab, { t: "arabisch", tt: tt1, srcText: srcText, c: 0, lesson: l.id, _lid: "ar-i-" + hash(pre + "x|" + m.s + "|" + k), plus: true,
+              q: T("Iʿrāb des markierten Wortes:"), ar: m.s, arMark: mk[k].length === 1 ? mk[k][0] : mk[k],
+              a: balanced([w[1]].concat(wrong1), "i|" + key), e: w[0] + ": " + w[2] + " – " + m.de });
+          }
           qs.push({ t: "arabisch", area: "irab", tt: tt, srcText: srcText, c: 0, lesson: l.id, _lid: "ar-w-" + hash(key), satz: m,
             q: T("Ganzer Satz – Wort {k} von {n}: Iʿrāb von {w}", { k: k + 1, n: m.words.length, w: w[0] }),
             ar: m.s, arMark: mk[k].length === 1 ? mk[k][0] : mk[k],
@@ -580,7 +592,7 @@
       return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-ar-lesson="' + l.id + '">' +
         '<span class="ar-num">' + esc(l.n) + "</span>" +
         '<span class="lt-main"><span class="lt-title"><strong>' + esc(l.title) + "</strong>" + ar(l.ar, "lt-ar") + "</span>" + bar(s) +
-        '<small class="lt-meta">' + T("{n} Vokabeln · {m} Übungen", { n: l.vocab.length, m: l.quiz.length + l.irab.length }) +
+        '<small class="lt-meta">' + T("{n} Vokabeln · {m} Übungen", { n: l.vocab.length, m: SETS[l.id].gram.length + SETS[l.id].irab.length }) +
         (s.learned ? " · " + T("{n} % gelernt", { n: s.pct }) : "") + "</small></span>" +
         '<span class="lt-pct">' + (st === "done" ? "✓" : s.pct + " %") + "</span></button></li>";
     }).join("") + "</ol>";
@@ -746,7 +758,9 @@
         return "<li>" + ar(e[0], "ar-ex") + '<span class="ar-de">' + esc(e[1]) + "</span></li>";
       }).join("") + "</ul></section>" : "") +
       '<section class="ar-block"><h3>' + T("Vokabeln") + " <small>" + l.vocab.length + "</small></h3>" + vocabTable(l.vocab) + "</section>" +
-      (l.model.length ? '<section class="ar-block"><h3>' + T("Iʿrāb Schritt für Schritt") + "</h3>" + l.model.map(modelHtml).join("") + "</section>" : "") +
+      (l.model.length ? '<section class="ar-block"><h3>' + T("Iʿrāb Schritt für Schritt") + "</h3>" + l.model.filter(function (m) { return !m.plus; }).map(modelHtml).join("") +
+        (l.model.some(function (m) { return m.plus; }) ? '<details class="lr-models"><summary>' + T("Weitere Sätze – länger und schwieriger") + " <small>" + l.model.filter(function (m) { return m.plus; }).length + "</small></summary>" +
+          l.model.filter(function (m) { return m.plus; }).map(modelHtml).join("") + "</details>" : "") + "</section>" : "") +
       '<nav class="ar-pager">' + (prev ? '<button type="button" class="btn" data-ar-lesson="' + prev.id + '">← ' + T("Lektion") + " " + esc(prev.n) + "</button>" : "<span></span>") +
       (next ? '<button type="button" class="btn" data-ar-lesson="' + next.id + '">' + T("Lektion") + " " + esc(next.n) + " →</button>" : "") + "</nav></div>";
   }
@@ -795,7 +809,9 @@
     genCheck();
     var list = irabList(), is = stats(list), b1 = state.book === 1;
     var models = [];
-    lessons().forEach(function (l) { l.model.forEach(function (m) { models.push([l, m]); }); });
+    lessons().forEach(function (l) { l.model.forEach(function (m) { if (!m.plus) models.push([l, m]); }); });
+    var more = 0;
+    lessons().forEach(function (l) { l.model.forEach(function (m) { if (m.plus) more++; }); });
     return '<div class="ar-irab-pane">' +
       '<div class="panel ar-irab-cta"><div><p class="eyebrow">' + T("Ziel des Kurses") + "</p><h3>" + T("Einen Satz vollständig analysieren") + "</h3>" +
       "<p>" + (b1 ? T("{n} Iʿrāb-Aufgaben aus allen Lektionen: Du siehst einen Satz mit einem markierten Wort und wählst die richtige Analyse. Wenn alle sitzen, kommen nach einem Tag neue Sätze dazu.", { n: list.length })
@@ -818,6 +834,7 @@
       }).join("") + "</details></section>" +
       '<section class="ar-block"><h3>' + T("Musteranalysen") + " <small>" + models.length + "</small></h3>" +
       models.map(function (x) { return '<p class="ar-model-src">' + T("Lektion") + " " + esc(x[0].n) + " · " + esc(x[0].title) + "</p>" + modelHtml(x[1]); }).join("") +
+      (more ? '<p class="ar-model-src">' + T("Dazu {n} weitere, längere Sätze – in jeder Lektion unter „Iʿrāb Schritt für Schritt“ und im Training „Ganzen Satz bestimmen“.", { n: more }) + "</p>" : "") +
       "</section></div>";
   }
 
