@@ -243,6 +243,13 @@
         return null;
       });
     }
+    /* difficulty of a whole sentence: its words plus the hard analyses (only implied endings, a place instead
+       of an ending, a replaced ending, dropped letters, hidden pronouns, …) – the borders depend on the book */
+    var HARD = /مقدر|محل|نيابة|حذف|مستتر|مضمرة|الخمسة|مؤول|زائد|التقاء/, LVL_MAX = { 1: [3, 4], 2: [5, 7] };
+    function satzLevel(m, book) {
+      var score = m.words.length + m.words.filter(function (w) { return HARD.test(plain(w[1])); }).length, b = LVL_MAX[book] || LVL_MAX[2];
+      return score <= b[0] ? 1 : score <= b[1] ? 2 : 3;
+    }
     LESSONS.forEach(function (l) {
       var b2 = bookOf(l) === 2, pre = b2 ? "b2|" : "";
       var tt1 = b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n }), tt = tt1 + " · " + T("ganzer Satz");
@@ -271,13 +278,27 @@
             ar: m.s, arMark: mk[k].length === 1 ? mk[k][0] : mk[k],
             a: balanced(a, "w|" + key), e: w[0] + ": " + w[2] + " – " + m.de });
         });
-        SATZ_SENT.push({ l: l, m: m, qs: qs });
+        var lvl = satzLevel(m, bookOf(l));
+        qs.forEach(function (q) { q.lvl = lvl; });
+        SATZ_SENT.push({ l: l, m: m, qs: qs, lvl: lvl });
         SATZ = SATZ.concat(qs);
       });
     });
   })();
-  function satzList() { return SATZ_SENT.filter(function (x) { return bookOf(x.l) === state.book; }); }
+  /* level for „Ganzen Satz bestimmen“ (0 = all), like the Niveau of the Quiz */
+  var satzLvl = 0;
+  try { satzLvl = +localStorage.getItem("fiqh:satzlvl") || 0; } catch (e) {}
+  function satzAll() { return SATZ_SENT.filter(function (x) { return bookOf(x.l) === state.book; }); }
+  function satzList() { return satzAll().filter(function (x) { return !satzLvl || x.lvl === satzLvl; }); }
   function satzQs() { return satzList().reduce(function (a, x) { return a.concat(x.qs); }, []); }
+  function satzLvlHtml() {
+    var all = satzAll(), names = [[1, "Anfänger", "Mubtadiʾ"], [2, "Fortgeschritten", "Ṭālibu l-ʿIlm"], [3, "Experte", "Ustāḏ"], [0, "Alle", "gemischt"]];
+    return '<div class="lvls ar-satz-lvls" role="group" aria-label="' + esc(T("Niveau")) + '">' + names.map(function (n) {
+      var c = all.filter(function (x) { return !n[0] || x.lvl === n[0]; }).length, bars = [1, 2, 3].map(function (k) { return "<i" + (!n[0] || k <= n[0] ? ' class="on"' : "") + "></i>"; }).join("");
+      return '<button type="button" class="lvl" data-ar-satzlvl="' + n[0] + '" aria-pressed="' + (satzLvl === n[0]) + '"' + (c ? "" : " disabled") + '><span class="lvl-bars' + (n[0] ? "" : " all") + '" aria-hidden="true">' + bars + "</span>" +
+        "<strong>" + esc(T(n[1])) + "</strong><small>" + esc(T(n[2])) + '</small><em class="lvl-count">' + T(c === 1 ? "1 Satz" : "{n} Sätze", { n: c }) + "</em></button>";
+    }).join("") + "</div>";
+  }
   /* a round: the next two sentences that are not learned yet (or two at random), every word in order */
   function startSatz() {
     var list = satzList();
@@ -818,8 +839,8 @@
         : T("{n} Iʿrāb-Aufgaben aus allen Lektionen von Buch 2: Du siehst einen Satz mit einem markierten Wort und wählst die richtige Analyse.", { n: list.length })) + "</p>" + (b1 ? genNote() : "") + "</div>" +
       '<div class="ar-irab-actions"><button type="button" class="btn btn-primary" data-ar-irab-train>' + T("Iʿrāb-Training") + " · " + is.pct + " %</button>" +
       '<button type="button" class="btn" data-ar-irab-exam>' + T("Prüfung: 20 gemischte Sätze") + "</button></div></div>" +
-      (satzList().length ? '<div class="panel ar-irab-cta"><div><p class="eyebrow">' + T("Ganzen Satz bestimmen") + "</p><h3>" + T("Jedes Wort eines Satzes nacheinander") + "</h3>" +
-        "<p>" + T("{n} Mustersätze aus den Lektionen: Du bestimmst den Iʿrāb von jedem Wort des Satzes, eines nach dem anderen – am Ende siehst du die ganze Analyse.", { n: satzList().length }) + "</p></div>" +
+      (satzAll().length ? '<div class="panel ar-irab-cta ar-satz-cta"><div><p class="eyebrow">' + T("Ganzen Satz bestimmen") + "</p><h3>" + T("Jedes Wort eines Satzes nacheinander") + "</h3>" +
+        "<p>" + T("{n} Mustersätze aus den Lektionen: Du bestimmst den Iʿrāb von jedem Wort des Satzes, eines nach dem anderen – am Ende siehst du die ganze Analyse.", { n: satzAll().length }) + "</p>" + satzLvlHtml() + "</div>" +
         '<div class="ar-irab-actions"><button type="button" class="btn btn-primary" data-ar-satz>' + T("Ganzen Satz bestimmen") + " · " + stats(satzQs()).pct + " %</button></div></div>" : "") +
       '<section class="ar-block"><h3>' + T("Einführung") + "</h3>" + M.irabIntro.map(function (sec, i) {
         return "<details class=\"ar-intro\"" + (i === 0 ? " open" : "") + "><summary>" + esc(sec.t) + "</summary>" +
@@ -921,6 +942,13 @@
     if (zb) zb.addEventListener("click", function () { start(listFrom("zahlen"), T("Zahlen"), {}, undefined, "zahlen"); });
     var sz = $("[data-ar-satz]", body);
     if (sz) sz.addEventListener("click", startSatz);
+    $all("[data-ar-satzlvl]", body).forEach(function (b) {
+      b.addEventListener("click", function () {
+        satzLvl = +b.getAttribute("data-ar-satzlvl");
+        try { localStorage.setItem("fiqh:satzlvl", String(satzLvl)); } catch (e) {}
+        render();
+      });
+    });
     var ex = $("[data-ar-irab-exam]", body);
     if (ex) ex.addEventListener("click", function () {
       var pool = irabList(), qs = APP.shuffle(pool.slice()).slice(0, 20);

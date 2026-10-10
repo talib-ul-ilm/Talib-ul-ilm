@@ -700,6 +700,8 @@ window.I18N_EN = {
  "Umschrift": "Transliteration",
  "Bedeutung": "Meaning",
  "Musteranalysen": "Model analyses",
+ "{n} Sätze": "{n} sentences",
+ "1 Satz": "1 sentence",
  "Weitere Sätze – länger und schwieriger": "More sentences – longer and harder",
  "Dazu {n} weitere, längere Sätze – in jeder Lektion unter „Iʿrāb Schritt für Schritt“ und im Training „Ganzen Satz bestimmen“.": "Plus {n} more, longer sentences – in every lesson under “Iʿrāb step by step” and in the “Analyse the whole sentence” training.",
  "Vokabeltrainer": "Vocabulary trainer",
