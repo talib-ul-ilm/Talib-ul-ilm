@@ -300,11 +300,24 @@
     }).join("") + "</div>";
   }
   /* a round: the next two sentences that are not learned yet (or two at random), every word in order */
+  /* a sentence shown in the last two hours only comes again once all other sentences of the chosen
+     level were shown – first the ones not learned yet, then the learned ones; the longest-ago come first */
+  var SATZ_PAUSE = 2 * 60 * 60 * 1000;
+  function satzSeen() { try { return JSON.parse(localStorage.getItem("fiqh:satzseen") || "{}") || {}; } catch (e) { return {}; } }
+  function satzKey(x) { return x.qs.length ? x.qs[0]._lid : x.m.s; }
   function startSatz() {
     var list = satzList();
     if (!list.length) return;
-    var open = list.filter(function (x) { return x.qs.some(function (q) { return lv(q) !== 2; }); });
-    var pick = (open.length ? open : APP.shuffle(list.slice())).slice(0, 2);
+    var seen = satzSeen(), now = Date.now();
+    function when(x) { return seen[satzKey(x)] || 0; }
+    function oldest(arr) { return APP.shuffle(arr.slice()).sort(function (a, b) { return when(a) - when(b); }); }
+    function isOpen(x) { return x.qs.some(function (q) { return lv(q) !== 2; }); }
+    function recent(x) { return now - when(x) < SATZ_PAUSE; }
+    var open = list.filter(isOpen), done = list.filter(function (x) { return !isOpen(x); });
+    var pick = oldest(open.filter(function (x) { return !recent(x); }))
+      .concat(oldest(done.filter(function (x) { return !recent(x); })), oldest(list.filter(recent))).slice(0, 2);
+    pick.forEach(function (x) { seen[satzKey(x)] = now; });
+    try { localStorage.setItem("fiqh:satzseen", JSON.stringify(seen)); } catch (e) {}
     var qs = pick.reduce(function (a, x) { return a.concat(x.qs); }, []), all = satzQs();
     var preset = roundPreset(all, qs, false, T("Ganzen Satz bestimmen"), { satz: true }, undefined, "satz", stats(all));
     var finish = preset.onFinish;
