@@ -111,6 +111,13 @@ Im Iʿrāb-Bereich gibt es „Ganzen Satz bestimmen“: die Mustersätze der Lek
 
 **Niveau** (wie im Quiz: Anfänger · Mubtadiʾ, Fortgeschritten · Ṭālibu l-ʿIlm, Experte · Ustāḏ, Alle): Die Karte „Ganzen Satz bestimmen“ hat dieselben Niveau-Karten wie das Quiz. Die Wahl wird in `fiqh:satzlvl` gespeichert. Die Schwierigkeit eines Satzes ist die Zahl seiner Wörter plus die Zahl der schweren Analysen (nur gedachte Endung, Stelle statt Endung (fī maḥall), Ersatzzeichen, weggefallene Buchstaben, verstecktes Pronomen, fünf Nomen, maṣdar muʾawwal, zusätzliches بِـ, Vokal gegen zwei Sukūn). Die Grenzen hängen vom Buch ab: Buch 1 bis 3 / 4 / darüber, Buch 2 bis 5 / 7 / darüber. Für Buch 2 ergibt das 63, 53 und 37 Sätze. Die Wortfragen (`ar-w-…`) bekommen dieses Niveau auch im Quiz.
 
+**Keine Wiederholung:** Eine Runde nimmt zwei Sätze des gewählten Niveaus. Jeder gezeigte Satz wird in `fiqh:satzseen` mit der Uhrzeit gespeichert. Ein Satz der letzten zwei Stunden kommt erst wieder, wenn alle anderen Sätze des Niveaus dran waren. Reihenfolge der Auswahl:
+1. noch nicht gelernte Sätze,
+2. gelernte Sätze,
+3. kürzlich gezeigte Sätze.
+
+Innerhalb jeder Gruppe kommt zuerst der Satz, der am längsten zurückliegt.
+
 ## Nachschlagen (Arabisch)
 
 Im Fach Arabisch gibt es den Reiter **Nachschlagen** (auf dem Handy die Lupe). `nachschlagen.js` sammelt die Grammatikregeln aller Madina-Lektionen (`grammar`, Buch 2 erst wenn es offen ist), die Ṣarf-Regeln aus `arabisch/sarf-regeln.js` (Wurzel und Mīzān, die sechs Abwāb, Māḍī, Muḍāriʿ, die fünf Verbformen, manṣūb und maǧzūm, Befehl, Verbot, Passiv, Partizipien, Idġām, die 14 Personen – mit den Formen von نَصَرَ als Beispiel aus `sarf.js`) und die Grammatikbegriffe aus `glossar.js` (`FIQH_GLOSSAR_LIST("a")`). Die Suche vergleicht ohne Groß/Klein, Vokalzeichen und Umschriftzeichen (Genitiv, مفعول, mafʿul …); Filter Alles / Grammatik / Ṣarf / Begriffe und Themen-Knöpfe. Ohne Suchwort stehen die Ṣarf-Regeln und die Grammatik nach Lektion (aufklappbar); ein Treffer aus einer Lektion öffnet diese Lektion (`FIQH_ARABIC.openLesson`).
