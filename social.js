@@ -64,9 +64,9 @@
   var AR_Q = 10, AR_VERBS = 2;
   var AR_CELLS = AR_VERBS * 2 * 14, AR_TOTAL = 3 * AR_Q + AR_CELLS;
   var SARF_CELL = 10, SARF_PERFECT = 50;
-  /* The Fiqh-Liga rests for now (Fiqh was rebuilt with a new source); only the Arabisch-Liga runs.
-     Set to !!APP.fiqhOff to bring it back once Fiqh has content. */
-  var FIQH_PAUSED = true;
+  /* Without Fiqh content (app.js fiqhOff) the Fiqh-Liga rests; only the Arabisch-Liga runs.
+     Since 12.10.2026 its weekly questions come from „Wasīlatu ṭ-Ṭalab“ (data.js); the points stay. */
+  var FIQH_PAUSED = !!APP.fiqhOff;
   var league = FIQH_PAUSED || APP.store("league") === "arabisch" ? "arabisch" : "fiqh";
   function arTheme(weekIndex) {
     var A = window.FIQH_ARABIC, ls = A ? A.lessons : [], per = Math.ceil(ls.length / WEEKS_PER_SEASON) || 1;
