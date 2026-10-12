@@ -405,7 +405,8 @@
         var TJ = window.FIQH_TAJWID;
         if (!TJ) return [];
         return [{ name: "Kapitel", topics: TJ.chapters.map(function (c) { return { id: c.id, title: c.title }; }) },
-          { name: "Begriffe", topics: [{ id: "begriffe", title: T("Taǧwīd-Begriffe") }] }];
+          { name: "Begriffe", topics: [{ id: "begriffe", title: T("Taǧwīd-Begriffe") }] }]
+          .concat(TJ.tuhfa && TJ.tuhfa.length ? [{ name: "Tuḥfat al-Aṭfāl", topics: TJ.tuhfa.map(function (p) { return { id: p.id, title: p.title + " · " + T("Verse {r}", { r: p.range }) }; }) }] : []);
       } },
     arabisch: { eyebrow: "Arabisch-Quiz", loading: "Arabisch wird noch geladen …", topicLabel: "Lektionen", topicLevel: true,
       topicName: "Nach Lektionen", mixedName: "Nach Wissenschaften",
