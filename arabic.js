@@ -14,9 +14,10 @@
   var esc = APP.esc, hash = L.hash, T = window.T || function (s, v) { return v ? String(s).replace(/\{(\w+)\}/g, function (m, k) { return v[k] !== undefined ? v[k] : m; }) : s; };
   var ROUND = 10;
   var LESSONS = M.lessons;
-  /* book 2: more and longer Iʿrāb sentences (arabisch/irab2-saetze.js) – flagged plus, after the book's own model */
+  /* more Iʿrāb sentences (arabisch/irab1-saetze.js for book 1, irab2-saetze.js for book 2) – flagged plus, after the book's own model */
   LESSONS.forEach(function (l) {
-    ((window.MADINA_IRAB2 || {})[l.id] || []).forEach(function (m) { l.model.push({ s: m.s, de: m.de, words: m.words, plus: true }); });
+    ((window.MADINA_IRAB1 || {})[l.id] || []).concat((window.MADINA_IRAB2 || {})[l.id] || [])
+      .forEach(function (m) { l.model.push({ s: m.s, de: m.de, words: m.words, plus: true }); });
   });
   var BY_ID = {};
   LESSONS.forEach(function (l) { BY_ID[l.id] = l; });
@@ -228,8 +229,9 @@
       var b = window.IRAB_OPTIONS ? window.IRAB_OPTIONS(a, key) : a, seen = {};
       return b.every(function (x) { var k = plain(x); if (seen[k]) return false; seen[k] = 1; return true; }) ? b : a;
     }
-    var POOL = [];
-    LESSONS.forEach(function (l) { l.model.forEach(function (m) { m.words.forEach(function (w) { if (POOL.indexOf(w[1]) === -1) POOL.push(w[1]); }); }); });
+    /* wrong answers come from the analyses of the same book – so book 1 does not offer the harder roles of book 2 */
+    var POOLS = { 1: [], 2: [] }, POOL;
+    LESSONS.forEach(function (l) { var P = POOLS[bookOf(l)] || POOLS[2]; l.model.forEach(function (m) { m.words.forEach(function (w) { if (P.indexOf(w[1]) === -1) P.push(w[1]); }); }); });
     /* which tokens of the sentence belong to an analysed unit (a unit can be part of a token: لِ in لِلَّهِ, or two tokens: فِي الْمَطْبَخِ) */
     function marks(m) {
       var toks = m.s.split(/\s+/).map(bare), pos = 0;
@@ -254,6 +256,7 @@
       var b2 = bookOf(l) === 2, pre = b2 ? "b2|" : "";
       var tt1 = b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n }), tt = tt1 + " · " + T("ganzer Satz");
       var srcText = T("Quelle: Madina-Buch {b}, Lektion {n}", { b: bookOf(l), n: l.n }) + " – " + l.title;
+      POOL = POOLS[bookOf(l)] || POOLS[2];
       l.model.forEach(function (m) {
         var mk = marks(m), qs = [];
         if (mk.some(function (x) { return !x; })) return;
