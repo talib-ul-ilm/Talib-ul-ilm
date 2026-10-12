@@ -1362,6 +1362,10 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .lvl strong { font-weight: 700; font-size: .98rem; line-height: 1.2; min-width: 0; }
 .lvl small { color: var(--muted); font-size: .85rem; }
 .lvl-count { font-style: normal; color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.fiqh-rebuild { padding-top: 28px; padding-bottom: 40px; }
+.fiqh-rebuild .panel { padding: 24px 26px; display: grid; gap: 10px; justify-items: start; }
+.fiqh-rebuild h2 { margin: 0; font: 600 1.7rem/1.15 var(--display); }
+.fiqh-rebuild p:not(.eyebrow) { margin: 0; color: var(--muted); max-width: 60ch; }
 .ar-satz-lvls { margin-top: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .lvl:disabled { opacity: .5; cursor: default; }
 @media (max-width: 560px) {
@@ -1457,7 +1461,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
       <div class="wrap intro">
         <p class="hero-eyebrow">Nachschlagewerk <span lang="ar" dir="rtl">·&nbsp;مرجع</span></p>
         <h1>Alle Fiqh-Themen zum Nachschlagen</h1>
-        <p>Zusammengefasst aus dem Fiqh-Unterricht und vertieft mit dem „Delilleriyle İslâm İlmihali“ von Hamdi Döndüren – von den Quellen des Rechts und dem Īmān über Reinheit, Gebet und Fasten bis zu Zakāt, Ḥaǧǧ, Familie und Handel. Der Schwerpunkt liegt auf der hanafitischen Rechtsschule, Unterschiede zu den anderen Madhabs sind jeweils genannt.</p>
+        <p>Die Fiqh-Inhalte werden gerade aus einer neuen Quelle neu aufgebaut.</p>
         <div class="stats"><span><b id="stat-topics">25</b> Themengebiete</span><span><b id="stat-sections">0</b> Abschnitte</span><span><b id="stat-questions">0</b> Quizfragen</span></div>
       </div>
     </div>
@@ -2075,7 +2079,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 
 <footer class="foot">
   <div class="wrap">
-    <p>Grundlage: die Folien „Fiqh Unterricht 1–16“ und Hamdi Döndüren, „Delilleriyle İslâm İlmihali“. Die Seite ist eine Lernhilfe und ersetzt nicht den Unterricht. Bei konkreten Fragen wende dich an deine Lehrkraft oder eine Gelehrte bzw. einen Gelehrten.</p>
+    <p>Die Seite ist eine Lernhilfe und ersetzt nicht den Unterricht. Bei konkreten Fragen wende dich an deine Lehrkraft oder eine Gelehrte bzw. einen Gelehrten.</p>
     <p class="foot-links"><a href="datenschutz.html">Datenschutz &amp; Regeln</a> · <a href="datenschutz.html#impressum">Impressum</a></p>
   </div>
 </footer>
@@ -2241,18 +2245,6 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 <script src="firebase-config.js"></script>
 <script src="backend.js"></script>
 <script src="data.js"></script>
-<script src="buch/01-grundlagen.js"></script>
-<script src="buch/02-iman.js"></script>
-<script src="buch/03-tahara-wudhu.js"></script>
-<script src="buch/04-ghusl-tayammum-frauen.js"></script>
-<script src="buch/05-gebet.js"></script>
-<script src="buch/06-gebet-2.js"></script>
-<script src="buch/07-fasten.js"></script>
-<script src="buch/08-zakat.js"></script>
-<script src="buch/09-hajj-qurban.js"></script>
-<script src="buch/10-alltag.js"></script>
-<script src="fiqh-en.js"></script>
-<script src="fiqh-belege.js"></script>
 <script src="tajwid/begriffe.js"></script>
 <script src="glossar.js"></script>
 <script src="app.js"></script>

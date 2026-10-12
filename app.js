@@ -6,6 +6,9 @@
   var QUESTIONS = window.FIQH_QUESTIONS || [];
   var TOPIC_BY_ID = {};
   TOPICS.forEach(function (t) { TOPIC_BY_ID[t.id] = t; });
+  /* Fiqh is being rebuilt from a new source: without questions, Nachschlagen and Lernen show a notice,
+     the Quiz offers the other subjects and the Fiqh-Liga rests (social.js). */
+  var FIQH_OFF = !QUESTIONS.length;
 
   /* Niveau of each Fiqh question (Quiz: Anfänger · Mubtadiʾ / Fortgeschritten · Ṭālibu l-ʿIlm / Experte · Ustāḏ), worked out from the
      German text: questions on differences between the imams, fatwa opinions, Uṣūl terms or exact measures → 3;
@@ -336,7 +339,7 @@
      ===================================================== */
   var SUB_IDS = ["fiqh", "tajwid", "arabisch"];
   var setup = {
-    subject: SUB_IDS.indexOf(store("subject")) !== -1 ? store("subject") : "fiqh",
+    subject: SUB_IDS.indexOf(store("subject")) !== -1 && !(FIQH_OFF && store("subject") === "fiqh") ? store("subject") : FIQH_OFF ? "arabisch" : "fiqh",
     level: store("level") || 0,                     /* 0 = alle, 1–3 = Anfänger … Experte/Ustāḏ */
     mode: store("mode") || "topic",
     topics: store("topics") || ["wudhu"],
@@ -450,7 +453,7 @@
   }
   function byLevel(list) { return setup.level ? list.filter(function (q) { return (q.lvl || q.level) === setup.level; }) : list; }
   setup.topics = setup.topics.filter(function (id) { return TOPIC_BY_ID[id]; });
-  if (!setup.topics.length) setup.topics = [TOPICS[0].id];
+  if (!setup.topics.length && TOPICS.length) setup.topics = [TOPICS[0].id];
 
   function bestKey() {
     var lv = setup.level ? ":L" + setup.level : "", S = curSub();
@@ -471,7 +474,10 @@
 
     var S = curSub(), st = S ? setup.sub[setup.subject] : null, subTopic = !!S && st.mode === "topic";
     var topics = S ? subTopics(setup.subject) : setup.topics, groups = S ? S.groups() : GROUPS;
-    $all("[data-subject]").forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-subject") === setup.subject)); });
+    $all("[data-subject]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-subject") === setup.subject));
+      if (FIQH_OFF && b.getAttribute("data-subject") === "fiqh") b.hidden = true;
+    });
     $all("[data-level]").forEach(function (b) { b.setAttribute("aria-pressed", String(+b.getAttribute("data-level") === setup.level)); });
     $("#quiz-eyebrow").textContent = T(S ? S.eyebrow : "Fiqh-Quiz");
     $("#mode-step").hidden = !!S;
@@ -1156,7 +1162,7 @@
     (listeners[name] || []).forEach(function (fn) { try { fn(data); } catch (e) { console.error(e); } });
   }
   window.FIQH_APP = {
-    TOPICS: TOPICS, QUESTIONS: QUESTIONS, TOPIC_BY_ID: TOPIC_BY_ID, GROUPS: GROUPS,
+    TOPICS: TOPICS, QUESTIONS: QUESTIONS, TOPIC_BY_ID: TOPIC_BY_ID, GROUPS: GROUPS, fiqhOff: FIQH_OFF,
     esc: esc, markedArabic: markedArabic, bidiHtml: bidiHtml, arOnly: arOnly, store: store, sourceLine: sourceLine, dalilHtml: dalilHtml, termsHtml: termsHtml, whyHtml: whyHtml, shuffle: shuffle, pickQuestions: pickQuestions, maxScore: maxScore,
     showView: showView, tabOf: TAB_OF, startQuiz: startQuiz, onResume: onResume, relang: relangLabel, renderSetup: renderSetup, openTopic: openTopic,
     isPlaying: function () { return !!game && !$("#quiz-play").hidden; },
@@ -1177,8 +1183,20 @@
   $("#stat-questions").textContent = QUESTIONS.length;
   $("#stat-sections").textContent = TOPICS.reduce(function (n, t) { return n + t.sections.length; }, 0);
 
-  renderTopicNav();
-  showOverview();
+  /* Fiqh is being rebuilt: Nachschlagen and Lernen show a notice instead of their content */
+  if (FIQH_OFF) ["view-lookup", "view-learn"].forEach(function (id) {
+    var sec = document.getElementById(id);
+    if (!sec) return;
+    Array.prototype.forEach.call(sec.children, function (c) { if (!c.classList.contains("subject-bar")) c.hidden = true; });
+    var box = document.createElement("div");
+    box.className = "wrap fiqh-rebuild";
+    box.innerHTML = '<div class="panel"><p class="eyebrow">Fiqh <span lang="ar" dir="rtl">الفقه</span></p><h2>' + T("Fiqh wird neu aufgebaut") + "</h2>" +
+      "<p>" + T("Die bisherigen Inhalte wurden entfernt. Fiqh kommt bald mit einer neuen Quelle zurück – mit neuen Themen zum Nachschlagen, Lernen und für das Quiz.") + "</p>" +
+      '<button type="button" class="btn btn-primary" data-go="start">' + T("Zu den Fächern") + "</button></div>";
+    box.querySelector("[data-go]").addEventListener("click", function () { showView("start"); window.scrollTo(0, 0); });
+    sec.appendChild(box);
+  });
+  if (TOPICS.length) { renderTopicNav(); showOverview(); }
   renderSetup();
   var hash = (location.hash || "").replace("#", "");
   showView(views[hash] ? hash : (store("view") || "start"), false);

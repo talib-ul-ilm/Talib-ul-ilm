@@ -27,7 +27,7 @@
         if (byTopic[t.id]) fiqh.push({ key: "f-" + t.id, title: t.title, ar: t.ar, topic: t.id, qs: byTopic[t.id] });
       });
     });
-    SUBJECTS.push({ id: "fiqh", name: T("Fiqh"), back: "lernen", folders: fiqh });
+    if (fiqh.length) SUBJECTS.push({ id: "fiqh", name: T("Fiqh"), back: "lernen", folders: fiqh });
     /* Arabic questions grow (new Iʿrāb sentences), so its folders are built when needed */
     if (AR) SUBJECTS.push({ id: "arabisch", name: T("Arabisch"), back: "arabisch", make: function () {
       var byLesson = {};

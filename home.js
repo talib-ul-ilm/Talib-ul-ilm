@@ -10,8 +10,9 @@
   function num(n) { return Number(n).toLocaleString(window.I18N ? window.I18N.locale : "de-DE"); }
 
   var SUBJECTS = [
-    { id: "fiqh", name: "Fiqh", ar: "الفقه",
-      text: T("Das praktische Recht: Reinheit, Gebet, Fasten, Zakāt, Ḥaǧǧ und Alltag – mit Schwerpunkt auf der hanafitischen Rechtsschule."),
+    { id: "fiqh", name: "Fiqh", ar: "الفقه", rebuild: !!APP.fiqhOff,
+      text: APP.fiqhOff ? T("Fiqh wird gerade mit einer neuen Quelle neu aufgebaut. Die neuen Themen kommen bald.")
+        : T("Das praktische Recht: Reinheit, Gebet, Fasten, Zakāt, Ḥaǧǧ und Alltag – mit Schwerpunkt auf der hanafitischen Rechtsschule."),
       meta: function () { return [[APP.TOPICS.length, T("Themen")], [APP.QUESTIONS.length, T("Fragen")]]; },
       stats: function () { return L ? L.stats() : null; },
       actions: [{ label: T("Nachschlagen"), view: "nachschlagen", primary: true }, { label: T("Lernen"), view: "lernen", progress: true }] },
@@ -56,6 +57,7 @@
     var folderDone = false;
     box.innerHTML = SUBJECTS.map(function (sub) {
       var head = '<div class="subject-head"><h2>' + esc(sub.name) + '</h2><span class="subject-ar" lang="ar" dir="rtl">' + esc(sub.ar) + "</span></div>";
+      if (sub.rebuild) return '<article class="subject is-soon">' + head + "<p>" + esc(sub.text) + '</p><span class="soon-badge">' + T("Wird neu aufgebaut") + "</span></article>";
       if (sub.soon) {
         var pre = folderDone ? "" : folderHtml();
         folderDone = true;

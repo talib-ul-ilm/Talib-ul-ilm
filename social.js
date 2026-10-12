@@ -37,7 +37,7 @@
   }
   function weekKey(season, week) { return "s" + season + "w" + week; }
   /* Every week has its own Sachgebiet, in turn: Glaube, Reinheit, Gebet, Fasten, Zakāt & Ḥaǧǧ, Alltag, … */
-  function themeFor(weekIndex) { var G = APP.GROUPS; return G[weekIndex % G.length]; }
+  function themeFor(weekIndex) { var G = APP.GROUPS; return G.length ? G[weekIndex % G.length] : { name: "Fiqh", topics: [] }; }
   function day(ms) { return new Date(ms).toLocaleDateString(LOC, { day: "2-digit", month: "2-digit" }); }
   function dayLong(ms) { return new Date(ms).toLocaleDateString(LOC, { weekday: "short", day: "2-digit", month: "2-digit" }); }
   function pts(n) { return Number(n || 0).toLocaleString(LOC); }
@@ -64,7 +64,9 @@
   var AR_Q = 10, AR_VERBS = 2;
   var AR_CELLS = AR_VERBS * 2 * 14, AR_TOTAL = 3 * AR_Q + AR_CELLS;
   var SARF_CELL = 10, SARF_PERFECT = 50;
-  var league = APP.store("league") === "arabisch" ? "arabisch" : "fiqh";
+  /* Fiqh is being rebuilt (app.js fiqhOff): the Fiqh-Liga rests, only the Arabisch-Liga runs */
+  var FIQH_PAUSED = !!APP.fiqhOff;
+  var league = FIQH_PAUSED || APP.store("league") === "arabisch" ? "arabisch" : "fiqh";
   function arTheme(weekIndex) {
     var A = window.FIQH_ARABIC, ls = A ? A.lessons : [], per = Math.ceil(ls.length / WEEKS_PER_SEASON) || 1;
     var b = weekIndex % WEEKS_PER_SEASON, part = ls.slice(b * per, b * per + per);
@@ -363,7 +365,7 @@
   APP.onResume("comp-fiqh", function (a) {
     return whenMine().then(function (m) {
       var cal = calendar(Date.now()), entry = m && m.comp[cal.key];
-      if (cal.key !== a.key || !entry || entry.done) return null;
+      if (FIQH_PAUSED || cal.key !== a.key || !entry || entry.done) return null;
       return fiqhCompPreset(cal, entry);
     });
   });
@@ -375,7 +377,10 @@
     });
   });
   $all("[data-league]").forEach(function (b) {
-    b.addEventListener("click", function () { league = b.getAttribute("data-league"); APP.store("league", league); render(); });
+    b.addEventListener("click", function () {
+      if (FIQH_PAUSED && b.getAttribute("data-league") === "fiqh") return;
+      league = b.getAttribute("data-league"); APP.store("league", league); render();
+    });
   });
 
   function openAuth(pane) {
@@ -440,13 +445,15 @@
   function renderComp(cal) {
     var lg = LG(), theme = lg.theme(cal.index);
     $all("[data-league]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-league") === league ? "true" : "false"); });
+    var tabs = $(".league-tabs");
+    if (tabs) tabs.hidden = FIQH_PAUSED;
     $("#comp-eyebrow").textContent = lg.name + " · " + T("Saison {n}", { n: cal.season });
     $("#comp-title").textContent = T("Woche {n} von {m}", { n: cal.week, m: WEEKS_PER_SEASON });
     $("#comp-theme").textContent = T(theme.name);
     $("#comp-theme-topics").textContent = league === "fiqh" ? theme.topics.map(function (t) { return t.title; }).join(" · ")
       : theme.lessons.map(function (l) { return l.title; }).join(" · ");
     $("#comp-sub").textContent = T("Saison {n} läuft vom {a} bis {b}", { n: cal.season, a: day(cal.seasonStart), b: day(cal.seasonEnd - 1) }) +
-      " – " + lg.what + ". " + T("Die Summe der vier Wochen entscheidet.");
+      " – " + lg.what + ". " + T("Die Summe der vier Wochen entscheidet.") + (FIQH_PAUSED ? " " + T("Die Fiqh-Liga ruht, bis Fiqh mit der neuen Quelle zurück ist.") : "");
     updateCountdown();
 
     var comp = mine ? mine.comp : {};
