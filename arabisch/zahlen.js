@@ -4,20 +4,20 @@
    100, 200, 300, 1000 (B2 L24).
    window.MADINA_ZAHLEN() → [{ key, lesson, lvl, q, ar?, a: [richtig, falsch, falsch, falsch], e }]
    arabic.js macht daraus Quizfragen (Kennung ar-z-…, Bereich „zahlen“). Alle Sätze mit عِنْدِي, damit
-   die Zahl im Nominativ steht. */
+   die Zahl im Nominativ steht – bei Verwandten (Sohn, Tochter) mit لِي wie im Buch (لِي أَخٌ). */
 (function () {
   "use strict";
-  // Nomen: [Singular Nom., Singular Gen., Singular Akk., Plural Gen., Dual Nom., Dual Gen., deutsch Sg., deutsch Pl.]
+  // Nomen: [Singular Nom., Singular Gen., Singular Akk., Plural Gen., Dual Nom., Dual Gen., deutsch Sg., deutsch Pl., 1 = Verwandte (لِي statt عِنْدِي)]
   var M = [
     ["كِتَابٌ", "كِتَابٍ", "كِتَابًا", "كُتُبٍ", "كِتَابَانِ", "كِتَابَيْنِ", "Buch", "Bücher"],
     ["طَالِبٌ", "طَالِبٍ", "طَالِبًا", "طُلَّابٍ", "طَالِبَانِ", "طَالِبَيْنِ", "Student", "Studenten"],
     ["قَلَمٌ", "قَلَمٍ", "قَلَمًا", "أَقْلَامٍ", "قَلَمَانِ", "قَلَمَيْنِ", "Stift", "Stifte"],
-    ["وَلَدٌ", "وَلَدٍ", "وَلَدًا", "أَوْلَادٍ", "وَلَدَانِ", "وَلَدَيْنِ", "Junge", "Jungen"],
+    ["وَلَدٌ", "وَلَدٍ", "وَلَدًا", "أَوْلَادٍ", "وَلَدَانِ", "وَلَدَيْنِ", "Sohn", "Söhne", 1],
     ["بَيْتٌ", "بَيْتٍ", "بَيْتًا", "بُيُوتٍ", "بَيْتَانِ", "بَيْتَيْنِ", "Haus", "Häuser"],
     ["رِيَالٌ", "رِيَالٍ", "رِيَالًا", "رِيَالَاتٍ", "رِيَالَانِ", "رِيَالَيْنِ", "Riyal", "Riyal"]
   ];
   var F = [
-    ["بِنْتٌ", "بِنْتٍ", "بِنْتًا", "بَنَاتٍ", "بِنْتَانِ", "بِنْتَيْنِ", "Tochter", "Töchter"],
+    ["بِنْتٌ", "بِنْتٍ", "بِنْتًا", "بَنَاتٍ", "بِنْتَانِ", "بِنْتَيْنِ", "Tochter", "Töchter", 1],
     ["طَالِبَةٌ", "طَالِبَةٍ", "طَالِبَةً", "طَالِبَاتٍ", "طَالِبَتَانِ", "طَالِبَتَيْنِ", "Studentin", "Studentinnen"],
     ["غُرْفَةٌ", "غُرْفَةٍ", "غُرْفَةً", "غُرَفٍ", "غُرْفَتَانِ", "غُرْفَتَيْنِ", "Zimmer", "Zimmer"],
     ["سَيَّارَةٌ", "سَيَّارَةٍ", "سَيَّارَةً", "سَيَّارَاتٍ", "سَيَّارَتَانِ", "سَيَّارَتَيْنِ", "Auto", "Autos"],
@@ -81,6 +81,9 @@
     if (n < 100) return "21–99: Einer + وَ + Zehner; der Einer folgt der Regel von 1–10 (" + (fem ? "weiblich: إِحْدَى، اثْنَتَانِ، ثَلَاثٌ …" : "männlich: وَاحِدٌ، اثْنَانِ، ثَلَاثَةٌ …") + "), das Gezählte steht im Singular und im Akkusativ.";
     return "100, 200, 300, 1000: Die Zahl ist Muḍāf, das Gezählte steht im Singular und im Genitiv (مِائَةُ كِتَابٍ، مِائَتَا كِتَابٍ، ثَلَاثُمِائَةِ كِتَابٍ، أَلْفُ كِتَابٍ).";
   }
+  /* „ich habe“: لِي bei Verwandten, sonst عِنْدِي */
+  function have(w) { return w[8] ? "لِي " : "عِنْدِي "; }
+  function kinNote(w) { return w[8] ? " Bei Verwandten sagt man لِي, nicht عِنْدِي (wie لِي أَخٌ)." : ""; }
   function de(n, w) { return "Ich habe " + n + " " + (n === 1 ? w[6] : w[7]) + "."; }
   /* numbers that are easy to mix up with n: same digit in another place */
   function confuse(n, pool) {
@@ -95,19 +98,20 @@
       [[M, false], [F, true]].forEach(function (gs) {
         var nouns = gs[0], fem = gs[1];
         if (n >= 20 && n % 10 === 0 && n < 100 && fem && n !== 20 && n !== 30) return;   // Zehner: einmal genügt
-        [nouns[i % nouns.length], nouns[(i + 3) % nouns.length]].forEach(function (w, k) {
+        /* große Zahlen nicht mit Söhnen und Töchtern („1000 Töchter“): dann das nächste Nomen */
+        [nouns[i % nouns.length], nouns[(i + 3) % nouns.length]].map(function (w) { return w[8] && n > 12 ? nouns[(nouns.indexOf(w) + 1) % nouns.length] : w; }).forEach(function (w, k) {
           var forms = phrase(n, w, fem), right = forms[0];
           var seen = {}, opts = forms.filter(function (x) { if (seen[x]) return false; seen[x] = 1; return true; });
           if (opts.length < 4) return;
           var base = { lesson: lessonOf(n, fem), lvl: lvlOf(n) };
           /* build: German → Arabic */
           out.push(Object.assign({ key: "b|" + n + "|" + w[0], q: "Wie sagt man auf Arabisch: „" + de(n, w) + "“",
-            a: opts.map(function (x) { return "عِنْدِي " + x + "."; }), e: "عِنْدِي " + right + ". – " + rule(n, fem) }, base));
+            a: opts.map(function (x) { return have(w) + x + "."; }), e: have(w) + right + ". – " + rule(n, fem) + kinNote(w) }, base));
           /* read: Arabic → German, with numbers that look alike */
           if (k === 0 && n > 2) {
             var wrong = confuse(n, NS).slice(0, 3).map(function (m) { return de(m, w); });
-            if (wrong.length === 3) out.push(Object.assign({ key: "r|" + n + "|" + w[0], q: "Was bedeutet dieser Satz?", ar: "عِنْدِي " + right + ".",
-              a: [de(n, w)].concat(wrong), e: "عِنْدِي " + right + ". = " + de(n, w) }, base, { lvl: n <= 10 ? 1 : 2 }));
+            if (wrong.length === 3) out.push(Object.assign({ key: "r|" + n + "|" + w[0], q: "Was bedeutet dieser Satz?", ar: have(w) + right + ".",
+              a: [de(n, w)].concat(wrong), e: have(w) + right + ". = " + de(n, w) + kinNote(w) }, base, { lvl: n <= 10 ? 1 : 2 }));
           }
         });
       });
