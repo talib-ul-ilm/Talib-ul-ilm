@@ -127,6 +127,52 @@
     QS = QS.concat(TERM_QS);
   }
 
+  /* Tuḥfat al-Aṭfāl (tajwid/tuhfa.js): je Teil die Inhaltsfragen, „Wie geht der Vers weiter?“ zu jedem Vers
+     und Vokabeln aus dem Wortschatz der Verse */
+  var TU = window.TAJWID_TUHFA, TUHFA_QS = [], VERSES = [];
+  function range(p) { var a = p.verses[0].n, b = p.verses[p.verses.length - 1].n; return a === b ? String(a) : a + "–" + b; }
+  if (TU) {
+    TU.parts.forEach(function (p) { p.verses.forEach(function (v) { v.part = p; VERSES.push(v); }); });
+    var HARD = { mithlain: 1, maddahkam: 1, lazim: 1 }, seenW = {}, WORDS = [];
+    /* a meaning short enough for an answer option: without the remarks in brackets */
+    function plain(m) { return String(m).replace(/\s*\([^)]*\)/g, "").trim(); }
+    function bare(s) { return String(s).replace(/[ً-ْٰ]/g, ""); }
+    VERSES.forEach(function (v) {
+      v.w.forEach(function (w) {
+        var m = plain(w[1]), k = bare(w[0]);
+        if (seenW[k] || m.length < 3 || m.length > 40 || /eigentlich|„|Name/.test(m) || k.length < 2) return;
+        seenW[k] = 1; WORDS.push({ w: w[0], m: m, v: v });
+      });
+    });
+    TU.parts.forEach(function (p) {
+      var set = [], tt = T("Taǧwīd · Tuḥfat al-Aṭfāl · {t}", { t: p.title }), base = { t: "tajwid", tt: tt, c: 0, chapter: "tuhfa-" + p.id };
+      p.quiz.forEach(function (x) {
+        set.push(Object.assign({}, base, { _lid: "tj-t-" + hash(p.id + "|" + x.q), lvl: HARD[p.id] ? 2 : 1,
+          srcText: T("Quelle:") + " Tuḥfat al-Aṭfāl, " + T("Verse {r}", { r: range(p) }), q: x.q, ar: x.ar, a: x.a, e: x.e }));
+      });
+      p.verses.forEach(function (v) {
+        var idx = VERSES.indexOf(v), others = near(idx, VERSES, 6).map(function (o) { return o.b; })
+          .filter(function (b, i, all) { return b !== v.b && all.indexOf(b) === i; }).slice(0, 3);
+        set.push(Object.assign({}, base, { _lid: "tj-t-" + hash("v|" + v.n), lvl: 2, srcText: T("Quelle:") + " Tuḥfat al-Aṭfāl, " + T("Vers {n}", { n: v.n }),
+          q: T("Wie geht der Vers weiter? (Vers {n})", { n: v.n }), ar: v.a + " ۞ …", a: [v.b].concat(others),
+          e: v.a + " ۞ " + v.b + " – " + v.de }));
+      });
+      WORDS.forEach(function (x, i) {
+        if (x.v.part !== p) return;
+        var wrong = near(i, WORDS, 12).map(function (o) { return o.m; })
+          .filter(function (m, k, all) { return m !== x.m && all.indexOf(m) === k; }).slice(0, 3);
+        if (wrong.length < 3) return;
+        set.push(Object.assign({}, base, { _lid: "tj-t-" + hash("w|" + bare(x.w)), lvl: 1, srcText: T("Quelle:") + " Tuḥfat al-Aṭfāl, " + T("Vers {n}", { n: x.v.n }),
+          q: T("Was bedeutet dieses Wort aus der Tuḥfa? (Vers {n})", { n: x.v.n }), ar: x.w, a: [x.m].concat(wrong),
+          e: x.w + " = " + x.m + ". " + T("Vers {n}:", { n: x.v.n }) + " " + x.v.a + " ۞ " + x.v.b }));
+      });
+      SETS["tuhfa-" + p.id] = set;
+      TUHFA_QS = TUHFA_QS.concat(set);
+    });
+    SETS.tuhfa = TUHFA_QS;
+    QS = QS.concat(TUHFA_QS);
+  }
+
   function lv(q) { return L.levelOf(q._lid); }
   function stats(list) {
     var s = { total: list.length, learned: 0, almost: 0, wrong: 0, fresh: 0 };
@@ -150,6 +196,9 @@
     [3, "Experte / Ustāḏ", "Fallen und Feinheiten: wegfallende Dehnungsbuchstaben, zwei Madd-Ursachen, Buchstabennamen, Sakt, unvollständiger Idġām, Ausnahmen."]];
   function levelName(n) { return T(LEVELS[n - 1][1]); }
   function labelOf(id) { var lv = /^regeln([123])$/.exec(id || ""); if (lv) return T("Taǧwīd · Regel erkennen") + " · " + levelName(+lv[1]);
+    var tp = /^tuhfa-(\w+)$/.exec(id || ""), part = tp && TU && TU.parts.filter(function (p) { return p.id === tp[1]; })[0];
+    if (part) return T("Taǧwīd · Tuḥfat al-Aṭfāl · {t}", { t: part.title });
+    if (id === "tuhfa") return T("Taǧwīd · Tuḥfat al-Aṭfāl");
     return id === "regeln" ? T("Taǧwīd · Regel erkennen") : id === "begriffe" ? T("Taǧwīd · Begriffe") : id && BY_ID[id] ? T("Taǧwīd · {t}", { t: BY_ID[id].title }) : T("Taǧwīd"); }
   function start(id) {
     var list = listOf(id), r = roundFor(list);
@@ -174,8 +223,8 @@
   APP.onResume("tj-round", function (a, qs) { return preset(qs, a.id, a.review, a.before); });
 
   /* ---------- state ---------- */
-  var state = { chapter: null };
-  try { var saved = JSON.parse(localStorage.getItem("fiqh:tajwid") || "null"); if (saved && BY_ID[saved.chapter]) state.chapter = saved.chapter; } catch (e) {}
+  var state = { chapter: null, part: null };
+  try { var saved = JSON.parse(localStorage.getItem("fiqh:tajwid") || "null"); if (saved && (BY_ID[saved.chapter] || (saved.chapter === "tuhfa" && TU))) state.chapter = saved.chapter; } catch (e) {}
   function remember() { try { localStorage.setItem("fiqh:tajwid", JSON.stringify({ chapter: state.chapter })); } catch (e) {} }
 
   /* ---------- rendering ---------- */
@@ -221,8 +270,64 @@
         }).join("") + "</tbody></table></div>";
       }).join("") + "</details></div>";
   }
+  /* text of the Tuḥfa: German with Arabic runs, **…** in bold */
+  function md(s) { return mixed(s).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>"); }
+  function tuhfaCard() {
+    if (!TU) return "";
+    var s = stats(TUHFA_QS);
+    return '<div class="panel tj-quizcard tj-tuhfa-card"><div><p class="eyebrow">' + T("Lehrgedicht · vollständig") + "</p><h3>" + esc(TU.title) + " " + ar(TU.ar, "tj-rule-ar") + "</h3><p>" +
+      T("Alle {n} Verse von al-Ǧamzūrī mit Wortschatz, Übersetzung und Erklärung, dazu Autor, Sanad und Schluss. Geübt wird der Inhalt, „Wie geht der Vers weiter?“ und die Vokabeln der Verse.", { n: VERSES.length }) + "</p>" + bar(s) +
+      '<small class="lt-meta">' + T("{n} Teile · {m} Übungen", { n: TU.parts.length, m: TUHFA_QS.length }) + (s.learned ? " · " + T("{n} % gelernt", { n: s.pct }) : "") + "</small></div>" +
+      '<div class="tj-tuhfa-btns"><button type="button" class="btn btn-primary" data-tj-ch="tuhfa">' + T("Tuḥfa öffnen") + "</button>" +
+      '<button type="button" class="btn" data-tj-learn="tuhfa">' + (s.pct === 100 ? T("✓ Wiederholen") : s.learned ? T("Weiter üben · {n} %", { n: s.pct }) : T("Ganze Tuḥfa üben")) + "</button></div></div>";
+  }
+  function verseHtml(v) {
+    return '<article class="tj-verse" id="tuhfa-v' + v.n + '"><div class="tj-bait"><span class="tj-vn">' + v.n + '</span><div class="tj-hemis" lang="ar" dir="rtl"><span>' + esc(v.a) +
+      "</span><span>" + esc(v.b) + "</span></div></div>" +
+      '<p class="tj-vde">' + md(v.de) + "</p>" +
+      '<details class="tj-vmore"><summary>' + T("Wortschatz und Erklärung") + "</summary>" +
+      (v.w.length ? '<div class="ar-table-wrap"><table class="ar-table tj-table tj-words"><tbody>' + v.w.map(function (w) {
+        return "<tr><td>" + ar(w[0], "tj-rule-ar") + "</td><td>" + mixed(w[1]) + "</td></tr>";
+      }).join("") + "</tbody></table></div>" : "") +
+      '<ul class="tj-expl">' + v.x.map(function (x) { return "<li>" + md(x) + "</li>"; }).join("") + "</ul></details></article>";
+  }
+  function partHtml(p) {
+    var list = SETS["tuhfa-" + p.id], s = stats(list), c = BY_ID[p.ch];
+    return '<details class="tj-part" id="tuhfa-' + p.id + '"' + (state.part === p.id ? " open" : "") + "><summary>" +
+      '<span class="tj-part-n">' + T("Verse {r}", { r: range(p) }) + '</span><span class="tj-part-t"><strong>' + esc(p.title) + "</strong>" + ar(p.ar, "lt-ar") + "</span>" + bar(s) + "</summary>" +
+      '<div class="tj-part-body"><p class="tj-intro">' + md(p.intro) + "</p>" +
+      '<div class="tj-part-actions"><button type="button" class="btn btn-primary" data-tj-learn="tuhfa-' + p.id + '">' +
+      (s.pct === 100 ? T("✓ Wiederholen") : T("Diesen Teil üben · {n} %", { n: s.pct })) + "</button>" +
+      (c ? '<button type="button" class="linkish" data-tj-ch="' + c.id + '">' + T("Dazu Kapitel {n}: {t}", { n: c.n, t: c.title }) + " →</button>" : "") + "</div>" +
+      (p.pre || []).map(function (x) { return '<p class="tj-note">' + md(x) + "</p>"; }).join("") +
+      p.verses.map(verseHtml).join("") + "</div></details>";
+  }
+  function tuhfaPane() {
+    var s = stats(TUHFA_QS);
+    return '<div class="ar-lesson-view tj-tuhfa">' +
+      '<button type="button" class="linkish ar-back" data-tj-back>← ' + T("Alle Kapitel") + "</button>" +
+      '<header class="ar-lesson-head"><p class="eyebrow">' + T("Lehrgedicht · {n} Verse", { n: VERSES.length }) + "</p><h2>" + esc(TU.title) + "</h2>" + ar(TU.ar, "ar-title") + "</header>" +
+      '<p class="tj-intro">' + T("Die Tuḥfat al-Aṭfāl von Sulaimān al-Ǧamzūrī – vollständig, Vers für Vers. Sie ergänzt die Kapitel: Bei jedem Teil führt ein Verweis zum Kapitel mit denselben Regeln. Tippe auf „Wortschatz und Erklärung“ unter einem Vers.") + "</p>" +
+      '<button type="button" class="btn btn-primary" data-tj-learn="tuhfa">' + (s.pct === 100 ? T("✓ Wiederholen") : T("Ganze Tuḥfa üben · {n} %", { n: s.pct })) + "</button>" +
+      '<section class="ar-block"><h3>' + T("Über das Werk") + "</h3>" + TU.info.map(function (i) {
+        return '<details class="tj-info"><summary>' + esc(i.h) + "</summary><ul>" + i.li.map(function (l) { return "<li>" + md(l) + "</li>"; }).join("") + "</ul></details>";
+      }).join("") + "</section>" +
+      '<section class="ar-block"><h3>' + T("Die Verse") + "</h3>" + TU.parts.map(partHtml).join("") + "</section>" +
+      '<p class="tj-note">' + T("Quelle:") + " " + esc(TU.src) + "</p></div>";
+  }
+  /* in a chapter: the verses of the Tuḥfa about the same rules */
+  function tuhfaLink(c) {
+    var ps = TU ? TU.parts.filter(function (p) { return p.ch === c.id; }) : [];
+    if (!ps.length) return "";
+    return '<section class="ar-block"><h3>' + T("In der Tuḥfat al-Aṭfāl") + "</h3>" + ps.map(function (p) {
+      var v = p.verses[0];
+      return '<button type="button" class="tj-level tj-tlink" data-tj-tuhfa="' + p.id + '"><div><strong>' + esc(p.title) + '</strong><small class="lt-meta">' +
+        T("Verse {r}", { r: range(p) }) + " · " + esc(p.intro) + '</small><span class="tj-tlink-ar" lang="ar" dir="rtl">' + esc(v.a) + " ۞ " + esc(v.b) + (p.verses.length > 1 ? " …" : "") + "</span></div>" +
+        '<span class="tj-tlink-go" aria-hidden="true">→</span></button>';
+    }).join("") + "</section>";
+  }
   function listPane() {
-    return rulesCard() + termsCard() + '<ol class="ar-lessons">' + CH.map(function (c) {
+    return rulesCard() + termsCard() + tuhfaCard() + '<ol class="ar-lessons">' + CH.map(function (c) {
       var s = stats(SETS[c.id]), st = s.pct === 100 ? "done" : s.learned + s.almost + s.wrong ? "busy" : "new";
       return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-tj-ch="' + c.id + '">' +
         '<span class="ar-num">' + c.n + "</span>" +
@@ -264,6 +369,7 @@
       '<section class="ar-block"><h3>' + T("Regeln") + "</h3>" + c.rules.map(ruleHtml).join("") + "</section>" +
       (c.table ? '<section class="ar-block"><h3>' + T("Übersicht") + "</h3>" + tableHtml(c.table) + "</section>" : "") +
       (c.book.length ? '<section class="ar-block">' + bookHtml(c) + "</section>" : "") +
+      tuhfaLink(c) +
       '<nav class="ar-pager">' + (prev ? '<button type="button" class="btn" data-tj-ch="' + prev.id + '">← ' + esc(prev.title) + "</button>" : "<span></span>") +
       (next ? '<button type="button" class="btn" data-tj-ch="' + next.id + '">' + esc(next.title) + " →</button>" : "<span></span>") + "</nav></div>";
   }
@@ -299,7 +405,7 @@
     mis.textContent = T("Fehler wiederholen ({n})", { n: open });
     renderRound();
     var body = $("#tj-body");
-    body.innerHTML = state.chapter ? chapterPane(BY_ID[state.chapter]) : listPane();
+    body.innerHTML = state.chapter === "tuhfa" && TU ? tuhfaPane() : state.chapter && BY_ID[state.chapter] ? chapterPane(BY_ID[state.chapter]) : listPane();
     wire(body);
   }
   function scrollToBody() {
@@ -308,10 +414,21 @@
   }
   function wire(body) {
     $all("[data-tj-ch]", body).forEach(function (b) {
-      b.addEventListener("click", function () { state.chapter = b.getAttribute("data-tj-ch"); render(); scrollToBody(); });
+      b.addEventListener("click", function () { state.chapter = b.getAttribute("data-tj-ch"); state.part = null; render(); scrollToBody(); });
+    });
+    $all("[data-tj-tuhfa]", body).forEach(function (b) {
+      b.addEventListener("click", function () {
+        state.chapter = "tuhfa"; state.part = b.getAttribute("data-tj-tuhfa"); render();
+        var el = document.getElementById("tuhfa-" + state.part);
+        if (el) el.scrollIntoView({ block: "start" });
+      });
+    });
+    /* remember the open part, so a re-render after a round keeps it open */
+    $all(".tj-part", body).forEach(function (d) {
+      d.addEventListener("toggle", function () { if (d.open) state.part = d.id.replace("tuhfa-", ""); else if (state.part === d.id.replace("tuhfa-", "")) state.part = null; });
     });
     var back = $("[data-tj-back]", body);
-    if (back) back.addEventListener("click", function () { state.chapter = null; render(); scrollToBody(); });
+    if (back) back.addEventListener("click", function () { state.chapter = null; state.part = null; render(); scrollToBody(); });
     $all("[data-tj-learn]", body).forEach(function (b) { b.addEventListener("click", function () { start(b.getAttribute("data-tj-learn")); }); });
   }
 
@@ -328,13 +445,15 @@
   });
   $("#tj-count-ch").textContent = CH.length;
   $("#tj-count-q").textContent = QS.length;
+  var cv = $("#tj-count-v");
+  if (cv) { cv.textContent = VERSES.length; cv.parentNode.hidden = !VERSES.length; }
   $("#tj-count-b").textContent = CH.reduce(function (n, c) { return n + c.book.length; }, 0);
 
   APP.on("view", function (name) { if (name === "tajwid") render(); });
   if (L.onChange) L.onChange(function () { if (!view.hidden) render(); });
   render();
 
-  window.FIQH_TAJWID = { questions: QS, chapters: CH, stats: function () { return stats(QS); } };
+  window.FIQH_TAJWID = { questions: QS, chapters: CH, tuhfa: TU ? TU.parts.map(function (p) { return { id: "tuhfa-" + p.id, title: p.title, ar: p.ar, range: range(p) }; }) : [], stats: function () { return stats(QS); } };
   /* the Quiz tab offers Taǧwīd too – its setup was drawn before this file loaded */
   if (APP.renderSetup && APP.isPlaying && !APP.isPlaying()) APP.renderSetup();
 })();

@@ -1411,6 +1411,34 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .tj-bq [lang="ar"] { font: 400 1.2rem/1.7 var(--arabic); color: var(--primary); text-align: right; flex: 1; }
 .tj-bn { flex: none; font: 700 .75rem/1 var(--body); color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 4px 6px; }
 .tj-ba { margin: 0; }
+.tj-tuhfa-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.tj-info { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px 14px; }
+.tj-info > summary, .tj-vmore > summary { cursor: pointer; font-weight: 700; color: var(--primary); }
+.tj-info ul, .tj-expl { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+.tj-part { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); overflow: hidden; }
+.tj-part > summary { cursor: pointer; list-style: none; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 6px 12px; padding: 12px 14px; }
+.tj-part > summary::-webkit-details-marker { display: none; }
+.tj-part > summary .lbar { grid-column: 1 / -1; }
+.tj-part[open] > summary { border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.tj-part-n { font: 700 .75rem/1 var(--body); color: var(--muted); background: var(--surface-2); border: 1px solid var(--line); border-radius: 6px; padding: 5px 7px; white-space: nowrap; }
+.tj-part-t { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 10px; min-width: 0; }
+.tj-part-body { display: grid; gap: 12px; padding: 12px 14px 16px; }
+.tj-part-actions { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.tj-verse { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.tj-bait { display: flex; align-items: flex-start; gap: 10px; }
+.tj-vn { flex: none; font: 700 .75rem/1 var(--body); color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 5px 7px; margin-top: 8px; }
+.tj-hemis { flex: 1; max-width: 880px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 24px; font: 400 1.35rem/1.9 var(--arabic); color: var(--primary); }
+.tj-hemis span:last-child { text-align: left; }
+.tj-vde { margin: 0; max-width: 72ch; }
+.tj-words td:first-child { white-space: nowrap; }
+.tj-tlink { width: 100%; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.tj-tlink:hover { border-color: var(--primary); }
+.tj-tlink-ar { font: 400 1.1rem/1.8 var(--arabic); color: var(--primary); text-align: right; }
+.tj-tlink-go { flex: none; color: var(--primary); font-weight: 700; }
+@media (max-width: 560px) {
+  .tj-hemis { grid-template-columns: 1fr; font-size: 1.25rem; }
+  .tj-hemis span:last-child { text-align: left; padding-right: 1.5em; }
+}
 </style>
 </head>
 <body>
@@ -1652,8 +1680,8 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
       <div class="wrap intro">
         <p class="hero-eyebrow">Taǧwīd <span lang="ar" dir="rtl">·&nbsp;هِدَايَةُ الرَّحْمَنِ فِي تَجْوِيدِ الْقُرْآنِ</span></p>
         <h1>Den Qurʾān richtig lesen</h1>
-        <p>Die Regeln des Taǧwīd Kapitel für Kapitel – Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen. Mit den Fragen aus <b>Hidāyat ar-Raḥmān</b>, der Taǧwīd-Tafel und dem Quiz <b>Regel erkennen</b>.</p>
-        <div class="stats"><span><b id="tj-count-ch">0</b> Kapitel</span><span><b id="tj-count-q">0</b> Übungsfragen</span><span><b id="tj-count-b">0</b> Fragen aus dem Heft</span></div>
+        <p>Die Regeln des Taǧwīd Kapitel für Kapitel – Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen. Mit den Fragen aus <b>Hidāyat ar-Raḥmān</b>, der Taǧwīd-Tafel, dem Quiz <b>Regel erkennen</b> und der vollständigen <b>Tuḥfat al-Aṭfāl</b>.</p>
+        <div class="stats"><span><b id="tj-count-ch">0</b> Kapitel</span><span><b id="tj-count-q">0</b> Übungsfragen</span><span><b id="tj-count-b">0</b> Fragen aus dem Heft</span><span><b id="tj-count-v">0</b> Verse der Tuḥfa</span></div>
       </div>
     </div>
     <div class="wrap learn arabic tajwid">
@@ -1674,7 +1702,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
       </div>
       <div id="tj-body" aria-live="polite"></div>
       <div class="learn-foot">
-        <p>Quellen: „Hidāyat ar-Raḥmān fī Taǧwīd al-Qurʾān“ (Lesart Ḥafṣ ʿan ʿĀṣim) und die Taǧwīd-Tafel von Âlem Yayıncılık. Die Seite ist eine Lernhilfe – Taǧwīd lernt man am besten bei einem Lehrer, der einem zuhört.</p>
+        <p>Quellen: „Hidāyat ar-Raḥmān fī Taǧwīd al-Qurʾān“ (Lesart Ḥafṣ ʿan ʿĀṣim), die Taǧwīd-Tafel von Âlem Yayıncılık und die Tuḥfat al-Aṭfāl von al-Ǧamzūrī mit dem Kommentar „Aysar al-Aqwāl“. Die Seite ist eine Lernhilfe – Taǧwīd lernt man am besten bei einem Lehrer, der einem zuhört.</p>
         <button type="button" class="linkish" id="tj-reset">Taǧwīd-Fortschritt zurücksetzen</button>
         <div class="learn-reset" id="tj-reset-confirm" hidden>
           <span>Wirklich den Taǧwīd-Fortschritt auf 0 % setzen?</span>
@@ -2281,6 +2309,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 <script src="tajwid/inhalt.js"></script>
 <script src="tajwid/ergaenzung.js"></script>
 <script src="tajwid/regeln.js"></script>
+<script src="tajwid/tuhfa.js"></script>
 <script src="tajwid.js"></script>
 <script src="mistakes.js"></script>
 <script src="progress.js"></script>
