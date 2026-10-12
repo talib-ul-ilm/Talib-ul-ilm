@@ -21,7 +21,7 @@ Eine Lernseite für Fiqh, Arabisch (Madina-Bücher) und Taǧwīd.
 >   - Dazu die Gegenstücke und die Anmerkungen der Tabelle.
 >   - Nachschlagen zeigt die Skala farbig (`scale` im Abschnitt, `.ruling-scale`).
 >   - Die Fragen verknüpfen die Begriffe mit Beispielen aus dem Buch.
-> - Die **Fiqh-Liga ruht** vorerst (`FIQH_PAUSED` in `social.js`); im Wettbewerb läuft nur die Arabisch-Liga. Englische Fiqh-Texte gibt es noch nicht.
+> - Die **Fiqh-Liga** läuft seit 12.10.2026 wieder, mit den Fragen aus „Wasīlatu ṭ-Ṭalab“. Der Kalender und die bisherigen Punkte bleiben. Jede Woche kommt ein Sachgebiet dran: Grundlagen, Reinheit, Gebet, Zakāt, Fasten oder Ḥaǧǧ, jeweils mit 15 Fragen. Ohne Fiqh-Inhalte ruht sie (`FIQH_PAUSED = APP.fiqhOff`). Englische Fiqh-Texte gibt es noch nicht.
 > - Ohne Fiqh-Fragen (`APP.fiqhOff`) zeigen Nachschlagen und Lernen einen Hinweis.
 >
 > Die Abschnitte unten zu den alten Fiqh-Inhalten beschreiben den Stand vor dem Umbau.
