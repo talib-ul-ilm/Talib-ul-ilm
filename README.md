@@ -1,6 +1,17 @@
 # Ṭālibu l-ʿIlm (طَالِبُ الْعِلْمِ)
 
-Eine Lernseite zum Fiqh-Unterricht. Grundlage sind die Folien „Fiqh Unterricht 1–16“ (Google-Drive-Ordner „Fiqh“), vertieft und erweitert mit Hamdi Döndüren, „Delilleriyle İslâm İlmihali“.
+Eine Lernseite für Fiqh, Arabisch (Madina-Bücher) und Taǧwīd.
+
+> **Fiqh wird neu aufgebaut.** Die bisherige Quelle wurde mit allen Inhalten entfernt: die Folien „Fiqh Unterricht 1–16“, das İlmihal von H. Döndüren (`buch/`), die englischen Fragen (`fiqh-en.js`) und die Belege (`fiqh-belege.js`). Die neue Quelle kommt nach `data.js`, das Format steht dort im Kopf.
+>
+> Solange `FIQH_QUESTIONS` leer ist (`APP.fiqhOff`), gilt:
+> - Nachschlagen und Lernen zeigen einen Hinweis.
+> - Die Startseite zeigt Fiqh als „Wird neu aufgebaut“.
+> - Das Quiz bietet nur Arabisch und Taǧwīd an.
+> - „Mein Lernstand“ und der Fehlerordner zeigen kein Fiqh.
+> - Die **Fiqh-Liga ruht**; im Wettbewerb läuft nur die Arabisch-Liga.
+>
+> Die Abschnitte unten zu den alten Fiqh-Inhalten beschreiben den Stand vor dem Umbau.
 
 - **Sprachen** (`i18n.js`, Umschalter oben rechts): Deutsch (Original) und Englisch (`i18n-en.js`), Türkisch folgt. Die Wahl steht in `localStorage` („fiqh:lang“); ein Wechsel lädt die Seite neu, eine laufende Runde (Quiz, Lernen, Arabisch, Fehlerordner, Lernstand, Wettbewerb und Arabisch-Liga) geht danach an derselben Stelle weiter: `app.js` legt sie vorher in `sessionStorage` („fiqh:resume“) ab – Fragen per Kennung, Reihenfolge der Antworten, Punkte, Serie, Joker, beantwortete Frage mit Rückmeldung –, und das Modul, das die Runde gestartet hat, baut über `APP.onResume(art, …)` seine Abläufe wieder auf; ohne Wahl gilt Englisch für englischsprachige Browser, sonst Deutsch. Texte in den Skripten laufen über `T("deutscher Text", { platzhalter })`, die festen Texte in `index.html` werden beim Laden anhand desselben Wörterbuchs ersetzt; fehlt eine Übersetzung, bleibt der deutsche Text stehen. Kennungen für Lernstand und Wettbewerb hängen nicht von der Sprache ab. Die 698 Fiqh-Quizfragen und die Themennamen stehen englisch in `fiqh-en.js` (Schlüssel ist die deutsche Frage; `app.js` tauscht sie beim Laden aus, `q_de` bleibt für die Lernstand-Kennung). Die Abschnittsüberschriften stehen dort ebenfalls englisch. Noch nicht übersetzt: die Fiqh-Nachschlagetexte, die Erklärungen zum Madina-Buch und die Datenschutzseite.
 - **Fächer** (Startseite): eine Karte pro Fach mit Fortschritt – Fiqh und Arabisch, bald ʿAqīda, Tazkiya und Propheten. Die Leiste hat nur noch Fächer · Quiz · Wettbewerb · Chat; innerhalb eines Fachs führt eine eigene Leiste zurück zu allen Fächern und zwischen den Teilen (bei Fiqh: Nachschlagen | Lernen). Ein neues Fach bekommt einen Eintrag in `home.js` und eine eigene Ansicht.

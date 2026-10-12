@@ -16,6 +16,7 @@
 
   var subject = APP.store("lp-subject") === "fiqh" ? "fiqh" : "arabisch";
   if (!AR) subject = "fiqh";
+  if (APP.fiqhOff && AR) subject = "arabisch";   // Fiqh is being rebuilt
 
   /* ---------- measuring an area (a list of question ids) ---------- */
   function measure(ids) {
@@ -221,7 +222,7 @@
     var areas = areasFor(subject), all = measure(allIds(subject));
     var probs = problems(areas), strong = strengths(areas);
     $all("[data-lp-subject]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lp-subject") === subject ? "true" : "false"); });
-    $("#lp-subjects").hidden = !AR;
+    $("#lp-subjects").hidden = !AR || !!APP.fiqhOff;
 
     var round = $("#lp-round");
     if (lastRound) {
@@ -307,7 +308,7 @@
     });
   }
   function open(sub) {
-    if (sub) { subject = sub; APP.store("lp-subject", sub); }
+    if (sub && !(APP.fiqhOff && sub === "fiqh" && AR)) { subject = sub; APP.store("lp-subject", sub); }
     APP.showView("lernstand");
     window.scrollTo(0, 0);
   }
