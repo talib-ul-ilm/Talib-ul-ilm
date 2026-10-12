@@ -64,8 +64,9 @@
   var AR_Q = 10, AR_VERBS = 2;
   var AR_CELLS = AR_VERBS * 2 * 14, AR_TOTAL = 3 * AR_Q + AR_CELLS;
   var SARF_CELL = 10, SARF_PERFECT = 50;
-  /* Fiqh is being rebuilt (app.js fiqhOff): the Fiqh-Liga rests, only the Arabisch-Liga runs */
-  var FIQH_PAUSED = !!APP.fiqhOff;
+  /* The Fiqh-Liga rests for now (Fiqh was rebuilt with a new source); only the Arabisch-Liga runs.
+     Set to !!APP.fiqhOff to bring it back once Fiqh has content. */
+  var FIQH_PAUSED = true;
   var league = FIQH_PAUSED || APP.store("league") === "arabisch" ? "arabisch" : "fiqh";
   function arTheme(weekIndex) {
     var A = window.FIQH_ARABIC, ls = A ? A.lessons : [], per = Math.ceil(ls.length / WEEKS_PER_SEASON) || 1;
@@ -453,7 +454,7 @@
     $("#comp-theme-topics").textContent = league === "fiqh" ? theme.topics.map(function (t) { return t.title; }).join(" · ")
       : theme.lessons.map(function (l) { return l.title; }).join(" · ");
     $("#comp-sub").textContent = T("Saison {n} läuft vom {a} bis {b}", { n: cal.season, a: day(cal.seasonStart), b: day(cal.seasonEnd - 1) }) +
-      " – " + lg.what + ". " + T("Die Summe der vier Wochen entscheidet.") + (FIQH_PAUSED ? " " + T("Die Fiqh-Liga ruht, bis Fiqh mit der neuen Quelle zurück ist.") : "");
+      " – " + lg.what + ". " + T("Die Summe der vier Wochen entscheidet.") + (FIQH_PAUSED ? " " + T("Die Fiqh-Liga ruht vorerst.") : "");
     updateCountdown();
 
     var comp = mine ? mine.comp : {};

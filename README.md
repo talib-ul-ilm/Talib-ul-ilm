@@ -2,14 +2,27 @@
 
 Eine Lernseite für Fiqh, Arabisch (Madina-Bücher) und Taǧwīd.
 
-> **Fiqh wird neu aufgebaut.** Die bisherige Quelle wurde mit allen Inhalten entfernt: die Folien „Fiqh Unterricht 1–16“, das İlmihal von H. Döndüren (`buch/`), die englischen Fragen (`fiqh-en.js`) und die Belege (`fiqh-belege.js`). Die neue Quelle kommt nach `data.js`, das Format steht dort im Kopf.
+> **Fiqh nach „Wasīlatu ṭ-Ṭalab“** (وسيلة الطلب) von Mullā al-Ḥanafī al-Aḥsāʾī (gest. 1270 n. H.): eine kurze hanafitische Abhandlung über das, worüber der Verantwortliche nicht unwissend sein darf. Die frühere Quelle (Folien „Fiqh Unterricht 1–16“, İlmihal von H. Döndüren, `fiqh-en.js`, `fiqh-belege.js`) ist entfernt.
 >
-> Solange `FIQH_QUESTIONS` leer ist (`APP.fiqhOff`), gilt:
-> - Nachschlagen und Lernen zeigen einen Hinweis.
-> - Die Startseite zeigt Fiqh als „Wird neu aufgebaut“.
-> - Das Quiz bietet nur Arabisch und Taǧwīd an.
-> - „Mein Lernstand“ und der Fehlerordner zeigen kein Fiqh.
-> - Die **Fiqh-Liga ruht**; im Wettbewerb läuft nur die Arabisch-Liga.
+> - `data.js` enthält **29 Themen** in sechs Sachgebieten, mit **96 Abschnitten** und **317 Quizfragen**:
+>   - Grundlagen: das Buch und sein Autor, die Rechtsurteile, Islām und Īmān, Ridda, große Sünden, Reue
+>   - Reinheit
+>   - Gebet
+>   - Zakāt
+>   - Fasten
+>   - Ḥaǧǧ
+> - Der Haupttext des Buches steht in normalen Abschnitten. Die Erläuterungen der Ausgabe stehen in Abschnitten mit `note: true`; sie tragen die Marke „Erläuterung“ und nennen die klassischen Werke, auf die sie sich stützen (Marāqī l-Falāḥ, al-Iḫtiyār, Ḥāšiyat aṭ-Ṭaḥṭāwī, al-Lubāb, Radd al-Muḥtār u. a.). Den Übersetzer nennt die Seite nicht.
+> - Jede Frage trägt ihr Niveau selbst (`lvl`):
+>   - 1 = Haupttext
+>   - 2 = Einzelheiten
+>   - 3 = Erläuterungen und Maße
+> - **Die Rechtsurteile (Aḥkām at-Taklīf)** (Thema `ahkam`, Quelle `src: "Nizamiya – Aḥkām at-Taklīf"`): nach der Tabelle der Nizamiya.
+>   - Die Skala reicht von Farḍ über Wāǧib, Sunna muʾakkada, Sunna ġayr muʾakkada und Mustaḥabb bis Mubāḥ, dann weiter über Tark al-awlā, Makrūh tanzīhan, Isāʾa und Makrūh taḥrīman bis Ḥarām.
+>   - Dazu die Gegenstücke und die Anmerkungen der Tabelle.
+>   - Nachschlagen zeigt die Skala farbig (`scale` im Abschnitt, `.ruling-scale`).
+>   - Die Fragen verknüpfen die Begriffe mit Beispielen aus dem Buch.
+> - Die **Fiqh-Liga ruht** vorerst (`FIQH_PAUSED` in `social.js`); im Wettbewerb läuft nur die Arabisch-Liga. Englische Fiqh-Texte gibt es noch nicht.
+> - Ohne Fiqh-Fragen (`APP.fiqhOff`) zeigen Nachschlagen und Lernen einen Hinweis.
 >
 > Die Abschnitte unten zu den alten Fiqh-Inhalten beschreiben den Stand vor dem Umbau.
 

@@ -1362,6 +1362,13 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .lvl strong { font-weight: 700; font-size: .98rem; line-height: 1.2; min-width: 0; }
 .lvl small { color: var(--muted); font-size: .85rem; }
 .lvl-count { font-style: normal; color: var(--muted); font-size: .78rem; font-variant-numeric: tabular-nums; }
+.ruling-scale { list-style: none; margin: 4px 0 16px; padding: 0 0 0 22px; position: relative; display: grid; gap: 6px; }
+.ruling-scale::before { content: ""; position: absolute; left: 7px; top: 8px; bottom: 8px; width: 4px; border-radius: 2px;
+  background: linear-gradient(#3f9a3a, #5aa9a4 38%, #8fa3c9 50%, #e3a92b 68%, #b8261e); }
+.ruling-scale li { position: relative; display: flex; flex-wrap: wrap; gap: 2px 10px; align-items: baseline; padding: 6px 10px; border-radius: 10px; background: var(--surface); border: 1px solid var(--line); }
+.ruling-scale li::before { content: ""; position: absolute; left: -20px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--surface); border: 3px solid var(--c); }
+.ruling-scale b { font-weight: 700; }
+.ruling-scale span { color: var(--muted); font-size: .9rem; }
 .fiqh-rebuild { padding-top: 28px; padding-bottom: 40px; }
 .fiqh-rebuild .panel { padding: 24px 26px; display: grid; gap: 10px; justify-items: start; }
 .fiqh-rebuild h2 { margin: 0; font: 600 1.7rem/1.15 var(--display); }
@@ -1461,7 +1468,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
       <div class="wrap intro">
         <p class="hero-eyebrow">Nachschlagewerk <span lang="ar" dir="rtl">·&nbsp;مرجع</span></p>
         <h1>Alle Fiqh-Themen zum Nachschlagen</h1>
-        <p>Die Fiqh-Inhalte werden gerade aus einer neuen Quelle neu aufgebaut.</p>
+        <p>Nach „Wasīlatu ṭ-Ṭalab“ von Mullā al-Ḥanafī al-Aḥsāʾī – eine kurze hanafitische Abhandlung über das, was jeder Verantwortliche wissen muss: Glaubensgrundlagen, Reinheit, Gebet, Zakāt, Fasten und Ḥaǧǧ. Dazu die Begriffe der Rechtsurteile von Farḍ bis Ḥarām.</p>
         <div class="stats"><span><b id="stat-topics">25</b> Themengebiete</span><span><b id="stat-sections">0</b> Abschnitte</span><span><b id="stat-questions">0</b> Quizfragen</span></div>
       </div>
     </div>
@@ -2079,7 +2086,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 
 <footer class="foot">
   <div class="wrap">
-    <p>Die Seite ist eine Lernhilfe und ersetzt nicht den Unterricht. Bei konkreten Fragen wende dich an deine Lehrkraft oder eine Gelehrte bzw. einen Gelehrten.</p>
+    <p>Fiqh nach „Wasīlatu ṭ-Ṭalab“ (Mullā al-Ḥanafī al-Aḥsāʾī). Die Seite ist eine Lernhilfe und ersetzt nicht den Unterricht. Bei konkreten Fragen wende dich an deine Lehrkraft oder eine Gelehrte bzw. einen Gelehrten.</p>
     <p class="foot-links"><a href="datenschutz.html">Datenschutz &amp; Regeln</a> · <a href="datenschutz.html#impressum">Impressum</a></p>
   </div>
 </footer>

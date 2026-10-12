@@ -10,14 +10,15 @@
      the Quiz offers the other subjects and the Fiqh-Liga rests (social.js). */
   var FIQH_OFF = !QUESTIONS.length;
 
-  /* Niveau of each Fiqh question (Quiz: Anfänger · Mubtadiʾ / Fortgeschritten · Ṭālibu l-ʿIlm / Experte · Ustāḏ), worked out from the
-     German text: questions on differences between the imams, fatwa opinions, Uṣūl terms or exact measures → 3;
-     the lessons and the definition questions of the book → 1; the other in-depth questions of the book → 2. */
+  /* Niveau of each Fiqh question (Quiz: Anfänger · Mubtadiʾ / Fortgeschritten · Ṭālibu l-ʿIlm / Experte · Ustāḏ):
+     data.js gives it with lvl (1 = the main text, 2 = details, 3 = the explanations of the edition);
+     a question without lvl gets one from its German text. */
   var LEVEL_HARD = /Abū Yūsuf|Imām Muḥammad|\bMuḥammad\b(?! ﷺ)|Zufar|Šāfiʿ|Schāfiʿ|Mālik|Aḥmad|Ḥanbal|Mehrheit|Fatwa|fatwā|Madhab|Madhhab|Meinung|Ansicht|Unterschied|Iḫtilāf|Ikhtilaf|ẓannī|qaṭʿī|Āḥād|Naskh|Nāsiḫ|muṭlaq|muqayyad|Muḥkam|Qiyās|ʿIlla|Istiḥsān|Gramm|Miṯqāl|Mithqal|Ṣāʿ|Dirham|Dinar|Niṣāb|Elle|Kilometer|Farsaḫ|taḥrīmī|tanzīhī|li-ġairihī|li-ḏātihī/;
   var LEVEL_DEF = /^(Was (bedeutet|ist|sind|heißt)|Wie (nennt man|heißt|nennen)|Welche(s|r)? (Wort|Begriff|Name))/;
   QUESTIONS.forEach(function (q) {
+    if (q.lvl) return;
     var text = q.q + " " + q.a.join(" ") + " " + (q.e || "");
-    q.lvl = LEVEL_HARD.test(text) ? 3 : q.src !== "buch" || LEVEL_DEF.test(q.q) ? 1 : 2;
+    q.lvl = LEVEL_HARD.test(text) ? 3 : LEVEL_DEF.test(q.q) ? 1 : 2;
   });
 
   /* English: swap in translated questions and topic names. q_de keeps the
@@ -39,12 +40,12 @@
 
   /* Topics are grouped into Sachgebiete; unknown ids fall into "Weitere". */
   var GROUPS = [
-    { name: "Glaube & Grundlagen", ids: ["quellen", "madhabs", "ahkam", "iman"] },
-    { name: "Reinheit", ids: ["tahara", "wudhu", "ghusl", "tayammum", "frauen"] },
-    { name: "Gebet", ids: ["gebet", "ablauf", "adhan", "jamaa", "jumua", "nawafil", "sujud", "janaza"] },
-    { name: "Fasten", ids: ["fasten", "kaffara"] },
-    { name: "Zakāt & Ḥaǧǧ", ids: ["zakat", "hajj", "qurban"] },
-    { name: "Alltag & Gesellschaft", ids: ["familie", "wirtschaft", "alltag"] }
+    { name: "Grundlagen", ids: ["buch", "ahkam", "iman", "ridda", "kabair", "tawba"] },
+    { name: "Reinheit", ids: ["wudhu", "ghusl", "wasser", "tayammum", "najasa", "istinja"] },
+    { name: "Gebet", ids: ["shurut", "arkan", "wajibat", "sunan", "mufsidat", "makruhat", "witr", "sahw", "janaza"] },
+    { name: "Zakāt", ids: ["zakat", "masarif", "fitr"] },
+    { name: "Fasten", ids: ["saum", "mufattirat"] },
+    { name: "Ḥaǧǧ", ids: ["hajj", "ablauf", "arafa"] }
   ];
   (function () {
     var placed = {};
@@ -59,21 +60,11 @@
     GROUPS.forEach(function (g) { TOPICS = TOPICS.concat(g.topics); });
   })();
 
-  var BOOK = "İlmihal (H. Döndüren)";
-  function hasBook(t) { return t.sections.some(function (s) { return s.src; }); }
-  function topicSource(t) {
-    return hasBook(t) && t.lessons.indexOf("İlmihal") === -1 ? t.lessons + " · " + T("ergänzt aus dem İlmihal") : t.lessons;
-  }
-  /* "İlmihal S. 126–132" → "S. 126–132" (English: "pp. 126–132"). */
-  function pages(src) {
-    var p = String(src).replace(/^İlmihal S\. /, "");
-    return window.I18N && I18N.lang === "en" && p.indexOf("–") !== -1 ? "pp. " + p : T("S. {p}", { p: p });
-  }
-  function lessonNo(s) { return (s.u || "").replace(/^Unterricht /, ""); }
-  function srcBadge(s) {
-    if (s.src) return ' <span class="src-badge" title="' + esc(BOOK) + '">İlmihal ' + esc(pages(s.src)) + "</span>";
-    return s.u ? ' <span class="src-badge">' + esc(T("Unterricht {n}", { n: lessonNo(s) })) + "</span>" : "";
-  }
+  /* Source: „Wasīlatu ṭ-Ṭalab“ (Mullā al-Ḥanafī al-Aḥsāʾī); a topic can name another source (src).
+     Sections with note: true hold the explanations of the edition and get the badge „Erläuterung“. */
+  var BOOK = "Wasīlatu ṭ-Ṭalab";
+  function topicSource(t) { return t.src ? t.src : BOOK + " · " + t.lessons; }
+  function srcBadge(s) { return s.note ? ' <span class="src-badge">' + esc(T("Erläuterung")) + "</span>" : ""; }
   /* Evidence (fiqh-belege.js): Qurʾān verse, hadith, qiyās … with the place in the İlmihal. */
   var DALIL = window.FIQH_DALIL || {};
   var DALIL_KIND = { Q: "Qurʾān", H: "Hadith", A: "Wort eines Gefährten", I: "Idschmāʿ", K: "Qiyās", S: "Istiḥsān",
@@ -94,9 +85,7 @@
     var t = TOPIC_BY_ID[q.t];
     if (!t) return T(q.srcText || "");
     var s = t.sections[q.s];
-    if (!s) return T("Quelle:") + " " + (q.src === "buch" ? BOOK : t.lessons) + " – " + t.title;
-    var where = s.src ? BOOK + ", " + pages(s.src) : T("Fiqh-Unterricht {n}", { n: lessonNo(s) });
-    return T("Quelle:") + " " + where + " · " + t.title + " › " + s.h;
+    return T("Quelle:") + " " + (t.src || BOOK) + " · " + t.title + (s ? " › " + s.h : "");
   }
 
   var QUESTION_SECONDS = 30;
@@ -243,7 +232,7 @@
         return '<a href="#" data-jump="sec-' + t.id + "-" + i + '">' + esc(s.h) + "</a>";
       }).join("") + "</nav></header>";
     html += t.sections.map(function (s, i) {
-      return '<section class="entry" id="sec-' + t.id + "-" + i + '"><h3>' + esc(s.h) + srcBadge(s) + "</h3><ul>" +
+      return '<section class="entry" id="sec-' + t.id + "-" + i + '"><h3>' + esc(s.h) + srcBadge(s) + "</h3>" + scaleHtml(s.scale) + "<ul>" +
         s.li.map(function (li) { return "<li>" + fmt(li) + "</li>"; }).join("") + "</ul></section>";
     }).join("");
     var art = $("#article");
@@ -256,6 +245,13 @@
     }
   }
 
+  /* a scale of terms (the rulings from farḍ to ḥarām): [term, meaning, colour] */
+  function scaleHtml(list) {
+    if (!list) return "";
+    return '<ol class="ruling-scale">' + list.map(function (x) {
+      return '<li style="--c:' + esc(x[2]) + '"><b>' + esc(x[0]) + "</b><span>" + esc(T(x[1])) + "</span></li>";
+    }).join("") + "</ol>";
+  }
   function wireArticle(root) {
     $all("[data-quiz-topic]", root).forEach(function (b) {
       b.addEventListener("click", function () {

@@ -12,7 +12,7 @@
   var SUBJECTS = [
     { id: "fiqh", name: "Fiqh", ar: "الفقه", rebuild: !!APP.fiqhOff,
       text: APP.fiqhOff ? T("Fiqh wird gerade mit einer neuen Quelle neu aufgebaut. Die neuen Themen kommen bald.")
-        : T("Das praktische Recht: Reinheit, Gebet, Fasten, Zakāt, Ḥaǧǧ und Alltag – mit Schwerpunkt auf der hanafitischen Rechtsschule."),
+        : T("Das praktische Recht nach der hanafitischen Rechtsschule – nach „Wasīlatu ṭ-Ṭalab“: Glaubensgrundlagen, Reinheit, Gebet, Zakāt, Fasten und Ḥaǧǧ, dazu die Begriffe der Rechtsurteile."),
       meta: function () { return [[APP.TOPICS.length, T("Themen")], [APP.QUESTIONS.length, T("Fragen")]]; },
       stats: function () { return L ? L.stats() : null; },
       actions: [{ label: T("Nachschlagen"), view: "nachschlagen", primary: true }, { label: T("Lernen"), view: "lernen", progress: true }] },
