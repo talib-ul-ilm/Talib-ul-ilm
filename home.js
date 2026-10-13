@@ -29,7 +29,7 @@
       text: T("Den Qurʾān richtig lesen: Madd, Nūn und Mīm sākina, Lām, Rāʾ, Qalqala, die Austrittsstellen der Buchstaben und die Pausenzeichen."),
       meta: function () { return TJ ? [[TJ.chapters.length, T("Kapitel")], [TJ.questions.length, T("Übungen")]] : []; },
       stats: function () { return TJ ? TJ.stats() : null; },
-      actions: [{ label: T("Kapitel öffnen"), view: "tajwid", primary: true }] },
+      actions: [{ label: T("Nachschlagen"), view: "tajwid", tab: "nachschlagen", primary: true }, { label: T("Lernen"), view: "tajwid", tab: "lernen", progress: true }] },
     { id: "aqida", name: "ʿAqīda", ar: "العقيدة", soon: true,
       text: T("Die Glaubenslehre: Allah, Seine Namen und Eigenschaften und die sechs Säulen des Īmān.") },
     { id: "tazkiya", name: "Tazkiya", ar: "التزكية", soon: true,
@@ -79,6 +79,7 @@
         var tab = b.getAttribute("data-tab");
         APP.showView(b.getAttribute("data-open")); window.scrollTo(0, 0);
         /* Arabisch: straight to a tab (Nachschlagen or the lessons) */
+        if (tab && b.getAttribute("data-open") === "tajwid") { if (window.FIQH_TAJWID && window.FIQH_TAJWID.setMode) window.FIQH_TAJWID.setMode(tab); var tb = document.getElementById("tj-body"); if (tab === "nachschlagen" && tb) tb.scrollIntoView({ block: "start" }); return; }
         if (tab && window.FIQH_ARABIC_RENDER) {
           window.FIQH_ARABIC_RENDER(tab);
           var tabs = document.getElementById("ar-tabs");

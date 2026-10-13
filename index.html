@@ -1411,6 +1411,8 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .tj-bq [lang="ar"] { font: 400 1.2rem/1.7 var(--arabic); color: var(--primary); text-align: right; flex: 1; }
 .tj-bn { flex: none; font: 700 .75rem/1 var(--body); color: var(--muted); background: var(--surface-2); border-radius: 6px; padding: 4px 6px; }
 .tj-ba { margin: 0; }
+.lk-card .tj-rule { border: 0; padding: 0; background: none; }
+.lk-where { text-align: left; }
 .tj-tuhfa-btns { display: flex; flex-wrap: wrap; gap: 8px; }
 .tj-info { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 10px 14px; }
 .tj-info > summary, .tj-vmore > summary { cursor: pointer; font-weight: 700; color: var(--primary); }
@@ -1675,6 +1677,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
     <nav class="subject-bar" aria-label="Fach Taǧwīd"><div class="wrap">
       <button type="button" class="sb-back" data-go="start"><span aria-hidden="true">←</span> Fächer</button>
       <span class="sb-title">Taǧwīd <span lang="ar" dir="rtl">التَّجْوِيدُ</span></span>
+      <div class="sb-tabs" id="tj-tabs"><button type="button" data-tj-mode="nachschlagen">Nachschlagen</button><button type="button" data-tj-mode="lernen" aria-current="page">Lernen</button></div>
     </div></nav>
     <div class="hero hero-ar">
       <div class="wrap intro">
