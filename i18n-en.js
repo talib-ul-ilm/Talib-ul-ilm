@@ -1038,5 +1038,12 @@ window.I18N_EN = {
  "Die Tuḥfat al-Aṭfāl von Sulaimān al-Ǧamzūrī – vollständig, Vers für Vers. Sie ergänzt die Kapitel: Bei jedem Teil führt ein Verweis zum Kapitel mit denselben Regeln. Tippe auf „Wortschatz und Erklärung“ unter einem Vers.": "The Tuḥfat al-Aṭfāl of Sulaymān al-Jamzūrī – complete, verse by verse. It supplements the chapters: each part links to the chapter with the same rules. Tap “Vocabulary and explanation” below a verse.",
  "Über das Werk": "About the work",
  "Die Verse": "The verses",
- "In der Tuḥfat al-Aṭfāl": "In the Tuḥfat al-Aṭfāl"
+ "In der Tuḥfat al-Aṭfāl": "In the Tuḥfat al-Aṭfāl",
+ "Regel": "Rule",
+ "Frage aus dem Heft": "Question from the booklet",
+ "In der Tuḥfa öffnen": "Open in the Tuḥfa",
+ "Alle Regeln nach Kapitel": "All rules by chapter",
+ "Taǧwīd nachschlagen": "Look up tajwīd",
+ "z. B. Iḫfāʾ, Madd lāzim, Qalqala, إخفاء …": "e.g. Ikhfāʾ, Madd lāzim, Qalqala, إخفاء …",
+ "Tuḥfat al-Aṭfāl": "Tuḥfat al-Aṭfāl"
 };

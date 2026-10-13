@@ -223,7 +223,7 @@
   APP.onResume("tj-round", function (a, qs) { return preset(qs, a.id, a.review, a.before); });
 
   /* ---------- state ---------- */
-  var state = { chapter: null, part: null };
+  var state = { chapter: null, part: null, mode: "lernen" };
   try { var saved = JSON.parse(localStorage.getItem("fiqh:tajwid") || "null"); if (saved && (BY_ID[saved.chapter] || (saved.chapter === "tuhfa" && TU))) state.chapter = saved.chapter; } catch (e) {}
   function remember() { try { localStorage.setItem("fiqh:tajwid", JSON.stringify({ chapter: state.chapter })); } catch (e) {} }
 
@@ -374,6 +374,94 @@
       (next ? '<button type="button" class="btn" data-tj-ch="' + next.id + '">' + esc(next.title) + " →</button>" : "<span></span>") + "</nav></div>";
   }
 
+  /* ---------- Nachschlagen: rules of all chapters, tables, booklet questions, terms and the Tuḥfa, searchable ---------- */
+  function norm(s) {
+    return String(s).replace(/\*\*/g, "")
+      .replace(/[ً-ْٰـ]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه")
+      .replace(/[šŠ]/g, "sch").normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[ʿʾ'’`ʼ‘]/g, "")
+      .replace(/ß/g, "ss").toLowerCase();
+  }
+  var LK_MAX = 60, lkEntries = null;
+  var LK_KINDS = [["all", "Alles"], ["regel", "Regeln"], ["heft", "Fragen aus dem Heft"], ["begriff", "Begriffe"], ["tuhfa", "Tuḥfat al-Aṭfāl"]];
+  var LK_TOPICS = ["Iẓhār", "Idġām", "Iqlāb", "Iḫfāʾ", "Ġunna", "Madd", "Qalqala", "Rāʾ", "Lām", "Tafḫīm", "Maḫraǧ", "Waqf", "Sakt", "Hamzat al-waṣl"];
+  var lk = { q: "" };
+  try { var lk0 = JSON.parse(localStorage.getItem("fiqh:tjlookup") || "null"); if (lk0) lk.q = lk0.q || ""; } catch (e) {}
+  lk.kind = "all";
+  function lkBuild() {
+    var out = [];
+    CH.forEach(function (c) {
+      c.rules.forEach(function (r, i) {
+        out.push({ kind: "regel", c: c, r: r, hay: norm([r.h, r.ar, r.text, c.title, c.ar].concat((r.ex || []).map(function (e) { return e.join(" "); })).join(" ")) });
+      });
+      if (c.table) out.push({ kind: "regel", c: c, table: c.table, hay: norm([T("Übersicht"), c.title].concat(c.table.head, c.table.rows.map(function (r) { return r.join(" "); })).join(" ")) });
+      c.book.forEach(function (b) { out.push({ kind: "heft", c: c, b: b, hay: norm(b.join(" ") + " " + c.title) }); });
+    });
+    if (BG) BG.LIST.forEach(function (t) { out.push({ kind: "begriff", t: t, hay: norm(t.join(" ") + " " + (BG.GROUPS[t[2]] || "")) }); });
+    VERSES.forEach(function (v) { out.push({ kind: "tuhfa", v: v, hay: norm([v.a, v.b, v.de, v.part.title].concat(v.x, v.w.map(function (w) { return w.join(" "); })).join(" ")) }); });
+    return out;
+  }
+  function lkAll() { return lkEntries || (lkEntries = lkBuild()); }
+  function lkWords() { return norm(lk.q).split(/\s+/).filter(Boolean); }
+  function lkMatch(e, words) { return words.every(function (w) { return e.hay.indexOf(w) !== -1; }); }
+  function chLink(c) { return '<button type="button" class="linkish lk-where" data-tj-ch="' + c.id + '">' + T("Kapitel") + " " + c.n + " – " + esc(c.title) + " →</button>"; }
+  function lkCard(e) {
+    if (e.kind === "regel" && e.table) return '<li class="lk-card"><p class="lk-tag">' + T("Übersicht") + "</p>" + tableHtml(e.table) + chLink(e.c) + "</li>";
+    if (e.kind === "regel") return '<li class="lk-card"><p class="lk-tag">' + T("Regel") + "</p>" + ruleHtml(e.r) + chLink(e.c) + "</li>";
+    if (e.kind === "heft") return '<li class="lk-card"><p class="lk-tag">' + T("Frage aus dem Heft") + " " + e.b[0] + '</p><p class="tj-bq">' + ar(e.b[1]) + '</p><p class="tj-ba">' + mixed(e.b[2]) + "</p>" + chLink(e.c) + "</li>";
+    if (e.kind === "begriff") return '<li class="lk-card lk-term"><p class="lk-tag">' + T("Begriff") + " · " + esc(BG.GROUPS[e.t[2]] || "") + "</p><p><b>" + esc(e.t[0]) + "</b> " + ar(e.t[1], "tj-rule-ar") + " – " + mixed(e.t[3]) +
+      (e.t[4] ? ' <small class="tj-lit">' + T("wörtlich: {w}", { w: esc(e.t[4]) }) + "</small>" : "") + "</p></li>";
+    var v = e.v;
+    return '<li class="lk-card"><p class="lk-tag">Tuḥfat al-Aṭfāl · ' + T("Vers {n}", { n: v.n }) + " · " + esc(v.part.title) + '</p><div class="tj-hemis" lang="ar" dir="rtl"><span>' + esc(v.a) + "</span><span>" + esc(v.b) + "</span></div>" +
+      '<p class="tj-vde">' + md(v.de) + '</p><details class="tj-vmore"><summary>' + T("Wortschatz und Erklärung") + '</summary><ul class="tj-expl">' + v.x.map(function (x) { return "<li>" + md(x) + "</li>"; }).join("") + "</ul></details>" +
+      '<button type="button" class="linkish lk-where" data-tj-tuhfa="' + v.part.id + '">' + T("In der Tuḥfa öffnen") + " →</button></li>";
+  }
+  function lkResults() {
+    var words = lkWords();
+    if (!words.length && lk.kind === "all") {
+      return '<h3 class="lk-h">' + T("Alle Regeln nach Kapitel") + "</h3>" + CH.map(function (c) {
+        var list = lkAll().filter(function (e) { return e.kind === "regel" && e.c === c; });
+        return '<details class="lk-lesson"><summary><span>' + T("Kapitel") + " " + c.n + " – " + esc(c.title) + " " + ar(c.ar, "lk-ar") + "</span><small>" + list.length + "</small></summary>" +
+          '<ul class="lk-list">' + list.map(lkCard).join("") + "</ul></details>";
+      }).join("");
+    }
+    var list = lkAll().filter(function (e) { return (lk.kind === "all" || e.kind === lk.kind) && lkMatch(e, words); });
+    if (!list.length) return '<p class="lk-none">' + T("Nichts gefunden. Versuche ein anderes Wort – deutsch, arabisch oder in Umschrift.") + "</p>";
+    return '<p class="lk-count">' + T(list.length === 1 ? "1 Treffer" : "{n} Treffer", { n: list.length }) + (list.length > LK_MAX ? " · " + T("die ersten {n} – verfeinere die Suche", { n: LK_MAX }) : "") + "</p>" +
+      '<ul class="lk-list">' + list.slice(0, LK_MAX).map(lkCard).join("") + "</ul>";
+  }
+  function lkKinds() {
+    var words = lkWords(), c = { all: 0, regel: 0, heft: 0, begriff: 0, tuhfa: 0 };
+    lkAll().forEach(function (e) { if (lkMatch(e, words)) { c.all++; c[e.kind]++; } });
+    return LK_KINDS.map(function (k) {
+      return '<button type="button" class="chip" data-lk-kind="' + k[0] + '" aria-pressed="' + (lk.kind === k[0]) + '">' + esc(T(k[1])) + '<span class="chip-count">' + c[k[0]] + "</span></button>";
+    }).join("");
+  }
+  function lookupPane() {
+    return '<div class="lk-pane">' +
+      '<div class="panel lk-search"><label class="lk-label" for="tj-lk-q">' + T("Taǧwīd nachschlagen") + "</label>" +
+      '<input type="search" id="tj-lk-q" class="lk-input" autocomplete="off" placeholder="' + esc(T("z. B. Iḫfāʾ, Madd lāzim, Qalqala, إخفاء …")) + '" value="' + esc(lk.q) + '">' +
+      '<div class="chips lk-kinds">' + lkKinds() + "</div>" +
+      '<div class="lk-topics"><span>' + T("Themen:") + "</span>" + LK_TOPICS.map(function (t) { return '<button type="button" class="linkish" data-lk-topic="' + esc(t) + '">' + esc(t) + "</button>"; }).join("") + "</div></div>" +
+      '<div id="tj-lk-results">' + lkResults() + "</div></div>";
+  }
+  function lkRefresh(body) {
+    var r = $("#tj-lk-results", body), k = $(".lk-kinds", body);
+    if (r) { r.innerHTML = lkResults(); wire(r); }
+    if (k) { k.innerHTML = lkKinds(); lkWireKinds(body); }
+    try { localStorage.setItem("fiqh:tjlookup", JSON.stringify({ q: lk.q })); } catch (e) {}
+  }
+  function lkWireKinds(body) {
+    $all("[data-lk-kind]", body).forEach(function (b) { b.addEventListener("click", function () { lk.kind = b.getAttribute("data-lk-kind"); lkRefresh(body); }); });
+  }
+  function lkWire(body) {
+    var input = $("#tj-lk-q", body), timer = null;
+    if (!input) return;
+    input.addEventListener("input", function () { clearTimeout(timer); timer = setTimeout(function () { lk.q = input.value; lkRefresh(body); }, 120); });
+    $all("[data-lk-topic]", body).forEach(function (b) { b.addEventListener("click", function () { input.value = lk.q = b.getAttribute("data-lk-topic"); lkRefresh(body); }); });
+    lkWireKinds(body);
+  }
+  function setMode(m) { state.mode = m === "nachschlagen" ? "nachschlagen" : "lernen"; render(); }
+
   function renderRound() {
     var box = $("#tj-round");
     if (!lastRound) { box.hidden = true; box.innerHTML = ""; return; }
@@ -403,10 +491,14 @@
     var open = all.wrong + all.almost, mis = $("#tj-mistakes");
     mis.hidden = !open;
     mis.textContent = T("Fehler wiederholen ({n})", { n: open });
-    renderRound();
+    var look = state.mode === "nachschlagen";
+    $all("[data-tj-mode]").forEach(function (b) { if (b.getAttribute("data-tj-mode") === state.mode) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); });
+    $(".tajwid .learn-head").hidden = look;
+    if (look) { $("#tj-round").hidden = true; } else renderRound();
     var body = $("#tj-body");
-    body.innerHTML = state.chapter === "tuhfa" && TU ? tuhfaPane() : state.chapter && BY_ID[state.chapter] ? chapterPane(BY_ID[state.chapter]) : listPane();
+    body.innerHTML = look ? lookupPane() : state.chapter === "tuhfa" && TU ? tuhfaPane() : state.chapter && BY_ID[state.chapter] ? chapterPane(BY_ID[state.chapter]) : listPane();
     wire(body);
+    if (look) lkWire(body);
   }
   function scrollToBody() {
     var el = $("#tj-body");
@@ -414,11 +506,11 @@
   }
   function wire(body) {
     $all("[data-tj-ch]", body).forEach(function (b) {
-      b.addEventListener("click", function () { state.chapter = b.getAttribute("data-tj-ch"); state.part = null; render(); scrollToBody(); });
+      b.addEventListener("click", function () { state.chapter = b.getAttribute("data-tj-ch"); state.part = null; state.mode = "lernen"; render(); scrollToBody(); });
     });
     $all("[data-tj-tuhfa]", body).forEach(function (b) {
       b.addEventListener("click", function () {
-        state.chapter = "tuhfa"; state.part = b.getAttribute("data-tj-tuhfa"); render();
+        state.chapter = "tuhfa"; state.part = b.getAttribute("data-tj-tuhfa"); state.mode = "lernen"; render();
         var el = document.getElementById("tuhfa-" + state.part);
         if (el) el.scrollIntoView({ block: "start" });
       });
@@ -450,10 +542,11 @@
   $("#tj-count-b").textContent = CH.reduce(function (n, c) { return n + c.book.length; }, 0);
 
   APP.on("view", function (name) { if (name === "tajwid") render(); });
+  $all("[data-tj-mode]").forEach(function (b) { b.addEventListener("click", function () { setMode(b.getAttribute("data-tj-mode")); window.scrollTo(0, 0); }); });
   if (L.onChange) L.onChange(function () { if (!view.hidden) render(); });
   render();
 
-  window.FIQH_TAJWID = { questions: QS, chapters: CH, tuhfa: TU ? TU.parts.map(function (p) { return { id: "tuhfa-" + p.id, title: p.title, ar: p.ar, range: range(p) }; }) : [], stats: function () { return stats(QS); } };
+  window.FIQH_TAJWID = { questions: QS, chapters: CH, tuhfa: TU ? TU.parts.map(function (p) { return { id: "tuhfa-" + p.id, title: p.title, ar: p.ar, range: range(p) }; }) : [], stats: function () { return stats(QS); }, setMode: setMode };
   /* the Quiz tab offers Taǧwīd too – its setup was drawn before this file loaded */
   if (APP.renderSetup && APP.isPlaying && !APP.isPlaying()) APP.renderSetup();
 })();
