@@ -77,7 +77,7 @@ topic({ id: "ahkam", title: "Die Rechtsurteile (Aḥkām at-Taklīf)", ar: "ال
   intro: "Die Begriffe, mit denen der Fiqh jede Handlung einordnet – auf einer Skala von Farḍ (Pflicht) über Mubāḥ (erlaubt) bis Ḥarām (verboten). Sie kommen in jedem Kapitel von „Wasīlatu ṭ-Ṭalab“ vor.",
   sections: [
     { h: "Die Skala: von der Pflicht bis zum Verbot", scale: [
-      ["Farḍ", "Pflicht", "#3f9a3a"], ["Wāǧib", "erforderlich · Farḍ ʿamalī", "#5aac55"], ["Sunna muʾakkada", "betonte Sunna", "#5bb38a"],
+      ["Farḍ", "Pflicht", "#3f9a3a"], ["Wāǧib", "erforderlich · stärkste Form: Farḍ ʿamalī", "#5aac55"], ["Sunna muʾakkada", "betonte Sunna", "#5bb38a"],
       ["Sunna ġayr muʾakkada", "nicht betonte Sunna", "#5aa9a4"], ["Mustaḥabb · Nafl · Mandūb · Adab · Taṭawwuʿ", "empfohlen / zusätzlich", "#6a9fbd"],
       ["Ḥalāl · Mubāḥ", "erlaubt", "#8fa3c9"], ["Tark al-awlā", "Unterlassung des Besseren", "#c9a16a"], ["Makrūh tanzīhan", "leicht verpönt", "#e3a92b"],
       ["Isāʾa", "Missetat", "#e07b24"], ["Makrūh taḥrīman", "verbotsnahe verpönt", "#d0501f"], ["Ḥarām", "verboten", "#b8261e"]], li: [
@@ -87,7 +87,8 @@ topic({ id: "ahkam", title: "Die Rechtsurteile (Aḥkām at-Taklīf)", ar: "ال
     ]},
     { h: "Die Seite des Gebotenen", li: [
       "**Farḍ** (Pflicht) – das stärkste Gebot. Beispiele aus dem Buch: die Säulen der Gebetswaschung, die Zakāt, der Ḥaǧǧ einmal im Leben.",
-      "**Wāǧib** (erforderlich), auch **Farḍ ʿamalī** (praktische Pflicht) genannt – in der Praxis wie eine Pflicht. Beispiele: das Witr-Gebet, die Fātiḥa im Gebet, die Reue von jeder Sünde.",
+      "**Wāǧib** (erforderlich) – in der Praxis wie eine Pflicht, aber nicht mit derselben Gewissheit belegt wie das Farḍ. Beispiele: das Witr-Gebet, die Fātiḥa im Gebet, die Reue von jeder Sünde.",
+      "Das Wāǧib hat **zwei Stufen**: Die **stärkste Form** heißt **Farḍ ʿamalī** (praktische Pflicht) – sie steht in der Praxis dem Farḍ gleich, z. B. das **Witr-Gebet** nach Abū Ḥanīfa. Schwächer ist z. B. die **Fātiḥa** im Gebet. Deshalb steht „Farḍ ʿamalī“ auf der Tabelle beim Wāǧib.",
       "**Sunna muʾakkada** (betonte Sunna) – z. B. die zwei Rakʿa vor dem Morgengebet, Aḏān und Iqāma für die Pflichtgebete.",
       "**Sunna ġayr muʾakkada** (nicht betonte Sunna).",
       "**Mustaḥabb / Nafl / Mandūb / Adab / Taṭawwuʿ** (empfohlen / zusätzlich) – z. B. das Suḥūr und sein Verspäten, vier Rakʿa vor dem Nachmittagsgebet."
@@ -122,11 +123,11 @@ q(0, 1, "Was ist das stärkste Urteil auf der Seite des Verbotenen?",
   ["Ḥarām (verboten)", "Makrūh taḥrīman", "Isāʾa", "Makrūh tanzīhan"],
   "Ganz rechts steht Ḥarām; davor Makrūh taḥrīman, Isāʾa, Makrūh tanzīhan und Tark al-awlā.");
 q(1, 1, "Was bedeutet „Wāǧib“?",
-  ["erforderlich – in der Praxis wie eine Pflicht (farḍ ʿamalī)", "erlaubt", "leicht verpönt", "empfohlen, aber nicht betont"],
-  "Wāǧib steht direkt nach Farḍ und heißt auch Farḍ ʿamalī, praktische Pflicht.");
-q(1, 2, "Wie heißt das Wāǧib noch?",
-  ["Farḍ ʿamalī (praktische Pflicht)", "Sunna muʾakkada", "Tark al-awlā", "Mandūb"],
-  "Auf der Tabelle steht unter Wāǧib: „Farḍ ʿAmalī (praktisch Pflicht)“.");
+  ["erforderlich – in der Praxis wie eine Pflicht", "erlaubt", "leicht verpönt", "empfohlen, aber nicht betont"],
+  "Wāǧib steht direkt nach Farḍ; seine stärkste Form heißt Farḍ ʿamalī (praktische Pflicht).");
+q(1, 2, "Was ist das „Farḍ ʿamalī“ (praktische Pflicht)?",
+  ["die stärkste Form des Wāǧib – in der Praxis wie ein Farḍ", "ein anderer Name für jedes Wāǧib", "die schwächste Form des Wāǧib", "eine betonte Sunna"],
+  "Das Wāǧib hat zwei Stufen. Die stärkere steht in der Praxis dem Farḍ gleich und heißt Farḍ ʿamalī – z. B. das Witr-Gebet nach Abū Ḥanīfa; schwächer ist z. B. die Fātiḥa im Gebet. Auf der Tabelle steht es beim Wāǧib.");
 q(1, 1, "Was bedeutet „Sunna muʾakkada“?",
   ["betonte Sunna", "nicht betonte Sunna", "Pflicht", "verbotsnahe verpönt"],
   "Muʾakkada heißt „bekräftigt, betont“ – Sunna muʾakkada ist die betonte Sunna.");
