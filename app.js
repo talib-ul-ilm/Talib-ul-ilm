@@ -761,6 +761,7 @@
     $("#q-streak").hidden = game.streak < 2;
     setText($("#q-text"), item.src.q);
     renderArabicLine(item.src);
+    renderIntro(item);
     $("#q-feedback").hidden = true;
     $("#joker").disabled = !game.joker;
     $("#joker").textContent = game.joker ? T("50:50-Joker") : T("Joker verbraucht");
@@ -777,6 +778,37 @@
     if (game.preset && game.preset.learn) stopTimer(); else startTimer();
     var first = $(".option", box);
     if (first && document.activeElement && document.activeElement.classList.contains("option")) first.focus();
+  }
+
+  /* A learn round can explain a rule before its exercises: preset.intro(question, index) returns
+     { title, html, first, fresh, n } or null. A new rule (fresh) comes as a card first – the question
+     appears after „Verstanden“; otherwise the rule can be opened above the question. */
+  function renderIntro(item) {
+    var box = $("#q-intro"), play = $("#quiz-play");
+    var intro = game.preset && game.preset.intro ? game.preset.intro(item.src, game.i) : null;
+    game.introGate = false;
+    play.classList.remove("intro-gate");
+    if (!box) return;
+    if (!intro) { box.hidden = true; box.innerHTML = ""; return; }
+    box.hidden = false;
+    game.introSeen = game.introSeen || {};
+    if (intro.first && intro.fresh && !game.introSeen[game.i]) {
+      game.introGate = true;
+      play.classList.add("intro-gate");
+      box.className = "q-intro is-new";
+      box.innerHTML = '<p class="q-intro-tag">' + esc(T("Neue Regel")) + "</p><h3>" + esc(intro.title) + '</h3><div class="q-intro-text">' + intro.html + "</div>" +
+        '<button type="button" class="btn btn-primary" id="q-intro-go">' + esc(intro.n > 1 ? T("Verstanden – jetzt {n} Übungen dazu", { n: intro.n }) : T("Verstanden – jetzt die Übung dazu")) + "</button>";
+      $("#q-intro-go").addEventListener("click", function () {
+        game.introSeen[game.i] = true;
+        renderIntro(item);
+        var first = $(".option", $("#q-options"));
+        if (first) first.focus({ preventScroll: true });
+        $("#q-text").scrollIntoView({ block: "nearest", behavior: "smooth" });
+      });
+      return;
+    }
+    box.className = "q-intro";
+    box.innerHTML = "<details" + (intro.first && !intro.fresh ? "" : "") + "><summary>" + esc(intro.first ? T("Zur Erinnerung: die Regel") : T("Die Regel zu dieser Übung")) + '</summary><div class="q-intro-text">' + intro.html + "</div></details>";
   }
 
   /* Arabic in questions and answers (Arabisch-Bereich): whole-Arabic text gets the Arabic
@@ -849,6 +881,7 @@
   $("#joker").addEventListener("click", useJoker);
 
   function answer(idx) {
+    if (game.introGate) return;
     if (game.answered || game.hidden.indexOf(idx) !== -1) return;
     game.answered = true;
     stopTimer();
@@ -1171,6 +1204,7 @@
     if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
     var k = e.key.toLowerCase();
     var map = { "1": 0, "2": 1, "3": 2, "4": 3, a: 0, b: 1, c: 2, d: 3 };
+    if (game.introGate) { if (k === "enter" && $("#q-intro-go")) { e.preventDefault(); $("#q-intro-go").click(); } return; }
     if (!game.answered && map.hasOwnProperty(k)) { e.preventDefault(); answer(map[k]); }
     else if (game.answered && (k === "enter" || k === " ") && document.activeElement !== $("#next-q")) { e.preventDefault(); $("#next-q").click(); }
   });

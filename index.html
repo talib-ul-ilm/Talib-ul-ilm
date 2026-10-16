@@ -831,6 +831,15 @@ h1, h2, h3, .brand-name, .tc-title, .ov-head, .q-text, .rank, .mode strong, .win
 /* learning rounds: no timer, points or joker */
 .play.is-learn .timer, .play.is-learn .score-pill, .play.is-learn .streak, .play.is-learn #joker { display: none !important; }
 .play.is-learn .fb-points { white-space: normal; }
+.q-intro { margin: 0; padding: 10px 14px; border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 12px; background: var(--surface-2); }
+.q-intro summary { cursor: pointer; font-weight: 700; color: var(--primary); }
+.q-intro-text { margin-top: 8px; max-width: 72ch; line-height: 1.6; }
+.q-intro.is-new { display: grid; gap: 10px; padding: 18px 20px; }
+.q-intro.is-new h3 { margin: 0; font: 600 1.35rem/1.3 var(--display); }
+.q-intro.is-new .q-intro-text { margin: 0; font-size: 1.05rem; }
+.q-intro.is-new .btn { justify-self: start; }
+.q-intro-tag { margin: 0; font: 700 .75rem/1 var(--body); letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.play.intro-gate #q-text, .play.intro-gate #q-ar, .play.intro-gate #q-options { display: none !important; }
 
 /* ---------- App-Hinweis ---------- */
 .install {
@@ -1102,6 +1111,8 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 .tr-de mark.tr-miss { color: var(--bad); text-decoration: underline wavy; text-underline-offset: 3px; }
 .ar-grammar { margin: 0; padding-left: 1.1em; display: grid; gap: 8px; max-width: 72ch; }
 .ar-grammar li::marker { color: var(--gold); }
+.ar-rule-go { display: block; margin-top: 4px; font-size: .9rem; }
+.ar-rule-hint { margin: 0 0 10px; color: var(--muted); font-size: .92rem; max-width: 72ch; }
 .ar-examples { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 .ar-examples li { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: center; padding: 10px 14px; background: var(--surface); }
 .ar-ex { font-size: 1.3rem; line-height: 1.6; text-align: right; order: 2; }
@@ -1838,6 +1849,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 
         <div class="panel qcard">
           <span class="q-topic" id="q-topic"></span>
+          <div class="q-intro" id="q-intro" hidden></div>
           <h2 class="q-text" id="q-text"></h2>
           <p class="q-ar" id="q-ar" lang="ar" dir="rtl" hidden></p>
           <div class="options" id="q-options"></div>

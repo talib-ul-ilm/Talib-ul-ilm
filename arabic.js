@@ -155,6 +155,54 @@
       add(s.irab, base("ar-i-" + hash(pre + it.s + "|" + it.w), { q: T("Iʿrāb des markierten Wortes:"), ar: it.s, arMark: it.w, a: window.IRAB_OPTIONS ? window.IRAB_OPTIONS(it.a, pre + it.s + "|" + it.w) : it.a, e: strip(it.e), why: whyList(why.i && why.i[i]) }));
     });
   });
+  /* Book 2: each grammar question belongs to the rule (bullet of l.grammar) it practises – found by the
+     Arabic and German words it shares with the rule, rarer words count more. Rounds then explain a rule
+     before its first exercise and keep the exercises of one rule together (q._rule = index of the rule). */
+  (function () {
+    var STOP = {};
+    ("eine einer einem einen eines nicht dass wird werden wenn auch nach oder sind steht stehen heißt heisst welche welcher welches warum diese dieser " +
+      "dieses immer kein keine sein seine ihre ihren also noch hier dann beim beide beiden durch über uber unter mehr ganz form formen richtig falsch " +
+      "satz wort worter wörter nomen bedeutet bedeutung beispiel beispiele lektion zwei drei vier").split(" ").forEach(function (w) { STOP[w] = 1; });
+    function bare(s) { return s.replace(/[\u064B-\u0652\u0670\u0640]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه"); }
+    function toks(s) {
+      s = String(s || "").replace(/\*\*/g, "");
+      var out = {};
+      (bare(s).match(/[\u0621-\u064A]{2,}/g) || []).forEach(function (w) { out["a:" + w] = 3; });
+      (s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[ʿʾ'’]/g, "").match(/[a-zäöüß]{4,}/g) || [])
+        .forEach(function (w) { if (!STOP[w]) out["d:" + w.slice(0, 6)] = 1; });
+      return out;
+    }
+    LESSONS.forEach(function (l) {
+      if (bookOf(l) !== 2 || !l.grammar || l.grammar.length < 2) return;
+      var rt = l.grammar.map(toks), df = {};
+      rt.forEach(function (r) { Object.keys(r).forEach(function (k) { df[k] = (df[k] || 0) + 1; }); });
+      SETS[l.id].gram.forEach(function (q) {
+        var t = toks(q.q + " " + (q.ar || "") + " " + q.a[0] + " " + (q.e || "")), best = -1, bs = 0;
+        rt.forEach(function (r, i) {
+          var s = 0;
+          Object.keys(t).forEach(function (k) { if (r[k]) s += t[k] * Math.log(1 + rt.length / df[k]); });
+          if (s > bs) { bs = s; best = i; }
+        });
+        if (best >= 0) q._rule = best;
+      });
+    });
+  })();
+  function ruleQs(id, i) { return SETS[id].gram.filter(function (q) { return q._rule === i; }); }
+  /* the exercises of one rule side by side, in the order of the rules – where the first grammar question was */
+  function ruleOrder(list) {
+    var gram = list.filter(function (q) { return q._rule !== undefined; });
+    if (gram.length < 2) return list;
+    var sorted = gram.map(function (q, i) { return [q, i]; }).sort(function (a, b) {
+      return a[0].lesson === b[0].lesson ? (a[0]._rule - b[0]._rule) || (a[1] - b[1]) : a[1] - b[1];
+    }).map(function (x) { return x[0]; }), out = [], done = false;
+    list.forEach(function (q) {
+      if (q._rule === undefined) out.push(q);
+      else if (!done) { out = out.concat(sorted); done = true; }
+    });
+    return out;
+  }
+  function ruleTitle(l, i) { return (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("Regel {n} von {m}", { n: i + 1, m: l.grammar.length }); }
+
   /* Quiz tab (area Übersetzen): „Was bedeutet dieser Satz?“ for the example sentences of every lesson;
      wrong answers are other sentences of the same lesson, then of the same book. Not part of the lessons'
      progress – only the Quiz and the Fehlerordner use them (ids ar-u-…). */
@@ -463,6 +511,7 @@
   }
   function listFrom(from, info) {
     if (info && info.lesson && SETS[info.lesson] && info.complete) return completeQs(info.lesson, true);
+    if (info && info.lesson && SETS[info.lesson] && info.rule !== undefined) return ruleQs(info.lesson, info.rule);
     if (info && info.lesson && SETS[info.lesson]) return info.part ? partQs(info.lesson, info.part) : lessonSel(info.lesson);
     if (from === "vocab") return bookQs().filter(function (q) { return /^ar-[vdp]-/.test(q._lid); });
     if (from === "irab2") return IRAB2;
@@ -473,9 +522,27 @@
   }
   function roundPreset(list, qs, review, label, info, size, from, before) {
     var correct = 0;
+    qs = ruleOrder(qs);
+    /* where each rule comes first in this round, and whether it is still new to the learner */
+    var introAt = {}, fresh = {}, inRound = {};
+    qs.forEach(function (q, i) {
+      if (q._rule === undefined) return;
+      var k = q.lesson + "|" + q._rule;
+      if (introAt[k] === undefined) introAt[k] = i;
+      inRound[k] = (inRound[k] || 0) + 1;
+    });
+    Object.keys(introAt).forEach(function (k) {
+      var p = k.split("|");
+      fresh[k] = ruleQs(p[0], +p[1]).every(function (q) { return lv(q) === 0; });
+    });
     return {
       learn: true,
       questions: qs,
+      intro: function (q, i) {
+        if (q._rule === undefined || !BY_ID[q.lesson]) return null;
+        var k = q.lesson + "|" + q._rule, l = BY_ID[q.lesson];
+        return { title: ruleTitle(l, q._rule), html: rich(l.grammar[q._rule]), first: introAt[k] === i, fresh: !!fresh[k], n: inRound[k] || 1 };
+      },
       label: review ? label + " " + T("(Wiederholung)") : label,
       resume: { kind: "ar-round", args: { review: review, info: info, size: size, from: from, before: before } },
       onAnswer: function (q, ok) { if (ok) correct++; return L.recordId(q._lid, ok); },
@@ -497,7 +564,7 @@
   }
   APP.onResume("ar-round", function (a, qs) {
     var info = a.info || {}, l = info.lesson && BY_ID[info.lesson];
-    var label = l && info.complete ? (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") : l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from === "zahlen" ? T("Zahlen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
+    var label = l && info.rule !== undefined ? ruleTitle(l, info.rule) : l && info.complete ? (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") : l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from === "zahlen" ? T("Zahlen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
     return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before);
   });
   function lessonLabel(l, part) {
@@ -540,6 +607,12 @@
     var list = lessonSel(id), r = mixedRound(groups, ROUND);
     if (!r.qs.length) return;
     APP.startQuiz(roundPreset(list, r.qs, r.review, lessonLabel(l), { lesson: id, mixed: true }, undefined, "", stats(list)));
+  }
+  /* one rule of a lesson: its explanation, then its exercises */
+  function startRule(id, i) {
+    var l = BY_ID[id];
+    if (!l || (bookOf(l) === 2 && !book2Open())) return;
+    start(ruleQs(id, i), ruleTitle(l, i), { lesson: id, part: "gram", rule: i });
   }
   function nextLesson() {
     var ls = lessons();
@@ -790,7 +863,12 @@
           '<small>' + T("Alles am Stück aus deiner Auswahl: {p} – {n} % gelernt", { p: partNames().replace("Iʿrāb", "Iʿrāb (" + T("mit ganzen Sätzen") + ")"), n: cs.pct }) +
           (free ? " · " + T("danach freies Übersetzen") : "") + "</small></div>";
       })() +
-      '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + '<ul class="ar-grammar">' + l.grammar.map(function (g) { return "<li>" + rich(g) + "</li>"; }).join("") + "</ul></section>" +
+      '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + (bookOf(l) === 2 ? '<p class="ar-rule-hint">' + T("Erst die Regel lesen, dann direkt dazu üben – in den Lektionsrunden wird jede neue Regel vor ihrer ersten Übung erklärt.") + "</p>" : "") +
+        '<ul class="ar-grammar">' + l.grammar.map(function (g, i) {
+          var rq = bookOf(l) === 2 ? ruleQs(l.id, i) : [], rs = rq.length ? stats(rq) : null;
+          return "<li>" + rich(g) + (rq.length ? '<button type="button" class="linkish ar-rule-go" data-ar-rule="' + l.id + "|" + i + '">' +
+            (rs.pct === 100 ? T("✓ Regel wiederholen ({n})", { n: rq.length }) : T(rq.length === 1 ? "Diese Regel üben · 1 Übung" : "Diese Regel üben · {n} Übungen", { n: rq.length }) + (rs.learned ? " · " + rs.pct + " %" : "")) + " →</button>" : "") + "</li>";
+        }).join("") + "</ul></section>" +
       (l.examples.length ? '<section class="ar-block"><h3>' + T("Beispiele") + "</h3>" + '<ul class="ar-examples">' + l.examples.map(function (e) {
         return "<li>" + ar(e[0], "ar-ex") + '<span class="ar-de">' + esc(e[1]) + "</span></li>";
       }).join("") + "</ul></section>" : "") +
@@ -924,6 +1002,9 @@
     wireTrans(body);
     var back = $("[data-ar-back]", body);
     if (back) back.addEventListener("click", function () { state.lesson = null; render(); scrollToPane(); });
+    $all("[data-ar-rule]", body).forEach(function (b) {
+      b.addEventListener("click", function () { var p = b.getAttribute("data-ar-rule").split("|"); startRule(p[0], +p[1]); });
+    });
     $all("[data-ar-complete]", body).forEach(function (b) {
       b.addEventListener("click", function () { startComplete(b.getAttribute("data-ar-complete")); });
     });
