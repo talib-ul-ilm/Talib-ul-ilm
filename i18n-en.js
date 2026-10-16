@@ -1045,5 +1045,15 @@ window.I18N_EN = {
  "Alle Regeln nach Kapitel": "All rules by chapter",
  "Taǧwīd nachschlagen": "Look up tajwīd",
  "z. B. Iḫfāʾ, Madd lāzim, Qalqala, إخفاء …": "e.g. Ikhfāʾ, Madd lāzim, Qalqala, إخفاء …",
- "Tuḥfat al-Aṭfāl": "Tuḥfat al-Aṭfāl"
+ "Tuḥfat al-Aṭfāl": "Tuḥfat al-Aṭfāl",
+ "Neue Regel": "New rule",
+ "Verstanden – jetzt {n} Übungen dazu": "Got it – now {n} exercises on it",
+ "Verstanden – jetzt die Übung dazu": "Got it – now the exercise on it",
+ "Zur Erinnerung: die Regel": "Reminder: the rule",
+ "Die Regel zu dieser Übung": "The rule for this exercise",
+ "Regel {n} von {m}": "Rule {n} of {m}",
+ "Erst die Regel lesen, dann direkt dazu üben – in den Lektionsrunden wird jede neue Regel vor ihrer ersten Übung erklärt.": "Read the rule first, then practise it right away – in the lesson rounds every new rule is explained before its first exercise.",
+ "✓ Regel wiederholen ({n})": "✓ Review rule ({n})",
+ "Diese Regel üben · {n} Übungen": "Practise this rule · {n} exercises",
+ "Diese Regel üben · 1 Übung": "Practise this rule · 1 exercise"
 };
