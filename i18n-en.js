@@ -1056,5 +1056,6 @@ window.I18N_EN = {
  "✓ Regel wiederholen ({n})": "✓ Review rule ({n})",
  "Diese Regel üben · {n} Übungen": "Practise this rule · {n} exercises",
  "Diese Regel üben · 1 Übung": "Practise this rule · 1 exercise",
- "Runde {n}": "Round {n}"
+ "Runde {n}": "Round {n}",
+ "Die Regel – noch einmal lesen": "The rule – read it once more"
 };

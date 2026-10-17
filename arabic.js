@@ -185,6 +185,10 @@
         });
         if (best >= 0) q._rule = best;
       });
+      /* the grammar of a lesson in the order of its rules – so you work through rule 1, 2, 3 … */
+      var g = SETS[l.id].gram, pos = new Map();
+      g.forEach(function (q, i) { pos.set(q, i); });
+      g.sort(function (a, b) { return ((a._rule === undefined ? 999 : a._rule) - (b._rule === undefined ? 999 : b._rule)) || (pos.get(a) - pos.get(b)); });
     });
   })();
   function ruleQs(id, i) { return SETS[id].gram.filter(function (q) { return q._rule === i; }); }
@@ -522,6 +526,15 @@
   }
   function roundPreset(list, qs, review, label, info, size, from, before) {
     var correct = 0;
+    /* a lesson round that touches a rule brings all open exercises of that rule, one after another */
+    if (!resuming && info && info.lesson && !info.complete) {
+      var have = {}, rulesIn = {};
+      qs.forEach(function (q) { have[q._lid] = 1; if (q._rule !== undefined) rulesIn[q.lesson + "|" + q._rule] = 1; });
+      qs = qs.slice();
+      list.forEach(function (q) {
+        if (q._rule !== undefined && rulesIn[q.lesson + "|" + q._rule] && !have[q._lid] && lv(q) !== 2) { qs.push(q); have[q._lid] = 1; }
+      });
+    }
     qs = ruleOrder(qs);
     /* where each rule comes first in this round, and whether it is still new to the learner */
     var introAt = {}, fresh = {}, inRound = {};
@@ -541,7 +554,7 @@
       intro: function (q, i) {
         if (q._rule === undefined || !BY_ID[q.lesson]) return null;
         var k = q.lesson + "|" + q._rule, l = BY_ID[q.lesson];
-        return { title: ruleTitle(l, q._rule), html: rich(l.grammar[q._rule]), first: introAt[k] === i, fresh: !!fresh[k], n: inRound[k] || 1 };
+        return { title: ruleTitle(l, q._rule), html: rich(l.grammar[q._rule]), first: introAt[k] === i, fresh: !!fresh[k], always: !!(info && info.rule !== undefined), n: inRound[k] || 1 };
       },
       label: review ? label + " " + T("(Wiederholung)") : label,
       resume: { kind: "ar-round", args: { review: review, info: info, size: size, from: from, before: before } },
@@ -554,7 +567,7 @@
       next: info && info.lesson && !info.complete && !review ? function (p) {
         var after = stats(list);
         if (after.pct === 100) return null;
-        var r = info.mixed ? mixedRound(partsOn.map(function (x) { return partQs(info.lesson, x); }).filter(function (g) { return g.length; }), ROUND) : roundFor(list, size);
+        var r = info.mixed ? sortedRound(partsOn.map(function (x) { return partQs(info.lesson, x); }).filter(function (g) { return g.length; }), ROUND) : roundFor(list, size);
         if (!r.qs.length || r.review) return null;
         var n = (info.round || 1) + 1, base = label.replace(/ · Runde \d+.*$/, "").replace(/ · Round \d+.*$/, "");
         var nextInfo = {}; Object.keys(info).forEach(function (k) { nextInfo[k] = info[k]; }); nextInfo.round = n;
@@ -572,10 +585,12 @@
       }
     };
   }
+  var resuming = false;
   APP.onResume("ar-round", function (a, qs) {
     var info = a.info || {}, l = info.lesson && BY_ID[info.lesson];
     var label = l && info.rule !== undefined ? ruleTitle(l, info.rule) : l && info.complete ? (bookOf(l) === 2 ? T("Buch 2") + " · " : "") + T("Lektion") + " " + l.n + " · " + T("komplett") : l ? lessonLabel(l, info.part) : a.from === "vocab" ? T("Vokabeltrainer") : a.from === "satz" ? T("Ganzen Satz bestimmen") : a.from === "zahlen" ? T("Zahlen") : a.from ? T("Iʿrāb-Training") : T("Neue Iʿrāb-Sätze");
-    return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before);
+    resuming = true;
+    try { return roundPreset(listFrom(a.from, info) || qs, qs, a.review, label, info, a.size, a.from, a.before); } finally { resuming = false; }
   });
   function lessonLabel(l, part) {
     var names = { vocab: T("Vokabeln"), gram: T("Grammatik"), irab: "Iʿrāb", trans: T("Übersetzen"), zahlen: T("Zahlen") };
@@ -602,19 +617,34 @@
   /* a round over several parts: first two of each part (the open ones before the learned), then the rest
      in turn – a review round when everything is learned draws from every part as well */
   function mixedRound(groups, size) {
-    var open = groups.map(function (g) { var r = roundFor(g, g.length); return r.review ? [] : r.qs; });
+    var byRule = function (a, b) { return (a._rule === undefined ? -1 : a._rule) - (b._rule === undefined ? -1 : b._rule); };
+    var open = groups.map(function (g) { var r = roundFor(g, g.length); return r.review ? [] : r.qs.slice().sort(byRule); });
     var review = open.every(function (g) { return !g.length; });
     var pools = review ? groups.map(function (g) { return APP.shuffle(g.slice()); }) : open, out = [];
     while (out.length < size && pools.some(function (p) { return p.length; }))
       pools.forEach(function (p) { if (out.length < size && p.length) out.push(p.shift()); });
     return { qs: APP.shuffle(out), review: review };
   }
+  /* working through a lesson: not mixed, but sorted by kind – the open vocabulary first, then the grammar
+     rule by rule, then Iʿrāb (in the order of „In den Lektionen üben“) */
+  function sortedRound(groups, size) {
+    var out = [];
+    groups.forEach(function (g) {
+      if (out.length >= size) return;
+      var r = roundFor(g, g.length);
+      if (r.review) return;
+      var open = r.qs.slice();
+      if (open.some(function (q) { return q._rule !== undefined; })) open.sort(function (a, b) { return (a._rule === undefined ? 999 : a._rule) - (b._rule === undefined ? 999 : b._rule); });
+      open.slice(0, size - out.length).forEach(function (q) { out.push(q); });
+    });
+    return out.length ? { qs: out, review: false } : mixedRound(groups, size);
+  }
   function startLesson(id, part) {
     var l = BY_ID[id];
     if (bookOf(l) === 2 && !book2Open()) return;
     if (part) { start(partQs(id, part), lessonLabel(l, part), { lesson: id, part: part }); return; }
     var groups = partsOn.map(function (p) { return partQs(id, p); }).filter(function (g) { return g.length; });
-    var list = lessonSel(id), r = mixedRound(groups, ROUND);
+    var list = lessonSel(id), r = sortedRound(groups, ROUND);
     if (!r.qs.length) return;
     APP.startQuiz(roundPreset(list, r.qs, r.review, lessonLabel(l), { lesson: id, mixed: true }, undefined, "", stats(list)));
   }
