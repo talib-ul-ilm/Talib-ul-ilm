@@ -1112,6 +1112,9 @@
       game = null;
       $("#quiz-play").hidden = true;
       g.preset.onFinish(progressOf(g, true));
+      /* a lesson goes on with its next round straight away – until it is learned or „Pause“ is pressed */
+      var nxt = g.preset.next ? g.preset.next(progressOf(g, true)) : null;
+      if (nxt) { startQuiz(nxt); return; }
       g.preset.onLeave();
       return;
     }

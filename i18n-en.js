@@ -1055,5 +1055,6 @@ window.I18N_EN = {
  "Erst die Regel lesen, dann direkt dazu üben – in den Lektionsrunden wird jede neue Regel vor ihrer ersten Übung erklärt.": "Read the rule first, then practise it right away – in the lesson rounds every new rule is explained before its first exercise.",
  "✓ Regel wiederholen ({n})": "✓ Review rule ({n})",
  "Diese Regel üben · {n} Übungen": "Practise this rule · {n} exercises",
- "Diese Regel üben · 1 Übung": "Practise this rule · 1 exercise"
+ "Diese Regel üben · 1 Übung": "Practise this rule · 1 exercise",
+ "Runde {n}": "Round {n}"
 };
