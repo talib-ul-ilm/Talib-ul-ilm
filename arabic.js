@@ -155,7 +155,7 @@
       add(s.irab, base("ar-i-" + hash(pre + it.s + "|" + it.w), { q: T("Iʿrāb des markierten Wortes:"), ar: it.s, arMark: it.w, a: window.IRAB_OPTIONS ? window.IRAB_OPTIONS(it.a, pre + it.s + "|" + it.w) : it.a, e: strip(it.e), why: whyList(why.i && why.i[i]) }));
     });
   });
-  /* Book 2: each grammar question belongs to the rule (bullet of l.grammar) it practises – found by the
+  /* Both books: each grammar question belongs to the rule (bullet of l.grammar) it practises – found by the
      Arabic and German words it shares with the rule, rarer words count more. Rounds then explain a rule
      before its first exercise and keep the exercises of one rule together (q._rule = index of the rule). */
   (function () {
@@ -173,7 +173,7 @@
       return out;
     }
     LESSONS.forEach(function (l) {
-      if (bookOf(l) !== 2 || !l.grammar || l.grammar.length < 2) return;
+      if (!l.grammar || l.grammar.length < 2) return;
       var rt = l.grammar.map(toks), df = {};
       rt.forEach(function (r) { Object.keys(r).forEach(function (k) { df[k] = (df[k] || 0) + 1; }); });
       SETS[l.id].gram.forEach(function (q) {
@@ -550,6 +550,16 @@
         lastRound = { label: label, info: info, answered: p.answered, correct: correct, before: before, after: stats(list), list: list, size: size, wrong: p.wrong || [] };
         L.sync();
       },
+      /* lessons: no stop after ten questions – the next round follows until everything is learned */
+      next: info && info.lesson && !info.complete && !review ? function (p) {
+        var after = stats(list);
+        if (after.pct === 100) return null;
+        var r = info.mixed ? mixedRound(partsOn.map(function (x) { return partQs(info.lesson, x); }).filter(function (g) { return g.length; }), ROUND) : roundFor(list, size);
+        if (!r.qs.length || r.review) return null;
+        var n = (info.round || 1) + 1, base = label.replace(/ · Runde \d+.*$/, "").replace(/ · Round \d+.*$/, "");
+        var nextInfo = {}; Object.keys(info).forEach(function (k) { nextInfo[k] = info[k]; }); nextInfo.round = n;
+        return roundPreset(list, r.qs, false, base + " · " + T("Runde {n}", { n: n }) + " (" + T("{n} % gelernt", { n: after.pct }) + ")", nextInfo, size, from, before);
+      } : null,
       onLeave: function () {
         APP.showView("arabisch");
         var l = info && info.lesson && BY_ID[info.lesson];
@@ -863,9 +873,9 @@
           '<small>' + T("Alles am Stück aus deiner Auswahl: {p} – {n} % gelernt", { p: partNames().replace("Iʿrāb", "Iʿrāb (" + T("mit ganzen Sätzen") + ")"), n: cs.pct }) +
           (free ? " · " + T("danach freies Übersetzen") : "") + "</small></div>";
       })() +
-      '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + (bookOf(l) === 2 ? '<p class="ar-rule-hint">' + T("Erst die Regel lesen, dann direkt dazu üben – in den Lektionsrunden wird jede neue Regel vor ihrer ersten Übung erklärt.") + "</p>" : "") +
+      '<section class="ar-block"><h3>' + T("Grammatik") + "</h3>" + ('<p class="ar-rule-hint">' + T("Erst die Regel lesen, dann direkt dazu üben – in den Lektionsrunden wird jede neue Regel vor ihrer ersten Übung erklärt.") + "</p>") +
         '<ul class="ar-grammar">' + l.grammar.map(function (g, i) {
-          var rq = bookOf(l) === 2 ? ruleQs(l.id, i) : [], rs = rq.length ? stats(rq) : null;
+          var rq = ruleQs(l.id, i), rs = rq.length ? stats(rq) : null;
           return "<li>" + rich(g) + (rq.length ? '<button type="button" class="linkish ar-rule-go" data-ar-rule="' + l.id + "|" + i + '">' +
             (rs.pct === 100 ? T("✓ Regel wiederholen ({n})", { n: rq.length }) : T(rq.length === 1 ? "Diese Regel üben · 1 Übung" : "Diese Regel üben · {n} Übungen", { n: rq.length }) + (rs.learned ? " · " + rs.pct + " %" : "")) + " →</button>" : "") + "</li>";
         }).join("") + "</ul></section>" +
