@@ -148,8 +148,9 @@
       add(s.gram, base("ar-g-" + hash(pre + g.q + "|" + g.a[0]), { q: strip(g.q), ar: g.ar, a: g.a, e: strip(g.e), why: whyList(why.q && why.q[i]) }));
     });
     /* extra understanding questions (arabisch/grammatik-plus.js); flagged plus so the Arabisch-Liga keeps its fixed set */
+    /* g.k (grammatik-ueben*.js): the exercise sentence – part of the id, as many share the same question text */
     ((window.MADINA_PLUS || {})[l.id] || []).forEach(function (g) {
-      add(s.gram, base("ar-g-" + hash(pre + g.q + "|" + g.a[0]), { q: strip(g.q), ar: g.ar, a: g.a, e: strip(g.e), why: whyList(g.w), plus: true }));
+      add(s.gram, base("ar-g-" + hash(pre + g.q + "|" + g.a[0] + (g.k ? "|" + g.k : "")), { q: strip(g.q), ar: g.ar, a: g.a, e: strip(g.e), why: whyList(g.w), plus: true }));
     });
     l.irab.forEach(function (it, i) {
       add(s.irab, base("ar-i-" + hash(pre + it.s + "|" + it.w), { q: T("Iʿrāb des markierten Wortes:"), ar: it.s, arMark: it.w, a: window.IRAB_OPTIONS ? window.IRAB_OPTIONS(it.a, pre + it.s + "|" + it.w) : it.a, e: strip(it.e), why: whyList(why.i && why.i[i]) }));
