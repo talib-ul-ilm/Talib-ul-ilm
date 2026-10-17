@@ -191,6 +191,10 @@
       g.sort(function (a, b) { return ((a._rule === undefined ? 999 : a._rule) - (b._rule === undefined ? 999 : b._rule)) || (pos.get(a) - pos.get(b)); });
     });
   })();
+  /* which rule explanations this learner has already read (clicked „Verstanden“) – each comes once */
+  var rulesSeen = {};
+  try { rulesSeen = JSON.parse(localStorage.getItem("fiqh:rulesseen") || "{}") || {}; } catch (e) { rulesSeen = {}; }
+  function ruleSeen(q) { rulesSeen[q.lesson + "|" + q._rule] = 1; try { localStorage.setItem("fiqh:rulesseen", JSON.stringify(rulesSeen)); } catch (e) {} }
   function ruleQs(id, i) { return SETS[id].gram.filter(function (q) { return q._rule === i; }); }
   /* the exercises of one rule side by side, in the order of the rules – where the first grammar question was */
   function ruleOrder(list) {
@@ -546,13 +550,11 @@
       if (introAt[k] === undefined) introAt[k] = i;
       inRound[k] = (inRound[k] || 0) + 1;
     });
-    Object.keys(introAt).forEach(function (k) {
-      var p = k.split("|");
-      fresh[k] = ruleQs(p[0], +p[1]).every(function (q) { return lv(q) === 0; });
-    });
+    Object.keys(introAt).forEach(function (k) { fresh[k] = !rulesSeen[k]; });
     return {
       learn: true,
       questions: qs,
+      introDone: function (q) { if (q._rule !== undefined) ruleSeen(q); },
       intro: function (q, i) {
         if (!inLesson || q._rule === undefined || !BY_ID[q.lesson]) return null;
         var k = q.lesson + "|" + q._rule, l = BY_ID[q.lesson];

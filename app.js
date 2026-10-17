@@ -800,6 +800,7 @@
         '<button type="button" class="btn btn-primary" id="q-intro-go">' + esc(intro.n > 1 ? T("Verstanden – jetzt {n} Übungen dazu", { n: intro.n }) : T("Verstanden – jetzt die Übung dazu")) + "</button>";
       $("#q-intro-go").addEventListener("click", function () {
         game.introSeen[game.i] = true;
+        if (game.preset.introDone) game.preset.introDone(item.src);
         renderIntro(item);
         var first = $(".option", $("#q-options"));
         if (first) first.focus({ preventScroll: true });
