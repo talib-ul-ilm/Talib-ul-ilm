@@ -343,6 +343,84 @@
         SATZ = SATZ.concat(qs);
       });
     });
+
+    /* „Grammatik am Satz“: from every analysed sentence of a lesson, grammar questions in German – which role
+       has the marked word, in which case (or mood) it stands and by which sign one sees it. Like the Iʿrāb,
+       there are plenty of them; they come after the rule-by-rule exercises of the lesson (no q._rule).
+       Ids ar-g-s…, flagged plus, so the Arabisch-Liga keeps its fixed grammar set. */
+    var ROLES = [["مبتدا مؤخر", "nachgestelltes Subjekt (Mubtadaʾ muʾakhkhar)"], ["مبتدا", "Subjekt des Nominalsatzes (Mubtadaʾ)"],
+      ["خبر ان ", "Prädikat von inna (Khabar inna)"], ["خبر لكن", "Prädikat von lākinna"], ["خبر كان", "Prädikat von kāna (Khabar kāna)"],
+      ["خبر ليس", "Prädikat von laisa (Khabar laisa)"], ["خبر لعل", "Prädikat von laʿalla"], ["خبر كان", "Prädikat von kāna (Khabar kāna)"], ["خبر", "Prädikat (Khabar)"],
+      ["اسم ان ", "Ism von inna"], ["اسم كان", "Ism von kāna"], ["اسم ليس", "Ism von laisa"], ["اسم لعل", "Ism von laʿalla"], ["اسم لكن", "Ism von lākinna"],
+      ["اسم كان", "Ism von kāna"], ["اسم مجرور", "Nomen im Genitiv nach einer Präposition"], ["اسم اشارة", "Demonstrativ (Ism al-išāra)"],
+      ["اسم استفهام", "Fragewort (Ism al-istifhām)"], ["اسم موصول", "Relativpronomen (Ism mauṣūl)"],
+      ["فاعل", "Subjekt des Verbs (Fāʿil)"], ["مفعول به", "Objekt (Mafʿūl bihī)"], ["مضاف اليه", "Besitzer in der Genitivverbindung (Muḍāf ilaihi)"],
+      ["نعت", "Adjektiv (Naʿt)"], ["بدل", "Apposition (Badal)"], ["تمييز", "Spezifizierung (Tamyīz)"], ["ظرف", "Adverb (Ẓarf)"],
+      ["فعل ماض", "Verb im Perfekt (Māḍī)"], ["فعل مضارع", "Verb im Präsens (Muḍāriʿ)"], ["فعل امر", "Imperativ (Amr)"],
+      ["منادى", "Angerufener (Munādā)"], ["توكيد", "Bekräftigung (Taʾkīd)"], ["ضمير منفصل", "freistehendes Pronomen als Subjekt"], ["معطوف", "verbundenes Wort (Maʿṭūf)"]];
+    function roleDe(x) {
+      var raw = String(x).replace(/[\u064B-\u0652\u0670]/g, "");
+      if (raw.indexOf("خبر أن ") === 0) return "Prädikat von anna";
+      if (raw.indexOf("اسم أن ") === 0) return "Ism von anna";
+      var p = plain(x) + " "; for (var i = 0; i < ROLES.length; i++) if (p.indexOf(ROLES[i][0]) === 0) return ROLES[i][1]; return ""; }
+    var NOUN_CASE = { "مرفوع": "Nominativ (marfūʿ)", "منصوب": "Akkusativ (manṣūb)", "مجرور": "Genitiv (majrūr)", "مبني": "unveränderlich (mabnī)" };
+    var VERB_MOOD = { "مرفوع": "Indikativ (marfūʿ)", "منصوب": "Subjunktiv (manṣūb)", "مجزوم": "Jussiv (majzūm)", "مبني": "unveränderlich (mabnī)" };
+    function onlyCase(x) { var p = plain(x), f = CASES.filter(function (c) { return p.indexOf(c) !== -1; }); return f.length === 1 ? f[0] : ""; }
+    var SIGN_AR = { "الضمة": "Ḍamma", "الفتحة": "Fatḥa", "الكسرة": "Kasra", "السكون": "Sukūn", "الواو": "Wāw", "الالف": "Alif", "الياء": "Yāʾ",
+      "حذف النون": "Wegfall des Nūn", "ثبوت النون": "das Nūn bleibt", "حذف حرف العلة": "Wegfall des schwachen Endbuchstabens" };
+    var SIGN_RE = /وعلامة (?:رفعه|نصبه|جره|جزمه) (حذف النون|ثبوت النون|حذف حرف العلة|الضمة|الفتحة|الكسرة|السكون|الواو|الالف|الياء)( المقدرة)?(?:[^،]*?نيابة عن (الضمة|الفتحة|الكسرة))?/;
+    function signDe(x) {
+      var m = SIGN_RE.exec(plain(x).replace(/ى/g, "ي"));
+      if (!m) return null;
+      var base = SIGN_AR[m[1]];
+      return { base: base, label: T(base) + (m[2] ? " – " + T("nur gedacht (muqaddar)") : "") + (m[3] ? " " + T("statt {s}", { s: T(SIGN_AR[m[3]]) }) : "") };
+    }
+    /* wrong answers only from what the learner has met so far: the roles and signs of this and the earlier lessons of the book */
+    var rolesUpTo = {}, signsUpTo = {}, seenR = { 1: {}, 2: {} }, seenS = { 1: { "Ḍamma": 1 }, 2: { "Ḍamma": 1, "Fatḥa": 1, "Kasra": 1, "Wāw": 1, "Alif": 1, "Yāʾ": 1 } };
+    LESSONS.forEach(function (l) {
+      var bk = bookOf(l);
+      l.model.forEach(function (m) { m.words.forEach(function (w) {
+        var r = roleDe(w[1]); if (r) seenR[bk][r] = 1;
+        var sg = signDe(w[1]); if (sg) seenS[bk][sg.base] = 1;
+      }); });
+      rolesUpTo[l.id] = Object.keys(seenR[bk]); signsUpTo[l.id] = Object.keys(seenS[bk]);
+    });
+    /* cases are taught from book 1, lesson 4 (Genitiv nach Präpositionen) on */
+    var caseFrom = LESSONS.map(function (l) { return l.id; }).indexOf("m04");
+    LESSONS.forEach(function (l) {
+      var book = bookOf(l), b2 = book === 2, pre = b2 ? "b2|" : "";
+      var tt = (b2 ? T("Arabisch · Buch 2 · Lektion {n}", { n: l.n }) : T("Arabisch · Lektion {n}", { n: l.n })) + " · " + T("Grammatik am Satz");
+      var srcText = T("Quelle: Madina-Buch {b}, Lektion {n}", { b: book, n: l.n }) + " – " + l.title;
+      var roleList = rolesUpTo[l.id].length >= 4 ? rolesUpTo[l.id] : (rolesUpTo.m04 || rolesUpTo[l.id]), moods = b2 && +l.n >= 17, cases = LESSONS.indexOf(l) >= caseFrom;
+      l.model.forEach(function (m) {
+        var mk = marks(m);
+        if (mk.some(function (x) { return !x; })) return;
+        m.words.forEach(function (w, k) {
+          var role = roleDe(w[1]);
+          if (!role) return;
+          var verb = /^فعل/.test(plain(w[1])), mark = mk[k].length === 1 ? mk[k][0] : mk[k], key = pre + m.s + "|" + k, rnd = seeded("gs|" + key);
+          var expl = w[0] + ": " + w[2] + " – " + m.de + " · " + T("Iʿrāb:") + " " + w[1];
+          var base = { t: "arabisch", tt: tt, srcText: srcText, c: 0, lesson: l.id, ar: m.s, arMark: mark, e: expl, plus: true, lvl: 2 };
+          function push(kind, q, a, lvl) {
+            add(SETS[l.id].gram, Object.assign({}, base, { _lid: "ar-g-s" + hash(kind + "|" + key), q: q, a: a, lvl: lvl || 2 }));
+          }
+          var wrongRoles = pickOthers(roleList, [role], 3, rnd);
+          if (wrongRoles.length === 3) push("r", T("Welche Rolle hat das markierte Wort im Satz?"), [T(role)].concat(wrongRoles.map(function (r) { return T(r); })));
+          var c = onlyCase(w[1]);
+          if (c && cases && (!verb || moods)) {
+            var names = verb ? VERB_MOOD : NOUN_CASE;
+            if (names[c]) push("c", verb ? T("In welchem Modus steht das markierte Verb?") : T("In welchem Fall steht das markierte Wort?"),
+              [T(names[c])].concat(Object.keys(names).filter(function (x) { return x !== c; }).map(function (x) { return T(names[x]); })), verb ? 3 : 2);
+          }
+          var sg = c && cases && c !== "مبني" ? signDe(w[1]) : null;
+          if (sg) {
+            var pool = signsUpTo[l.id].concat(["Fatḥa", "Kasra"]).filter(function (x, i, a) { return a.indexOf(x) === i && (verb || ["Sukūn", "Wegfall des Nūn", "das Nūn bleibt", "Wegfall des schwachen Endbuchstabens"].indexOf(x) === -1); });
+            var wrongS = (sg.label !== T(sg.base) ? [T(sg.base)] : []).concat(pickOthers(pool.filter(function (x) { return x !== sg.base; }), [], 3, rnd).map(function (x) { return T(x); })).slice(0, 3);
+            if (wrongS.length === 3) push("z", verb ? T("Woran erkennt man den Modus des markierten Verbs?") : T("Woran erkennt man den Fall des markierten Wortes?"), [sg.label].concat(wrongS), 3);
+          }
+        });
+      });
+    });
   })();
   /* level for „Ganzen Satz bestimmen“ (0 = all), like the Niveau of the Quiz */
   var satzLvl = 0;
