@@ -141,6 +141,13 @@ Im Iʿrāb-Bereich gibt es „Ganzen Satz bestimmen“: die Mustersätze der Lek
 
 **Lektionen ohne Unterbrechung**: Lernrunden einer Lektion (in Runden, nach Teil, nach Regel) enden nicht mehr nach 10 Fragen. `roundPreset` gibt `next()` mit; app.js startet nach der letzten Frage gleich die nächste Runde („Runde 2 (x % gelernt)“), bis die Lektion zu 100 % gelernt ist oder man „Pause“ drückt. Dann erscheint die Zusammenfassung ab Beginn.
 
+**Grammatik üben – Einsetzen und Umformen** (`arabisch/grammatik-ueben1.js`, `arabisch/grammatik-ueben2.js`): Zu jeder Lektion beider Bücher kommen rund 16 Aufgaben zur Regel der Lektion hinzu, insgesamt 872. Die Grammatik wächst damit von 920 auf 1789 Aufgaben, das sind 24–38 pro Lektion.
+- **Einsetzen** (`E`): ein Satz mit Lücke, z. B. „Setze ein – „Woher bist du?““ → أَنْتِ/أَنْتَ/هِيَ/أَنَا.
+- **Umformen** (`U`): Plural, Dual oder feminin bilden, verneinen, Frage bilden, إِنَّ/كَانَ/لَيْسَ davorsetzen, Verb in eine andere Person setzen, ins Arabische übersetzen.
+- **Erkennen** (`F`): einzelne Fragen dazu, z. B. „Welches Wort hat kein Tanwīn?“.
+
+Format wie `grammatik-plus.js`: `a[0]` ist richtig, `w` gibt für jede falsche Antwort einen Grund („Warum falsch?“). Die Aufgaben werden an `MADINA_PLUS` angehängt und sind `plus`, die Arabisch-Liga bleibt also unverändert. Die Regelzuordnung hängt sie an die passende Regelkarte, so kommen sie in der Lektion direkt nach der Erklärung. Da viele Aufgaben denselben Fragetext haben, geht der Übungssatz (`k`) in die Kennung ein.
+
 **Niveau** (wie im Quiz: Anfänger · Mubtadiʾ, Fortgeschritten · Ṭālibu l-ʿIlm, Experte · Ustāḏ, Alle): Die Karte „Ganzen Satz bestimmen“ hat dieselben Niveau-Karten wie das Quiz. Die Wahl wird in `fiqh:satzlvl` gespeichert. Die Schwierigkeit eines Satzes ist die Zahl seiner Wörter plus die Zahl der schweren Analysen (nur gedachte Endung, Stelle statt Endung (fī maḥall), Ersatzzeichen, weggefallene Buchstaben, verstecktes Pronomen, fünf Nomen, maṣdar muʾawwal, zusätzliches بِـ, Vokal gegen zwei Sukūn). Die Grenzen hängen vom Buch ab: Buch 1 bis 3 / 4 / darüber, Buch 2 bis 5 / 7 / darüber. Für Buch 2 ergibt das 63, 53 und 37 Sätze. Die Wortfragen (`ar-w-…`) bekommen dieses Niveau auch im Quiz.
 
 **Keine Wiederholung:** Eine Runde nimmt zwei Sätze des gewählten Niveaus. Jeder gezeigte Satz wird in `fiqh:satzseen` mit der Uhrzeit gespeichert. Ein Satz der letzten zwei Stunden kommt erst wieder, wenn alle anderen Sätze des Niveaus dran waren. Reihenfolge der Auswahl:
