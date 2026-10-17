@@ -535,7 +535,9 @@
         if (q._rule !== undefined && rulesIn[q.lesson + "|" + q._rule] && !have[q._lid] && lv(q) !== 2) { qs.push(q); have[q._lid] = 1; }
       });
     }
-    qs = ruleOrder(qs);
+    /* sorted and explained only when working through a lesson – the Quiz, trainers and the Fehlerordner stay mixed */
+    var inLesson = !!(info && info.lesson);
+    if (inLesson) qs = ruleOrder(qs);
     /* where each rule comes first in this round, and whether it is still new to the learner */
     var introAt = {}, fresh = {}, inRound = {};
     qs.forEach(function (q, i) {
@@ -552,7 +554,7 @@
       learn: true,
       questions: qs,
       intro: function (q, i) {
-        if (q._rule === undefined || !BY_ID[q.lesson]) return null;
+        if (!inLesson || q._rule === undefined || !BY_ID[q.lesson]) return null;
         var k = q.lesson + "|" + q._rule, l = BY_ID[q.lesson];
         return { title: ruleTitle(l, q._rule), html: rich(l.grammar[q._rule]), first: introAt[k] === i, fresh: !!fresh[k], always: !!(info && info.rule !== undefined), n: inRound[k] || 1 };
       },
