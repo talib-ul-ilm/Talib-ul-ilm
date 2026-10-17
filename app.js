@@ -781,8 +781,8 @@
   }
 
   /* A learn round can explain a rule before its exercises: preset.intro(question, index) returns
-     { title, html, first, fresh, n } or null. A new rule (fresh) comes as a card first – the question
-     appears after „Verstanden“; otherwise the rule can be opened above the question. */
+     { title, html, first, fresh, n } or null. Where a rule starts (first), its explanation comes alone as
+     a card – the exercises follow one after another once it is clicked away („Verstanden“). */
   function renderIntro(item) {
     var box = $("#q-intro"), play = $("#quiz-play");
     var intro = game.preset && game.preset.intro ? game.preset.intro(item.src, game.i) : null;
@@ -792,11 +792,11 @@
     if (!intro) { box.hidden = true; box.innerHTML = ""; return; }
     box.hidden = false;
     game.introSeen = game.introSeen || {};
-    if (intro.first && intro.fresh && !game.introSeen[game.i]) {
+    if (intro.first && (intro.fresh || intro.always) && !game.introSeen[game.i]) {
       game.introGate = true;
       play.classList.add("intro-gate");
       box.className = "q-intro is-new";
-      box.innerHTML = '<p class="q-intro-tag">' + esc(T("Neue Regel")) + "</p><h3>" + esc(intro.title) + '</h3><div class="q-intro-text">' + intro.html + "</div>" +
+      box.innerHTML = '<p class="q-intro-tag">' + esc(intro.fresh ? T("Neue Regel") : T("Die Regel – noch einmal lesen")) + "</p><h3>" + esc(intro.title) + '</h3><div class="q-intro-text">' + intro.html + "</div>" +
         '<button type="button" class="btn btn-primary" id="q-intro-go">' + esc(intro.n > 1 ? T("Verstanden – jetzt {n} Übungen dazu", { n: intro.n }) : T("Verstanden – jetzt die Übung dazu")) + "</button>";
       $("#q-intro-go").addEventListener("click", function () {
         game.introSeen[game.i] = true;
@@ -807,8 +807,8 @@
       });
       return;
     }
-    box.className = "q-intro";
-    box.innerHTML = "<details" + (intro.first && !intro.fresh ? "" : "") + "><summary>" + esc(intro.first ? T("Zur Erinnerung: die Regel") : T("Die Regel zu dieser Übung")) + '</summary><div class="q-intro-text">' + intro.html + "</div></details>";
+    /* after „Verstanden“ the exercises come on their own – no rule above them */
+    box.hidden = true; box.innerHTML = "";
   }
 
   /* Arabic in questions and answers (Arabisch-Bereich): whole-Arabic text gets the Arabic
