@@ -1,6 +1,8 @@
 /* Sarf (صَرْف): conjugation of sound three-letter verbs, laid out like the Emsile
    (الْأَمْثِلَةُ الْمُخْتَلِفَةُ, model verb نَصَرَ) and the six Abwāb of the Thulāthī Mujarrad.
    Only sound roots (no و/ي/ء, no doubled letter), so every form follows the pattern.
+   Passive: transitive verbs are conjugated through all 14 persons (نُصِرَ، نُصِرَا …); intransitive verbs
+   only impersonally with their preposition (ذُهِبَ بِهِ، ذُهِبَ بِهِمَا … ذُهِبَ بِنَا); Bāb 5 has no passive.
 
    - FIQH_SARF.conj(verb, form) -> the forms of one table row set (14 persons, or 6)
    - Learning (tab "Sarf" in Arabisch): a table is practised by putting the forms in the
@@ -29,25 +31,26 @@
     { n: 5, p: "u", m: "u", model: "حَسُنَ يَحْسُنُ", w: "فَعُلَ يَفْعُلُ" },
     { n: 6, p: "i", m: "i", model: "حَسِبَ يَحْسِبُ", w: "فَعِلَ يَفْعِلُ" }
   ];
-  /* [root, Bāb, German, transitive] */
+  /* [root, Bāb, German, transitive (1) or the preposition of the impersonal passive] */
   var VERBS = [
     ["نصر", 1, "helfen", 1], ["كتب", 1, "schreiben", 1], ["شكر", 1, "danken", 1], ["طلب", 1, "verlangen, suchen", 1],
-    ["ترك", 1, "verlassen, lassen", 1], ["عبد", 1, "anbeten, dienen", 1], ["دخل", 1, "hineingehen", 0], ["خرج", 1, "hinausgehen", 0],
-    ["نظر", 1, "schauen", 0], ["سجد", 1, "sich niederwerfen", 0], ["قعد", 1, "sitzen", 0], ["حضر", 1, "anwesend sein", 0],
+    ["ترك", 1, "verlassen, lassen", 1], ["عبد", 1, "anbeten, dienen", 1], ["دخل", 1, "hineingehen", "على"], ["خرج", 1, "hinausgehen", "ب"],
+    ["نظر", 1, "schauen", "إلى"], ["سجد", 1, "sich niederwerfen", "ل"], ["قعد", 1, "sitzen", "على"], ["حضر", 1, "anwesend sein", "ب"],
     ["ضرب", 2, "schlagen", 1], ["غسل", 2, "waschen", 1], ["عرف", 2, "kennen", 1], ["حمل", 2, "tragen", 1],
-    ["غفر", 2, "vergeben", 1], ["كسب", 2, "erwerben", 1], ["جلس", 2, "sich setzen", 0], ["نزل", 2, "herabkommen", 0],
-    ["رجع", 2, "zurückkehren", 0], ["صبر", 2, "geduldig sein", 0],
+    ["غفر", 2, "vergeben", 1], ["كسب", 2, "erwerben", 1], ["جلس", 2, "sich setzen", "إلى"], ["نزل", 2, "herabkommen", "ب"],
+    ["رجع", 2, "zurückkehren", "إلى"], ["صبر", 2, "geduldig sein", "على"],
     ["فتح", 3, "öffnen", 1], ["جمع", 3, "sammeln", 1], ["منع", 3, "verhindern", 1], ["نفع", 3, "nützen", 1],
-    ["زرع", 3, "säen, pflanzen", 1], ["رفع", 3, "heben", 1], ["ذهب", 3, "gehen", 0],
+    ["زرع", 3, "säen, pflanzen", 1], ["رفع", 3, "heben", 1], ["ذهب", 3, "gehen", "ب"],
     ["علم", 4, "wissen", 1], ["فهم", 4, "verstehen", 1], ["شرب", 4, "trinken", 1], ["ركب", 4, "reiten, einsteigen", 1],
     ["لبس", 4, "anziehen", 1], ["حفظ", 4, "auswendig lernen, bewahren", 1], ["عمل", 4, "tun, arbeiten", 1], ["سمع", 4, "hören", 1],
-    ["فرح", 4, "sich freuen", 0], ["لعب", 4, "spielen", 0], ["حزن", 4, "traurig sein", 0],
+    ["فرح", 4, "sich freuen", "ب"], ["لعب", 4, "spielen", "ب"], ["حزن", 4, "traurig sein", "على"],
     ["حسن", 5, "schön, gut sein", 0], ["كرم", 5, "edel, großzügig sein", 0], ["كبر", 5, "groß sein", 0],
     ["صغر", 5, "klein sein", 0], ["قرب", 5, "nahe sein", 0], ["بعد", 5, "fern sein", 0],
     ["حسب", 6, "meinen, glauben", 1]
   ].map(function (v) {
     var b = ABWAB[v[1] - 1], r = v[0].split("");
-    var verb = { id: v[0], r: r, bab: b, de: v[2], t: !!v[3] };
+    var verb = { id: v[0], r: r, bab: b, de: v[2], t: v[3] === 1, prep: typeof v[3] === "string" ? v[3] : null };
+    verb.pass = verb.t || !!verb.prep;
     verb.past = r[0] + FA + r[1] + V[b.p] + r[2] + FA;
     verb.pres = "يَ" + r[0] + SU + r[1] + V[b.m] + r[2] + DA;
     return verb;
@@ -66,6 +69,13 @@
   var NOUN_ROWS = [["مُفْرَدٌ مُذَكَّرٌ", "Singular m."], ["مُثَنًّى مُذَكَّرٌ", "Dual m."], ["جَمْعٌ مُذَكَّرٌ", "Plural m."],
     ["مُفْرَدٌ مُؤَنَّثٌ", "Singular f."], ["مُثَنًّى مُؤَنَّثٌ", "Dual f."], ["جَمْعٌ مُؤَنَّثٌ", "Plural f."]];
   var SECOND = [6, 7, 8, 9, 10, 11];
+  /* the preposition of the impersonal passive with the pronoun of each person (Emsile order) */
+  var PREPS = {
+    "ب": ["بِهِ", "بِهِمَا", "بِهِمْ", "بِهَا", "بِهِمَا", "بِهِنَّ", "بِكَ", "بِكُمَا", "بِكُمْ", "بِكِ", "بِكُمَا", "بِكُنَّ", "بِي", "بِنَا"],
+    "ل": ["لَهُ", "لَهُمَا", "لَهُمْ", "لَهَا", "لَهُمَا", "لَهُنَّ", "لَكَ", "لَكُمَا", "لَكُمْ", "لَكِ", "لَكُمَا", "لَكُنَّ", "لِي", "لَنَا"],
+    "إلى": ["إِلَيْهِ", "إِلَيْهِمَا", "إِلَيْهِمْ", "إِلَيْهَا", "إِلَيْهِمَا", "إِلَيْهِنَّ", "إِلَيْكَ", "إِلَيْكُمَا", "إِلَيْكُمْ", "إِلَيْكِ", "إِلَيْكُمَا", "إِلَيْكُنَّ", "إِلَيَّ", "إِلَيْنَا"],
+    "على": ["عَلَيْهِ", "عَلَيْهِمَا", "عَلَيْهِمْ", "عَلَيْهَا", "عَلَيْهِمَا", "عَلَيْهِنَّ", "عَلَيْكَ", "عَلَيْكُمَا", "عَلَيْكُمْ", "عَلَيْكِ", "عَلَيْكُمَا", "عَلَيْكُنَّ", "عَلَيَّ", "عَلَيْنَا"]
+  };
 
   /* endings */
   var PAST_END = [FA, FA + "ا", DA + "وا", FA + "تْ", FA + "تَا", SU + "نَ", SU + "تَ", SU + "تُمَا", SU + "تُمْ", SU + "تِ", SU + "تُمَا", SU + "تُنَّ", SU + "تُ", SU + "نَا"];
@@ -94,35 +104,61 @@
   }
   function noun(stem, last, i) { return stem + last + NOUN_END[i]; }
 
-  /* the forms, as in the Emsile */
+  /* a passive form: transitive verbs per person; intransitive verbs keep the 3rd person m. sg.
+     and the person moves into the preposition (ذُهِبَ بِهِمْ „man ging mit ihnen“) */
+  function passive(make) {
+    return function (v, i) { return v.t ? make(v, i) : make(v, 0) + " " + PREPS[v.prep][i]; };
+  }
+  /* the forms, as in the Emsile; grp groups them for „Was möchtest du üben?“ */
   var FORMS = [
-    { id: "madi", de: "Vergangenheit", ar: "الْفِعْلُ الْمَاضِي الْمَعْلُومُ", rows: "p", core: 1,
+    { id: "madi", de: "Vergangenheit", ar: "الْفِعْلُ الْمَاضِي الْمَعْلُومُ", rows: "p", core: 1, grp: "core",
       make: function (v, i) { return past(v, i, false); } },
-    { id: "mudari", de: "Gegenwart / Zukunft", ar: "الْفِعْلُ الْمُضَارِعُ الْمَعْلُومُ", rows: "p", core: 1,
+    { id: "mudari", de: "Gegenwart / Zukunft", ar: "الْفِعْلُ الْمُضَارِعُ الْمَعْلُومُ", rows: "p", core: 1, grp: "core",
       make: function (v, i) { return present(v, i, IND, false); } },
-    { id: "madi_p", de: "Vergangenheit Passiv", ar: "الْمَاضِي الْمَجْهُولُ", rows: "p", passive: 1,
-      make: function (v, i) { return past(v, i, true); } },
-    { id: "mudari_p", de: "Gegenwart Passiv", ar: "الْمُضَارِعُ الْمَجْهُولُ", rows: "p", passive: 1,
-      make: function (v, i) { return present(v, i, IND, true); } },
+    { id: "madi_p", de: "Vergangenheit Passiv", ar: "الْمَاضِي الْمَجْهُولُ", rows: "p", passive: 1, grp: "core",
+      make: passive(function (v, i) { return past(v, i, true); }) },
+    { id: "mudari_p", de: "Gegenwart Passiv", ar: "الْمُضَارِعُ الْمَجْهُولُ", rows: "p", passive: 1, grp: "core",
+      make: passive(function (v, i) { return present(v, i, IND, true); }) },
+    { id: "nafy", de: "Verneinte Gegenwart (lā)", ar: "النَّفْيُ", rows: "p", grp: "neg",
+      make: function (v, i) { return "لَا " + present(v, i, IND, false); } },
+    { id: "nafy_p", de: "Verneinte Gegenwart Passiv", ar: "النَّفْيُ الْمَجْهُولُ", rows: "p", passive: 1, grp: "neg",
+      make: passive(function (v, i) { return "لَا " + present(v, i, IND, true); }) },
+    { id: "lam", de: "Verneinte Vergangenheit (lam)", ar: "الْجَحْدُ الْمُطْلَقُ", rows: "p", grp: "neg",
+      make: function (v, i) { return "لَمْ " + present(v, i, JUS, false); } },
+    { id: "lam_p", de: "Verneinte Vergangenheit Passiv", ar: "الْجَحْدُ الْمُطْلَقُ الْمَجْهُولُ", rows: "p", passive: 1, grp: "neg",
+      make: passive(function (v, i) { return "لَمْ " + present(v, i, JUS, true); }) },
+    { id: "lan", de: "Verneinte Zukunft (lan)", ar: "تَأْكِيدُ نَفْيِ الِاسْتِقْبَالِ", rows: "p", grp: "neg",
+      make: function (v, i) { return "لَنْ " + present(v, i, SUBJ, false); } },
+    { id: "lan_p", de: "Verneinte Zukunft Passiv", ar: "تَأْكِيدُ نَفْيِ الِاسْتِقْبَالِ الْمَجْهُولُ", rows: "p", passive: 1, grp: "neg",
+      make: passive(function (v, i) { return "لَنْ " + present(v, i, SUBJ, true); }) },
     /* the command for all 14 persons as in the Emsile: 2nd person اُنْصُرْ (الْأَمْرُ الْحَاضِرُ),
        3rd and 1st person with lām al-amr لِيَنْصُرْ، لِأَنْصُرْ (الْأَمْرُ الْغَائِبُ) */
-    { id: "amr", de: "Befehl", ar: "الْأَمْرُ", rows: "p",
+    { id: "amr", de: "Befehl", ar: "الْأَمْرُ", rows: "p", grp: "amr",
       make: function (v, i) { return SECOND.indexOf(i) !== -1 ? imperative(v, i) : "لِ" + present(v, i, JUS, false); } },
-    { id: "nahy", de: "Verbot (lā)", ar: "النَّهْيُ", rows: "p",
+    /* the passive command always with lām al-amr: لِيُنْصَرْ، لِتُنْصَرْ، لِأُنْصَرْ */
+    { id: "amr_p", de: "Befehl Passiv", ar: "الْأَمْرُ الْمَجْهُولُ", rows: "p", passive: 1, grp: "amr",
+      make: passive(function (v, i) { return "لِ" + present(v, i, JUS, true); }) },
+    { id: "nahy", de: "Verbot (lā)", ar: "النَّهْيُ", rows: "p", grp: "amr",
       make: function (v, i) { return "لَا " + present(v, i, JUS, false); } },
-    { id: "lam", de: "Verneinte Vergangenheit (lam)", ar: "الْجَحْدُ الْمُطْلَقُ", rows: "p",
-      make: function (v, i) { return "لَمْ " + present(v, i, JUS, false); } },
-    { id: "lan", de: "Verneinte Zukunft (lan)", ar: "تَأْكِيدُ نَفْيِ الِاسْتِقْبَالِ", rows: "p",
-      make: function (v, i) { return "لَنْ " + present(v, i, SUBJ, false); } },
-    { id: "fail", de: "Partizip Aktiv (Tätiger)", ar: "اسْمُ الْفَاعِلِ", rows: "n",
+    { id: "nahy_p", de: "Verbot Passiv", ar: "النَّهْيُ الْمَجْهُولُ", rows: "p", passive: 1, grp: "amr",
+      make: passive(function (v, i) { return "لَا " + present(v, i, JUS, true); }) },
+    { id: "fail", de: "Partizip Aktiv (Tätiger)", ar: "اسْمُ الْفَاعِلِ", rows: "n", grp: "part",
       make: function (v, i) { return noun(v.r[0] + FA + "ا" + v.r[1] + KA, v.r[2], i); } },
-    { id: "maful", de: "Partizip Passiv (Betroffener)", ar: "اسْمُ الْمَفْعُولِ", rows: "n", passive: 1,
-      make: function (v, i) { return noun("مَ" + v.r[0] + SU + v.r[1] + DA + "و", v.r[2], i); } }
+    /* intransitive: مَذْهُوبٌ بِهِ، مَذْهُوبٌ بِهِمَا … (the six noun rows are the persons هُوَ … هُنَّ) */
+    { id: "maful", de: "Partizip Passiv (Betroffener)", ar: "اسْمُ الْمَفْعُولِ", rows: "n", passive: 1, grp: "part",
+      make: passive(function (v, i) { return noun("مَ" + v.r[0] + SU + v.r[1] + DA + "و", v.r[2], i); }) }
   ];
   var FORM_BY_ID = {};
   FORMS.forEach(function (f) { FORM_BY_ID[f.id] = f; });
 
-  function formsFor(v) { return FORMS.filter(function (f) { return v.t || !f.passive; }); }
+  function formsFor(v) { return FORMS.filter(function (f) { return v.pass || !f.passive; }); }
+  /* the forms before the passive of all tenses was added – their order keeps the quiz ids stable */
+  var OLD_FORMS = ["madi", "mudari", "madi_p", "mudari_p", "amr", "nahy", "lam", "lan", "fail", "maful"];
+  function quizIndex(v, f) {
+    var old = OLD_FORMS.filter(function (id) { return v.t || !FORM_BY_ID[id].passive; });
+    var k = old.indexOf(f.id);
+    return k !== -1 ? k : OLD_FORMS.length + FORMS.indexOf(f);
+  }
   function rowIdx(f) { return f.rows === "2" ? SECOND : f.rows === "n" ? [0, 1, 2, 3, 4, 5] : PERSONS.map(function (p, i) { return i; }); }
   function rowLabel(f, i) { return f.rows === "n" ? NOUN_ROWS[i] : PERSONS[i]; }
   function conj(v, f) {
@@ -256,8 +292,8 @@
     ["all", "Alle Formen", function () { return true; }],
     ["core", "Vergangenheit & Gegenwart", function (f) { return !!f.core; }],
     ["passiv", "Nur Passiv", function (f) { return !!f.passive; }],
-    ["amr", "Befehl & Verbot", function (f) { return f.id === "amr" || f.id === "nahy"; }],
-    ["neg", "Verneinung (lam, lan)", function (f) { return f.id === "lam" || f.id === "lan"; }],
+    ["amr", "Befehl & Verbot", function (f) { return f.grp === "amr"; }],
+    ["neg", "Verneinung (lā, lam, lan)", function (f) { return f.grp === "neg"; }],
     ["part", "Partizipien", function (f) { return f.rows === "n"; }]
   ];
   try { var fsaved = localStorage.getItem("fiqh:sarffocus"); if (fsaved && FOCUS.some(function (x) { return x[0] === fsaved; })) state.focus = fsaved; } catch (e) {}
@@ -314,9 +350,14 @@
             }).join("") + "</tr>";
         }).join("") + "</tbody></table></div>";
     }
-    var verbal = fs.filter(function (f) { return f.rows !== "n"; }), nouns = fs.filter(function (f) { return f.rows === "n"; });
-    return block(verbal, PERSONS.map(function (p, i) { return i; }), function (i) { return PERSONS[i]; }) +
-      block(nouns, [0, 1, 2, 3, 4, 5], function (i) { return NOUN_ROWS[i]; });
+    var active = fs.filter(function (f) { return f.rows !== "n" && !f.passive; }),
+      pass = fs.filter(function (f) { return f.rows !== "n" && f.passive; }), nouns = fs.filter(function (f) { return f.rows === "n"; });
+    var persons = PERSONS.map(function (p, i) { return i; }), pl = function (i) { return PERSONS[i]; };
+    return '<h4 class="sarf-sub">' + T("Aktiv") + ' <span lang="ar" dir="rtl">الْمَعْلُومُ</span></h4>' + block(active, persons, pl) +
+      (pass.length ? '<h4 class="sarf-sub">' + T("Passiv") + ' <span lang="ar" dir="rtl">الْمَجْهُولُ</span></h4>' +
+        (v.t ? "" : '<p class="sarf-help">' + T("Intransitiv: Das Verb bleibt in der 3. Person (er), die Person steckt im Pronomen an der Präposition.") + "</p>") +
+        block(pass, persons, pl) : "") +
+      '<h4 class="sarf-sub">' + T("Partizipien") + "</h4>" + block(nouns, [0, 1, 2, 3, 4, 5], function (i) { return NOUN_ROWS[i]; });
   }
   function pane() {
     var all = stats(TABLES), core = stats(TABLES.filter(function (t) { return t.f.core; })), fs = stats(focused());
@@ -330,7 +371,7 @@
     }
     if (!v) {
       html += '<div class="panel ar-irab-cta"><div><p class="eyebrow">Sarf · صَرْف</p><h3>' + T("Verben konjugieren wie in der Emsile") + "</h3>" +
-        "<p>" + T("{v} Verben aus allen sechs Abwāb, je bis zu {f} Formen: Vergangenheit und Gegenwart, Passiv, Befehl, Verbot, Verneinung mit lam und lan, Partizip Aktiv und Passiv.", { v: VERBS.length, f: FORMS.length }) + " " +
+        "<p>" + T("{v} Verben aus allen sechs Abwāb, je bis zu {f} Formen: Vergangenheit und Gegenwart, Befehl, Verbot, Verneinung mit lā, lam und lan – jeweils aktiv und passiv –, Partizip Aktiv und Passiv.", { v: VERBS.length, f: FORMS.length }) + " " +
         T("Eine Tabelle ist gelernt, wenn du sie fehlerfrei ordnest – nach einem Fehler zweimal hintereinander.") + "</p>" +
         '<div class="learn-stats"><span>' + T("<b>{n}</b> von {m} Tabellen gelernt", { n: all.learned, m: all.total }) + "</span><span>" + T("<b>{n} %</b> Vergangenheit &amp; Gegenwart", { n: core.pct }) + "</span></div></div>" +
         '<div class="sarf-focus"><p class="step-label">' + T("Was möchtest du üben?") + '</p><div class="chips">' + FOCUS.map(function (x) {
@@ -348,7 +389,7 @@
             return '<li class="lt lt-' + st + '"><button type="button" class="ar-lesson" data-sarf-verb="' + x.id + '">' +
               '<span class="ar-num sarf-num" lang="ar" dir="rtl">' + esc(x.past) + "</span>" +
               '<span class="lt-main"><span class="lt-title"><strong>' + esc(T(x.de)) + '</strong><span class="lt-ar" lang="ar" dir="rtl">' + esc(x.pres) + "</span></span>" + bar(s) +
-              '<small class="lt-meta">' + T("{n} Tabellen", { n: s.total }) + (x.t ? "" : " · " + T("intransitiv, ohne Passiv")) + "</small></span>" +
+              '<small class="lt-meta">' + T("{n} Tabellen", { n: s.total }) + (x.t ? "" : " · " + T(x.pass ? "intransitiv, Passiv mit Präposition" : "Bāb 5, ohne Passiv")) + "</small></span>" +
               '<span class="lt-pct">' + (st === "done" ? "✓" : s.pct + " %") + "</span></button></li>";
           }).join("") + "</ol></section>";
       }).join("");
@@ -356,7 +397,7 @@
       var ts = TABLES.filter(function (t) { return t.v === v; });
       html += '<div class="ar-lesson-view"><button type="button" class="linkish ar-back" data-sarf-back>← ' + T("Alle Verben") + "</button>" +
         '<div class="panel sarf-verb-head"><h3><span lang="ar" dir="rtl" class="sarf-verb">' + esc(v.past) + " " + esc(v.pres) + "</span> " + esc(T(v.de)) + "</h3>" +
-        "<p>Bāb " + v.bab.n + ' <span lang="ar" dir="rtl">' + esc(v.bab.w) + "</span> · " + T("wie") + ' <span lang="ar" dir="rtl">' + esc(v.bab.model) + "</span>" + (v.t ? "" : " · " + T("intransitiv, daher ohne Passiv")) + "</p>" +
+        "<p>Bāb " + v.bab.n + ' <span lang="ar" dir="rtl">' + esc(v.bab.w) + "</span> · " + T("wie") + ' <span lang="ar" dir="rtl">' + esc(v.bab.model) + "</span>" + (v.t ? "" : " · " + (v.pass ? T("intransitiv: Passiv nur mit Präposition, z. B. {w}", { w: FORMS[2].make(v, 0) }) : T("Bāb 5 (Eigenschaft), daher ohne Passiv"))) + "</p>" +
         '<div class="ar-parts">' + ts.map(function (t) {
           var l = lv(t), tb = tableBar(t);
           return '<button type="button" class="ar-part' + (l === 2 ? " is-done" : "") + '" data-sarf-table="' + t.id + '"><strong>' + esc(T(t.f.de)) + "</strong>" + tb.bar +
@@ -417,11 +458,15 @@
     }
     function label(f, i) { var r = rowLabel(f, i); return r[0] + " (" + T(r[1]) + ")"; }
     VERBS.forEach(function (v, vi) {
-      var fs = formsFor(v), all = [], count = {};
-      fs.forEach(function (f) { rowIdx(f).forEach(function (i) { var w = f.make(v, i); all.push({ f: f, i: i, w: w }); count[w] = (count[w] || 0) + 1; }); });
+      var fs = formsFor(v), all = [], count = {}, countOld = {};
+      fs.forEach(function (f) { rowIdx(f).forEach(function (i) {
+        var w = f.make(v, i);
+        all.push({ f: f, i: i, w: w }); count[w] = (count[w] || 0) + 1;
+        if (OLD_FORMS.indexOf(f.id) !== -1) countOld[w] = (countOld[w] || 0) + 1;
+      }); });
       var src = T("Ṣarf") + ": " + v.past + " " + v.pres + " · Bāb " + v.bab.n;
-      fs.forEach(function (f, fi) {
-        var rows = rowIdx(f), rnd = seeded(v.id + "|" + f.id);
+      fs.forEach(function (f) {
+        var fi = quizIndex(v, f), rows = rowIdx(f), rnd = seeded(v.id + "|" + f.id);
         /* build: two persons per form */
         [0, 1].forEach(function (k) {
           var i = rows[(vi * 3 + fi * 5 + k * 7) % rows.length], right = f.make(v, i);
@@ -436,9 +481,13 @@
             a: [right].concat(wrong), e: T("{f} von {v}, {p}: {w}", { f: T(f.de), v: v.past, p: label(f, i), w: right }) });
         });
         /* recognise: one form per table that is unique in the whole table of the verb */
+        /* the form is picked as before the new forms came (same id), unless it is no longer unique (لَا تَنْصُرْنَ is Nahy and Nafy) */
         var uniq = rows.filter(function (i) { return count[f.make(v, i)] === 1; });
         if (!uniq.length) return;
-        var ri = uniq[(vi + fi) % uniq.length], word = f.make(v, ri);
+        var old = OLD_FORMS.indexOf(f.id) !== -1 ? rows.filter(function (i) { return countOld[f.make(v, i)] === 1; }) : [];
+        var ri = old.length ? old[(vi + fi) % old.length] : -1;
+        if (ri === -1 || count[f.make(v, ri)] !== 1) ri = uniq[(vi + fi) % uniq.length];
+        var word = f.make(v, ri);
         var labels = all.filter(function (x) { return x.w !== word && count[x.w] === 1; }).map(function (x) { return T(x.f.de) + " · " + label(x.f, x.i); });
         var sameForm = labels.filter(function (x) { return x.indexOf(T(f.de) + " · ") === 0; });
         var wrongL = pick(sameForm, [], 1, rnd);
