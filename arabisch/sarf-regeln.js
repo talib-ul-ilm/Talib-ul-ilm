@@ -65,12 +65,32 @@ window.SARF_REGELN = [
     text: [
       "Muster **فُعِلَ**: Ḍamma auf dem 1. Radikal, Kasra auf dem 2.: نَصَرَ → **نُصِرَ** „ihm wurde geholfen“.",
       "Der Handelnde wird nicht genannt; das frühere Objekt wird zum **نَائِبُ الْفَاعِلِ** (Stellvertreter des Subjekts, Nominativ): كُتِبَ الدَّرْسُ.",
-      "Passiv bilden nur Verben mit Objekt (transitive Verben)."
+      "Verben mit Objekt (transitiv) bilden das Passiv in allen 14 Personen: نُصِرَ، نُصِرَا، نُصِرُوا … نُصِرْتُ، نُصِرْنَا. Verben ohne Objekt siehe „Passiv ohne Objekt“."
     ] },
   { id: "passiv_mudari", form: "mudari_p", title: "Passiv der Gegenwart", ar: "الْمُضَارِعُ الْمَجْهُولُ", tags: "passiv majhul yuf'alu gegenwart",
     text: [
       "Muster **يُفْعَلُ**: Ḍamma auf der Vorsilbe, Fatḥa auf dem 2. Radikal: يَنْصُرُ → **يُنْصَرُ** „ihm wird geholfen“.",
       "Das gilt für alle Abwāb gleich: يُضْرَبُ، يُفْتَحُ، يُعْلَمُ."
+    ] },
+  { id: "passiv_lazim", form: "madi_p", title: "Passiv ohne Objekt (intransitive Verben)", ar: "الْمَجْهُولُ مِنَ اللَّازِمِ", tags: "passiv majhul lazim intransitiv praeposition dhuhiba bihi",
+    text: [
+      "Ein Verb ohne Objekt (**لَازِمٌ**) bildet das Passiv nur **unpersönlich mit seiner Präposition**: ذَهَبَ بِهِ „er nahm ihn mit“ → **ذُهِبَ بِهِ** „er wurde mitgenommen“.",
+      "Das Verb bleibt immer in der 3. Person m. Sg.; die Person steckt im Pronomen an der Präposition: ذُهِبَ بِهِ، ذُهِبَ بِهِمَا، ذُهِبَ بِهِمْ، ذُهِبَ بِهَا … ذُهِبَ بِي، ذُهِبَ بِنَا.",
+      "Ebenso in allen Zeiten: يُذْهَبُ بِهِ، لَمْ يُذْهَبْ بِهِ، لَنْ يُذْهَبَ بِهِ – und im Partizip: **مَذْهُوبٌ بِهِ**. Andere Präpositionen: نُظِرَ إِلَيْهِ، سُجِدَ لَهُ، صُبِرَ عَلَيْهِ.",
+      "Verben des Bāb 5 (فَعُلَ يَفْعُلُ, Eigenschaften wie حَسُنَ) haben kein Passiv."
+    ] },
+  { id: "nafy", form: "nafy", title: "Verneinte Gegenwart (Nafy)", ar: "النَّفْيُ", tags: "nafy la nafiya verneinung gegenwart la yansuru",
+    text: [
+      "**لَا** + Muḍāriʿ im **Indikativ** verneint die Gegenwart: لَا يَنْصُرُ „er hilft nicht“, لَا يَنْصُرُونَ، لَا تَنْصُرِينَ.",
+      "Die Endung bleibt wie beim bejahten Muḍāriʿ (-u, -ūna, -īna). Dieses لَا heißt **لَا النَّافِيَةُ**.",
+      "Vergleich: لَا تَنْصُرُ „du hilfst nicht“ – **لَا تَنْصُرْ** „hilf nicht!“ (Verbot, Jussiv)."
+    ] },
+  { id: "passiv_rest", form: "lam_p", title: "Passiv von Verneinung, Befehl und Verbot", ar: "النَّفْيُ وَالْجَحْدُ وَالْأَمْرُ وَالنَّهْيُ الْمَجْهُولُ", tags: "passiv majhul lam lan la amr nahy yunsar",
+    text: [
+      "Alle Formen des Muḍāriʿ gibt es auch im Passiv, gebildet von **يُنْصَرُ**:",
+      "**لَا يُنْصَرُ** „ihm wird nicht geholfen“ · **لَمْ يُنْصَرْ** „ihm wurde nicht geholfen“ · **لَنْ يُنْصَرَ** „ihm wird nicht geholfen werden“.",
+      "Befehl im Passiv immer mit **لِـ** (auch für „du“): **لِيُنْصَرْ** „ihm soll geholfen werden“, لِتُنْصَرْ، لِأُنْصَرْ، لِنُنْصَرْ.",
+      "Verbot im Passiv: **لَا يُنْصَرْ**، لَا تُنْصَرْ، لَا تُنْصَرُوا."
     ] },
   { id: "fail", form: "fail", title: "Partizip Aktiv (Ism al-fāʿil)", ar: "اسْمُ الْفَاعِلِ", tags: "partizip aktiv ism fail faa'il taeter",
     text: [

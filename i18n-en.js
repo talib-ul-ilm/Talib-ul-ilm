@@ -1057,5 +1057,20 @@ window.I18N_EN = {
  "Diese Regel üben · {n} Übungen": "Practise this rule · {n} exercises",
  "Diese Regel üben · 1 Übung": "Practise this rule · 1 exercise",
  "Runde {n}": "Round {n}",
- "Die Regel – noch einmal lesen": "The rule – read it once more"
+ "Die Regel – noch einmal lesen": "The rule – read it once more",
+  "Verneinte Gegenwart (lā)": "Negated present (lā)",
+  "Verneinte Gegenwart Passiv": "Negated present passive",
+  "Verneinte Vergangenheit Passiv": "Negated past passive",
+  "Verneinte Zukunft Passiv": "Negated future passive",
+  "Befehl Passiv": "Imperative passive",
+  "Verbot Passiv": "Prohibition passive",
+  "Verneinung (lā, lam, lan)": "Negation (lā, lam, lan)",
+  "Aktiv": "Active",
+  "Passiv": "Passive",
+  "Intransitiv: Das Verb bleibt in der 3. Person (er), die Person steckt im Pronomen an der Präposition.": "Intransitive: the verb stays in the 3rd person (he); the person is in the pronoun on the preposition.",
+  "{v} Verben aus allen sechs Abwāb, je bis zu {f} Formen: Vergangenheit und Gegenwart, Befehl, Verbot, Verneinung mit lā, lam und lan – jeweils aktiv und passiv –, Partizip Aktiv und Passiv.": "{v} verbs from all six abwāb, each with up to {f} forms: past and present, imperative, prohibition, negation with lā, lam and lan – each active and passive –, active and passive participle.",
+  "intransitiv, Passiv mit Präposition": "intransitive, passive with preposition",
+  "Bāb 5, ohne Passiv": "Bāb 5, no passive",
+  "intransitiv: Passiv nur mit Präposition, z. B. {w}": "intransitive: passive only with a preposition, e.g. {w}",
+  "Bāb 5 (Eigenschaft), daher ohne Passiv": "Bāb 5 (quality), so no passive"
 };
