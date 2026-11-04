@@ -72,7 +72,12 @@
     if (n === 300) return ["ثَلَاثُمِائَةِ " + w[1], "ثَلَاثَةُ مِائَةِ " + w[1], "ثَلَاثُمِائَةِ " + w[3], "ثَلَاثُمِائَةٍ " + w[2]];
     return ["أَلْفُ " + w[1], "أَلْفُ " + w[3], "أَلْفٌ " + w[2], "أَلْفَا " + w[1]];
   }
-  function rule(n, fem) {
+  function rule(n, fem, w) {
+    var g = fem ? 1 : 0, gen = w[0] + (fem ? " ist weiblich" : " ist männlich");
+    if (n >= 3 && n <= 10) return "3–10: Die Zahl hat das umgekehrte Geschlecht. " + gen + ", deshalb steht die Zahl " + (fem ? "ohne" : "mit") + " ة: " +
+      U[n][g] + " (nicht " + U[n][1 - g] + "). Das Gezählte steht im Plural und im Genitiv: " + w[3] + ".";
+    if (n >= 11 && n <= 19) return (n <= 12 ? "11 und 12: Beide Teile stimmen mit dem Gezählten überein. " : "13–19: Der Einer hat das umgekehrte Geschlecht, عَشَرَ / عَشْرَةَ stimmt überein. ") +
+      gen + ": " + TEEN[n][g] + " (nicht " + TEEN[n][1 - g] + "). Das Gezählte steht im Singular und im Akkusativ: " + w[2] + ".";
     if (n === 1) return "1: Das Nomen steht vorne, وَاحِدٌ / وَاحِدَةٌ folgt als Adjektiv und richtet sich nach dem Geschlecht.";
     if (n === 2) return "2: der Dual – im Nominativ auf ـَانِ (ـَيْنِ ist Akkusativ/Genitiv).";
     if (n <= 10) return "3–10: Die Zahl hat das umgekehrte Geschlecht (männliches Gezähltes → Zahl mit ة), das Gezählte steht im Plural und im Genitiv.";
@@ -106,7 +111,7 @@
           var base = { lesson: lessonOf(n, fem), lvl: lvlOf(n) };
           /* build: German → Arabic */
           out.push(Object.assign({ key: "b|" + n + "|" + w[0], q: "Wie sagt man auf Arabisch: „" + de(n, w) + "“",
-            a: opts.map(function (x) { return have(w) + x + "."; }), e: have(w) + right + ". – " + rule(n, fem) + kinNote(w) }, base));
+            a: opts.map(function (x) { return have(w) + x + "."; }), e: have(w) + right + ". – " + rule(n, fem, w) + kinNote(w) }, base));
           /* read: Arabic → German, with numbers that look alike */
           if (k === 0 && n > 2) {
             var wrong = confuse(n, NS).slice(0, 3).map(function (m) { return de(m, w); });
