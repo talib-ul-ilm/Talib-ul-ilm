@@ -31,6 +31,11 @@
       if (MEAN_EN && MEAN_EN[v.de]) v[1] = MEAN_EN[v.de];
     });
   });
+  /* plurals the book leaves out (arabisch/plurale.js) – for the Plural column and the plural questions */
+  var PLURALE = window.MADINA_PLURALE || {};
+  LESSONS.forEach(function (l) {
+    l.vocab.forEach(function (v) { if (!v[2] && PLURALE[v[0]]) v[2] = PLURALE[v[0]]; });
+  });
   var BOOKS = { 1: LESSONS.filter(function (l) { return bookOf(l) === 1; }), 2: LESSONS.filter(function (l) { return bookOf(l) === 2; }) };
   var BOOK2_GATE = 5;
 
