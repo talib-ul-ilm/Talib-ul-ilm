@@ -492,7 +492,7 @@
   }
 
   /* ---------- state ---------- */
-  var state = { tab: "lektionen", lesson: null, filter: "", book: 1 };
+  var state = { tab: "lektionen", lesson: null, filter: "", wazn: "", book: 1 };
   try {
     var saved = JSON.parse(localStorage.getItem("fiqh:arabic") || "null");
     if (saved && saved.tab) state.tab = saved.tab;
@@ -934,23 +934,88 @@
   function vocabTable(list, withLesson) {
     return '<div class="ar-table-wrap"><table class="ar-table ar-vocab"><thead><tr><th>' + T("Arabisch") + "</th><th>" + T("Bedeutung") + "</th><th>" + T("Plural") + "</th>" + (withLesson ? "<th>" + T("Lek.") + "</th>" : "") + "</tr></thead><tbody>" +
       list.map(function (v) {
-        return "<tr><td>" + ar(v[0], "ar-word") + "</td><td>" + esc(v[1]) + "</td><td>" + (v[2] ? ar(v[2], "ar-word") : "") + "</td>" + (withLesson ? '<td class="ar-lek">' + esc(v[3]) + "</td>" : "") + "</tr>";
+        return "<tr><td>" + ar(v[0], "ar-word") + "</td><td>" + esc(v[1]) + "</td><td>" + (v[2] ? ar(v[2], "ar-word") + (withLesson ? waznTag(v[2]) : "") : "") + "</td>" + (withLesson ? '<td class="ar-lek">' + esc(v[3]) + "</td>" : "") + "</tr>";
       }).join("") + "</tbody></table></div>";
   }
   function fold(s) {
     return String(s).toLowerCase().normalize("NFD").replace(/[ً-ٰٟ̀-ͯ]/g, "")
       .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
   }
+  /* WAZN-START */
+  /* plural patterns (awzān al-jamʿ) for the filter of the vocabulary list.
+     Each pattern is written with ف ع ل as root letters; it becomes a regular expression in which
+     every root letter stands for any letter (a sukūn may be left out). Checked in this order. */
+  var WAZN = [
+    ["أَفْعَال", ["أَفْعَال"]], ["أَفْعِلَة", ["أَفْعِلَة"]], ["أَفْعُل", ["أَفْعُل"]], ["أَفْعِلَاء", ["أَفْعِلَاء", "أَفِعَّاء"]],
+    ["مَفَاعِيل", ["مَفَاعِيل"]], ["مَفَاعِل", ["مَفَاعِل"]], ["أَفَاعِل", ["أَفَاعِل"]], ["فَوَاعِل", ["فَوَاعِل"]], ["فَعَائِل", ["فَعَائِل"]],
+    ["فَعَالِيل", ["فَعَالِيل", "فَعَالِيّ"]], ["فَعَالِلَة", ["فَعَالِلَة"]], ["فَعَالِل", ["فَعَالِل"]], ["فَعَالَى", ["فَعَالَى", "فَعَالَا", "فُعَالَى"]],
+    ["فُعَلَاء", ["فُعَلَاء"]], ["فُعَّال", ["فُعَّال"]], ["فُعُول", ["فُعُول"]], ["فِعَال", ["فِعَال"]], ["فِعْلَان", ["فِعْلَان"]], ["فُعْلَان", ["فُعْلَان"]],
+    ["فُعَلَة", ["فُعَلَة"]], ["فَعَلَة", ["فَعَلَة"]], ["فِعَلَة", ["فِعَلَة"]], ["فِعْلَة", ["فِعْلَة"]], ["فَعْلَى", ["فَعْلَى"]], ["فَعِيل", ["فَعِيل"]],
+    ["فُعُل", ["فُعُل"]], ["فُعَل", ["فُعَل"]], ["فِعَل", ["فِعَل"]], ["فُعْل", ["فُعْل"]], ["فَعَل", ["فَعَل"]]
+  ];
+  /* weak roots that the letter patterns cannot see */
+  var WAZN_OF = { "أَيْدٍ": "أَفْعُل", "أَكُفٌّ": "أَفْعُل", "بِيضٌ": "فُعْل", "سَادَةٌ": "فَعَلَة", "قُضَاةٌ": "فُعَلَة",
+    "أَيَّامٌ": "أَفْعَال", "أَسِرَّةٌ": "أَفْعِلَة", "أَئِمَّةٌ": "أَفْعِلَة", "مَخَادُّ": "مَفَاعِل", "عِصِيٌّ": "فُعُول" };
+  function shaddaFirst(x) { return x.replace(/([ً-ِ])ّ/g, "ّ$1"); }   /* one order for shadda + vowel */
+  var WAZN_FIX = {};
+  Object.keys(WAZN_OF).forEach(function (k) { WAZN_FIX[shaddaFirst(k)] = WAZN_OF[k]; });
+  var WAZN_RE = WAZN.map(function (w) {
+    return [w[0], w[1].map(function (p) {
+      return new RegExp("^" + shaddaFirst(p).replace(/[فعل]/g, "[\\u0621-\\u064A]").replace(/ْ/g, "\\u0652?") + "$");
+    })];
+  });
+  function waznOf(pl) {
+    var p = shaddaFirst(String(pl).split("/")[0].trim())
+      .replace(/^ال([ء-ي])ّ?/, "$1");             /* article: an-nisāʾ → nisāʾ */
+    if (WAZN_FIX[p]) return WAZN_FIX[p];
+    if (/(ونَ|ينَ)$/.test(p)) return "un";  /* -ūna / -īna: sound masculine */
+    var s = p.replace(/آ/g, "أَا")                     /* ʾā = ʾa + alif */
+      .replace(/ٍ$/, "ِي")                                  /* maʿānin → maʿānī */
+      .replace(/ًى$/, "َى")                            /* quran → qurā */
+      .replace(/[ً-ِ]+$/, "");                                   /* case ending */
+    var at = /ات$/.test(s);                                      /* ends in -āt */
+    for (var i = 0; i < WAZN_RE.length; i++) {
+      /* awqāt is afʿāl, but miʾāt is not fiʿāl */
+      if ((!at || WAZN_RE[i][0] === WAZN[0][0]) && WAZN_RE[i][1].some(function (re) { return re.test(s); })) return WAZN_RE[i][0];
+    }
+    return at ? "at" : "x";                                                /* -āt: sound feminine */
+  }
+  /* WAZN-END */
+  function waznTag(pl) {
+    var k = waznOf(pl);
+    return k === "x" ? "" : '<small class="ar-wazn" lang="ar" dir="rtl">' + (k === "un" ? "ـُونَ" : k === "at" ? "ـَاتٌ" : esc(k)) + "</small>";
+  }
+  function waznName(k) {
+    return k === "un" ? T("gesunder Plural m. (ـُونَ)") : k === "at" ? T("gesunder Plural f. (ـَاتٌ)") : k === "x" ? T("andere Muster") : k;
+  }
   function vocabPane() {
     var rows = [];
     lessons().forEach(function (l) { l.vocab.forEach(function (v) { rows.push([v[0], v[1], v[2], l.n]); }); });
     var f = fold(state.filter.trim());
     var hit = f ? rows.filter(function (r) { return fold(r[0] + " " + r[1] + " " + (r[2] || "")).indexOf(f) !== -1; }) : rows;
+    /* plural pattern: "" all words, "pl" only words with a plural, else one pattern (waznOf) */
+    var groups = {}, seenPl = {};
+    rows.forEach(function (r) {
+      if (!r[2]) return;
+      var k = waznOf(r[2]);
+      (groups[k] = groups[k] || { n: 0, ex: [] }).n++;
+      if (!seenPl[r[2]] && groups[k].ex.length < 2) { seenPl[r[2]] = 1; groups[k].ex.push(r[2].split("/")[0].trim()); }
+    });
+    if (state.wazn && state.wazn !== "pl" && !groups[state.wazn]) state.wazn = "";
+    if (state.wazn) hit = hit.filter(function (r) { return r[2] && (state.wazn === "pl" || waznOf(r[2]) === state.wazn); });
+    var keys = Object.keys(groups).sort(function (a, b) { return (a === "x") - (b === "x") || groups[b].n - groups[a].n; });
+    var sel = '<label class="ar-wazn-sel"><span>' + T("Plural-Muster") + '</span><select id="ar-wazn">' +
+      '<option value="">' + T("alle Wörter") + "</option>" +
+      '<option value="pl"' + (state.wazn === "pl" ? " selected" : "") + ">" + T("nur Wörter mit Plural") + "</option>" +
+      keys.map(function (k) {
+        return '<option value="' + esc(k) + '"' + (state.wazn === k ? " selected" : "") + ">" + esc(waznName(k)) +
+          (k === "x" ? "" : " – " + esc(groups[k].ex.join("، "))) + " (" + groups[k].n + ")</option>";
+      }).join("") + "</select></label>";
     var vs = stats(bookQs().filter(function (q) { return /^ar-[vdp]-/.test(q._lid); }));
     return '<div class="ar-vocab-pane"><div class="ar-vocab-head">' +
       '<form class="search" role="search" data-ar-search><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>' +
       '<input id="ar-filter" type="search" dir="auto" autocomplete="off" aria-label="' + T("Vokabeln durchsuchen") + '" placeholder="' + T("Suchen: Haus, بيت …") + '" value="' + esc(state.filter) + '"></form>' +
-      '<button type="button" class="btn btn-primary" data-ar-vocab-train>Vokabeltrainer · ' + vs.pct + " %</button></div>" +
+      sel + '<button type="button" class="btn btn-primary" data-ar-vocab-train>Vokabeltrainer · ' + vs.pct + " %</button></div>" +
       '<p class="ar-count">' + T("{n} von {m} Vokabeln · der Trainer fragt Bedeutung, Arabisch und Plural ab und beginnt mit deinen Fehlern.", { n: hit.length, m: rows.length }) + "</p>" +
       vocabTable(hit.slice(0, 400), true) + "</div>";
   }
@@ -1075,6 +1140,8 @@
       });
       $("[data-ar-search]", body).addEventListener("submit", function (e) { e.preventDefault(); });
     }
+    var wz = $("#ar-wazn", body);
+    if (wz) wz.addEventListener("change", function () { state.wazn = wz.value; render(); var n = $("#ar-wazn"); if (n) n.focus(); });
     var vt = $("[data-ar-vocab-train]", body);
     if (vt) vt.addEventListener("click", function () {
       start(listFrom("vocab"), T("Vokabeltrainer"), {}, undefined, "vocab");
