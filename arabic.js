@@ -36,8 +36,9 @@
 
   /* ---------- text helpers ---------- */
   var AR = "\\u0600-\\u06FF\\u0750-\\u077F\\uFB50-\\uFDFF\\uFE70-\\uFEFF";
-  /* one Arabic phrase, including **bold** inside it, so it stays one right-to-left block */
-  var AR_RUN = new RegExp("(?:\\*\\*)?[" + AR + "](?:[" + AR + "\\s،؛؟.…–\\-/()*]*[" + AR + "])?[؟]?(?:\\*\\*)?", "g");
+  /* one Arabic phrase, including **bold** inside it, so it stays one right-to-left block;
+     a full stop followed by a space ends the phrase, so two Arabic sentences are not swapped (… بِالْجَامِعَةِ. مَا …) */
+  var AR_RUN = new RegExp("(?:\\*\\*)?[" + AR + "](?:(?:[" + AR + "\\s،؛؟…–\\-/()*]|\\.(?!\\s))*[" + AR + "])?[؟]?(?:\\*\\*)?", "g");
   function strip(s) { return String(s).replace(/\*\*/g, ""); }
   /* German text with inline Arabic and **bold** -> HTML */
   function rich(s) {
