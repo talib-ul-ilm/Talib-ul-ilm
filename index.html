@@ -406,6 +406,8 @@ mark { background: var(--accent-soft); color: inherit; padding: 0 2px; border-ra
 .comp-action { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 .comp-state { margin: 0; color: var(--muted); }
 .comp-state b { color: var(--ink); }
+.remind { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface-2); display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.remind p { margin: 0; flex: 1 1 260px; font-size: .9rem; color: var(--muted); } .remind p b { color: var(--ink); }
 .comp-error { margin: 0; color: var(--bad); background: var(--bad-soft); padding: 10px 14px; border-radius: var(--radius); }
 .winner { display: flex; gap: 14px; align-items: center; padding: 16px 20px; border-radius: 14px; background: var(--accent-soft); border: 1px solid var(--accent); }
 .winner[hidden] { display: none; }
@@ -561,10 +563,12 @@ dialog.auth::backdrop { background: rgba(8, 20, 17, .55); backdrop-filter: blur(
 
 /* ---------- chat ---------- */
 .tab { position: relative; }
+.tab-dot { display: inline-block; width: 9px; height: 9px; margin-left: 5px; border-radius: 50%; background: var(--bad); vertical-align: .3em; box-shadow: 0 0 0 2px var(--surface); }
 .tab-badge { display: inline-grid; place-items: center; min-width: 1.35em; height: 1.35em; margin-left: 5px; padding: 0 4px; border-radius: 999px; background: var(--bad); color: #fff; font-size: .72rem; font-weight: 800; vertical-align: .1em; }
 @media (max-width: 480px) {
   .tab { padding: 7px 4px; font-size: .88rem; }
   .tab-badge { position: absolute; top: -2px; right: 0; margin: 0; }
+  .tab-dot { position: absolute; top: 2px; left: 4px; margin: 0; }
 }
 .chat-wrap { padding-block: 20px 60px; }
 .chat-off { padding: 26px; display: grid; gap: 10px; }
@@ -920,6 +924,7 @@ h1, h2, h3, .setup h2, .article h2, .entry h3, .social h2, .social h3, .ov-head,
   .tab[aria-selected="true"] { background: var(--primary-soft); }
   .tab::after { top: 0; bottom: auto; left: 32%; right: 32%; }
   .tab-badge { position: absolute; top: 2px; left: calc(50% + 6px); right: auto; margin: 0; }
+  .tab-dot { position: absolute; top: 4px; left: auto; right: calc(50% + 10px); margin: 0; }
   body { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
 }
 
@@ -1478,7 +1483,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
       <button type="button" class="tab" role="tab" data-view="quiz" aria-selected="false">
         <svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9.7 9.6a2.4 2.4 0 1 1 3.3 2.2c-.7.3-1 .8-1 1.5v.4M12 16.6v.2"/></svg><span class="tab-label">Quiz</span></button>
       <button type="button" class="tab" role="tab" data-view="wettbewerb" aria-selected="false">
-        <svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8v4.5a4 4 0 0 1-8 0zM8 6.5H5.5a2.5 2.5 0 0 0 2.6 3.6M16 6.5h2.5a2.5 2.5 0 0 1-2.6 3.6M12 13v3.5M8.5 19.5h7M10 16.5h4v3h-4z"/></svg><span class="tab-label">Wettbewerb</span><span class="tab-badge" id="friend-badge" hidden></span></button>
+        <svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4.5h8v4.5a4 4 0 0 1-8 0zM8 6.5H5.5a2.5 2.5 0 0 0 2.6 3.6M16 6.5h2.5a2.5 2.5 0 0 1-2.6 3.6M12 13v3.5M8.5 19.5h7M10 16.5h4v3h-4z"/></svg><span class="tab-label">Wettbewerb</span><span class="tab-dot" id="comp-dot" hidden></span><span class="tab-badge" id="friend-badge" hidden></span></button>
       <button type="button" class="tab" role="tab" data-view="chat" aria-selected="false">
         <svg class="tab-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.5h14a1.5 1.5 0 0 1 1.5 1.5v8.5A1.5 1.5 0 0 1 19 17h-8.5L6 20.5V17H5a1.5 1.5 0 0 1-1.5-1.5V7A1.5 1.5 0 0 1 5 5.5z"/></svg><span class="tab-label">Chat</span><span class="tab-badge" id="chat-badge" hidden></span></button>
     </nav>
@@ -1988,6 +1993,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
           <div class="comp-action">
             <button type="button" class="btn btn-primary btn-lg" id="comp-start">Wochenquiz starten</button>
             <p class="comp-state" id="comp-state"></p>
+            <div class="remind" id="remind" hidden></div>
           </div>
           <ul class="rules">
             <li>jede Woche ein anderes Sachgebiet</li>
@@ -2303,6 +2309,7 @@ bdi[lang="ar"], .ar-in { display: inline-block; max-width: 100%; vertical-align:
 <script src="tajwid/begriffe.js"></script>
 <script src="glossar.js"></script>
 <script src="app.js"></script>
+<script src="reminder.js"></script>
 <script src="social.js"></script>
 <script src="chat.js"></script>
 <script src="auth.js"></script>
