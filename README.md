@@ -179,6 +179,19 @@ Jede Fiqh-Frage verweist mit `s` auf den Abschnitt ihres Themas (Index in `secti
 
 In jeder Quiz-Runde (Fiqh, Taǧwīd und Arabisch, Themen- wie gemischter Modus) merkt sich `app.js` in `localStorage` („fiqh:mixseen“), wann eine Frage gestellt wurde. Eine Frage der letzten zwei Stunden kommt erst wieder, wenn alle anderen Fragen der gewählten Auswahl (Themen, Bereiche, Buch, Niveau) gestellt wurden; dann füllen die am längsten zurückliegenden die Runde auf. Nach zwei Stunden gilt eine Frage wieder als neu. Die Einstellungsübersicht zeigt, wie viele Fragen gerade pausieren. Lektionsrunden (eigene Reihenfolge nach Lernstand) und Wettbewerb sind davon nicht betroffen.
 
+## Erinnerung an das Wochenquiz
+
+`reminder.js` erinnert an die Runde der Woche, solange man sie noch nicht gespielt hat. `social.js` meldet nach jedem `render()` über `FIQH_REMINDER.update(...)`, welche Ligen dieser Woche noch offen sind. Die Fiqh-Liga zählt nicht mit, solange sie ruht.
+- **Roter Punkt** am Reiter „Wettbewerb“ für alle angemeldeten Spieler mit bestätigter E-Mail, solange eine Liga der Woche offen ist. In der installierten App steht zusätzlich die Zahl der offenen Ligen am App-Symbol.
+- **Benachrichtigung** zum Einschalten in der Wettbewerbskarte („Erinnerung einschalten“, `fiqh:remind`). Erst dieser Klick fragt nach der Erlaubnis. Es gibt höchstens zwei Erinnerungen pro Woche:
+  - eine zu Beginn der Woche („Neues Wochenquiz ist da“), am ersten Nachmittag, an dem das Gerät nachsieht;
+  - eine am letzten Tag, also Sonntag („Heute letzter Tag“), nur noch für die Ligen, die dann noch offen sind.
+
+  Beide kommen nur **zwischen 16:00 und 19:30 Uhr** Ortszeit, also nach der Schule und nicht spätabends oder nachts. Sie kommen nicht, wenn die App gerade offen im Blick ist; dann reicht der Punkt.
+- **Entscheidung im Service Worker** (`remindCheck` in `sw.js`): Die Seite gibt ihm ihren Zustand (Ligen, Kalender, Texte in der gewählten Sprache), er speichert ihn im Cache `fiqh-reminder`. Bei jeder Prüfung rechnet er die aktuelle Woche selbst aus und liest die öffentliche Spielerkarte `players/<uid>` (Firestore REST, Feld `comp`). Eine auf einem anderen Gerät gespielte Runde zählt also auch. Was schon gemeldet wurde, steht in `sent`, damit nichts doppelt kommt.
+- **Zustellung**: Periodic Background Sync (`quiz-reminder`, installierte App in Chrome, Edge oder Android) weckt den Service Worker auch bei geschlossener App. Ist die Seite offen (auch im Hintergrund), prüft sie alle 5 Minuten und beim Wechsel in den Hintergrund. Auf iPhone und iPad gibt es Benachrichtigungen nur für die zum Home-Bildschirm hinzugefügte App, und nur solange sie läuft; das sagt die Karte auch so. Ein Klick auf die Benachrichtigung öffnet den Wettbewerb.
+- Echte Push-Nachrichten vom Server (Firebase Cloud Messaging) brauchen eine Cloud Function und damit den Blaze-Tarif. Dafür ist hier noch nichts eingerichtet.
+
 ## Arabisch-Liga: jede Woche gleich schwer
 
 Seit Woche 1 der ersten Saison (`AR_BALANCED_FROM` in `social.js`) gilt:

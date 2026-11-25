@@ -441,6 +441,19 @@
     if (!guest) renderFriends(cal);
     if (mine) renderAccount();
     if (window.FIQH_CHAT) window.FIQH_CHAT.refresh();
+    remind(cal);
+  }
+  /* reminder.js: which leagues of this week are still open (red dot, notifications) */
+  function remind(cal) {
+    if (!window.FIQH_REMINDER) return;
+    var ready = !!(mine && authUser && authUser.emailVerified);
+    var leagues = (FIQH_PAUSED ? ["arabisch"] : ["fiqh", "arabisch"]).map(function (k) { return { sfx: LEAGUES[k].sfx, name: LEAGUES[k].name }; });
+    window.FIQH_REMINDER.update({
+      uid: authUser ? authUser.uid : null, ready: ready,
+      open: ready ? leagues.filter(function (l) { return !mine.comp[cal.key + l.sfx]; }).map(function (l) { return l.name; }) : [],
+      played: ready ? Object.keys(mine.comp) : [], leagues: leagues,
+      cal: { anchor: ANCHOR, week: WEEK, per: WEEKS_PER_SEASON, n: cal.week }
+    });
   }
 
   function renderComp(cal) {
